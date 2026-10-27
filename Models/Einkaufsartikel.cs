@@ -50,10 +50,50 @@ namespace Einkaufsliste.Models
         }
 
         public string Kategorie { get; set; } = "Sonstiges";
-        public string Menge { get; set; } = "1";
-        public string Einheit { get; set; } = "Stück";
-        public string Hinweis { get; set; } = string.Empty;
+        private string menge = "1";
+        public string Menge
+        {
+            get => menge;
+            set
+            {
+                if (menge == value)
+                    return;
 
+                menge = value;
+                OnPropertyChanged(nameof(Menge));
+                OnPropertyChanged(nameof(DetailsAnzeige));
+            }
+        }
+
+        private string einheit = "Stück";
+        public string Einheit
+        {
+            get => einheit;
+            set
+            {
+                if (einheit == value)
+                    return;
+
+                einheit = value;
+                OnPropertyChanged(nameof(Einheit));
+                OnPropertyChanged(nameof(DetailsAnzeige));
+            }
+        }
+
+        private string hinweis = string.Empty;
+        public string Hinweis
+        {
+            get => hinweis;
+            set
+            {
+                if (hinweis == value)
+                    return;
+
+                hinweis = value;
+                OnPropertyChanged(nameof(Hinweis));
+                OnPropertyChanged(nameof(DetailsAnzeige));
+            }
+        }
 
         public string DetailsAnzeige
 

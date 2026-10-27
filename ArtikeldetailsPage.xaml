@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="Einkaufsliste.ArtikeldetailsPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Artikel bearbeiten">
+
+    <ScrollView>
+        <VerticalStackLayout
+            Padding="24"
+            Spacing="18">
+
+            <Label
+                Text="Artikel bearbeiten"
+                FontSize="24"
+                FontAttributes="Bold"
+                TextColor="#244D38" />
+
+            <Label
+                Text="Artikelname"
+                FontAttributes="Bold" />
+
+            <Entry
+                x:Name="NameEingabe"
+                Placeholder="z. B. Milch"
+                ClearButtonVisibility="WhileEditing" />
+
+            <Label
+                Text="Menge"
+                FontAttributes="Bold" />
+
+            <Entry
+                x:Name="MengeEingabe"
+                Placeholder="z. B. 2"
+                Keyboard="Numeric" />
+
+            <Label
+                Text="Einheit"
+                FontAttributes="Bold" />
+
+            <Picker
+                x:Name="EinheitAuswahl"
+                Title="Einheit auswählen">
+                <Picker.Items>
+                    <x:String>Stück</x:String>
+                    <x:String>Packung</x:String>
+                    <x:String>Flasche</x:String>
+                    <x:String>Gramm</x:String>
+                    <x:String>Kilogramm</x:String>
+                    <x:String>Milliliter</x:String>
+                    <x:String>Liter</x:String>
+                    <x:String>Beutel</x:String>
+                    <x:String>Dose</x:String>
+                    <x:String>Glas</x:String>
+                </Picker.Items>
+            </Picker>
+
+            <Label
+                Text="Hinweis"
+                FontAttributes="Bold" />
+
+            <Editor
+                x:Name="HinweisEingabe"
+                Placeholder="z. B. tiefgekühlt oder Marke"
+                AutoSize="TextChanges"
+                MinimumHeightRequest="90" />
+
+            <Button
+                Text="Speichern"
+                BackgroundColor="#244D38"
+                TextColor="White"
+                CornerRadius="12"
+                Clicked="OnSpeichernClicked" />
+
+            <Button
+                Text="Abbrechen"
+                BackgroundColor="#E8EDE9"
+                TextColor="#244D38"
+                CornerRadius="12"
+                Clicked="OnAbbrechenClicked" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

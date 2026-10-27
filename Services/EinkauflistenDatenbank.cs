@@ -118,14 +118,21 @@ public class EinkauflistenDatenbank
 
     public async Task ArtikelSpeichernAsync(Einkaufsartikel artikel)
     {
+        int ergebnis;
+
         if(artikel.Id == 0)
         {
-            await datenbank.InsertAsync(artikel);
+            ergebnis = await datenbank.InsertAsync(artikel);
         }
         else
         {
-            await datenbank.UpdateAsync(artikel);
+            ergebnis = await datenbank.UpdateAsync(artikel);
         }
+
+        System.Diagnostics.Debug.WriteLine(
+        $"SQLite-Speichern: ID={artikel.Id}, " +
+        $"Menge={artikel.Menge}, Einheit={artikel.Einheit}, " +
+        $"Ergebnis={ergebnis}");
     }
 
     public async Task ArtikelLoeschenAsync(Einkaufsartikel artikel)
@@ -254,5 +261,11 @@ public class EinkauflistenDatenbank
         }
     }
 
-
- }
+    public async Task<Einkaufsartikel?> ArtikelLadenNachIdAsync(int id)
+    {
+        return await datenbank
+            .Table<Einkaufsartikel>()
+            .Where(a => a.Id == id)
+            .FirstOrDefaultAsync();
+    }
+}

@@ -72,6 +72,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <MauiXaml Update="ArtikeldetailsPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="KategorienPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>

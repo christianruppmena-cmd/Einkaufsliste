@@ -336,6 +336,59 @@ namespace Einkaufsliste
             }
         }
 
+        /*private async void OnArtikelBearbeitenClicked(object sender, EventArgs e)
+         {
+             if (sender is not Button button ||
+                 button.BindingContext is not Einkaufsartikel artikel)
+             {
+                 return;
+             }
+
+             var seite = new ArtikeldetailsPage(artikel);
+
+             await Navigation.PushModalAsync(new NavigationPage(seite));
+
+             if (!seite.Gespeichert)
+             {
+                 return;
+             }
+
+             await datenbank.ArtikelSpeichernAsync(artikel);
+
+
+
+         }*/
+
+
+        private async void OnArtikelBearbeitenClicked(object sender, EventArgs e)
+        {
+            if (sender is not Button button ||
+                button.BindingContext is not Einkaufsartikel artikel)
+            {
+                return;
+            }
+
+            var seite = new ArtikeldetailsPage(artikel);
+
+            await Navigation.PushModalAsync(new NavigationPage(seite));
+
+            bool gespeichert = await seite.ErgebnisTask;
+
+            if (!gespeichert)
+            {
+                return;
+            }
+
+            await datenbank.ArtikelSpeichernAsync(artikel);
+        }
+
+
+
+
+
+
+
+
 
     }
 }
