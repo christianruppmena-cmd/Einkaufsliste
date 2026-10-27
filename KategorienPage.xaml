@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Einkaufsliste.KategorienPage"
+             Title="Kategorien">
+    <Grid
+        Padding="20"
+        RowDefinitions="Auto,Auto,*"
+        RowSpacing="16"
+        BackgroundColor="#F4F7F4">
+        <Label
+            Grid.Row="0"
+            Text="Kategorien verwalten"
+            FontSize="26"
+            FontAttributes="Bold"
+            TextColor="#245B3D"
+            />
+        <Button
+            Grid.Row="1"
+            Text="+ Neue Kategorie erstellen"
+            BackgroundColor="#245B3D"
+            TextColor="White"
+            CornerRadius="12"
+            HeightRequest="50"
+            Clicked="OnNeueKategorieClicked" />
+        
+        <CollectionView
+            Grid.Row="2"
+            x:Name="KategorienListe"
+            SelectionMode="None">
+            <CollectionView.EmptyView>
+                <Label
+                    Text="Noch keine Kategorien vorhanden."
+                    TextColor="#89968E"
+                    HorizontalTextAlignment="Center"
+                    VerticalTextAlignment="Center"/>
+            </CollectionView.EmptyView>
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Border
+                        BackgroundColor="White"
+                        Stroke="#E3EBE5"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 12"
+                        Padding="16"
+                        Margin="0,4">
+
+                        <Label
+                            Text="{Binding Name}"
+                            FontSize="17"
+                            TextColor="#26352C"
+                            VerticalOptions="Center"/>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+    </Grid>
+</ContentPage>
