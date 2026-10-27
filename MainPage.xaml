@@ -232,6 +232,11 @@
                                     FontSize="18"
                                     TextColor="#222222"
                                     LineBreakMode="WordWrap">
+                                    <Label.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Tapped="OnArtikelDetailsAnzeigenClicked"/>
+                                    </Label.GestureRecognizers>
+                                    
                                     <Label.Triggers>
                                     <DataTrigger
                                             TargetType="Label"
@@ -245,12 +250,13 @@
                                      </DataTrigger>
 
                                     </Label.Triggers>
-                                </Label>
-
+                                </Label>                              
+                               
                                 <Label
-                                    Text="{Binding Kategorie}"
+                                    Text="{Binding DetailsAnzeige}"
                                     FontSize="12"
-                                    TextColor="#278653"/>
+                                    TextColor="#64746A"
+                                    LineBreakMode="WordWrap"/>
                             </VerticalStackLayout>
 
                             <!-- Löschen Button-->

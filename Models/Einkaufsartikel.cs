@@ -54,5 +54,21 @@ namespace Einkaufsliste.Models
         public string Einheit { get; set; } = "Stück";
         public string Hinweis { get; set; } = string.Empty;
 
+
+        public string DetailsAnzeige
+
+        {
+            get
+            {
+                string mengeEinheit = $"{Menge} {Einheit}".Trim();
+
+                if (string.IsNullOrWhiteSpace(Hinweis))
+                    return mengeEinheit;
+
+                return $"{mengeEinheit} - {Hinweis}";
+            }
+        }
     }
+
+    
 }

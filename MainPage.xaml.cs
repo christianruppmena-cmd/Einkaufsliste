@@ -272,7 +272,70 @@ namespace Einkaufsliste
             }
         
         }
-        
+
+        private async Task ArtikeldetailsBearbeitenAsync(Einkaufsartikel artikel)
+        {
+            string? menge = await DisplayPromptAsync(
+                "Menge Bearbeiten",
+                $"Menge für {artikel.Name} :",
+                initialValue: artikel.Menge,
+                keyboard: Keyboard.Default);
+
+            if (menge == null)
+                return;
+
+            menge = menge.Trim();
+
+            if (string.IsNullOrWhiteSpace(menge))
+                {
+                    await DisplayAlertAsync(
+                        "Ungültige Menge",
+                        "Bitte gib eine Menge ein.",
+                        "OK");
+                    return;
+                }
+
+            string[] einheiten =
+            {
+                "Stück","Packung", "Flasche", "Kg", "g", "Liter", "ml"
+            };
+
+            string? einheit = await DisplayActionSheetAsync(
+                "Einheit auswählen",
+                "Abbrechen",
+                null,
+                einheiten);
+
+            if (string.IsNullOrWhiteSpace(einheit) || einheit == "Abbrechen")
+            { 
+                return;
+            }
+            string? hinweis = await DisplayPromptAsync(
+                "Hinweis bearbeiten",
+                "Zusätzliche Angaben, z.B. TK oder Vollkorn: ",
+                initialValue: artikel.Hinweis);
+
+            if (hinweis == null)
+                return;
+
+            artikel.Menge = menge;
+            artikel.Einheit = einheit;
+            artikel.Hinweis = hinweis.Trim();
+        }
+
+        private async void OnArtikelDetailsAnzeigenClicked(object sender, TappedEventArgs e)
+        {
+            if (sender is Label label &&
+                label.BindingContext is Einkaufsartikel artikel)
+            {
+                await ArtikeldetailsBearbeitenAsync(artikel);
+
+                // Liste aktualisieren , damit die Details sichtbar werden
+                ArtikelListe.ItemsSource = null;
+                ArtikelListe.ItemsSource = artikelGruppen;
+            }
+        }
+
 
     }
 }
