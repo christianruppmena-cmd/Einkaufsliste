@@ -4,293 +4,297 @@
              x:Class="Einkaufsliste.MainPage"
              Title="Einkaufsliste"
              BackgroundColor="#F4F7F5">
-    <Grid Padding="20"
-          RowDefinitions="Auto,Auto,Auto,Auto,Auto,*"
-          RowSpacing="16">
-        
-
-        <!-- Überschrift -->
-        <Border
-            Grid.Row="0"
-            BackgroundColor="#1B5E43"
-            StrokeThickness="0"
-            StrokeShape="RoundRectangle 12"
-            Padding="22"
-            Margin="0,0,0,5">
-            <VerticalStackLayout Spacing="8">
-
-                <Label
-                    Text="&#x1F6D2; Meine Einkaufsliste"
-                    FontSize="26"
-                    FontAttributes="Bold"
-                    TextColor="White"
-                    LineBreakMode="WordWrap"
-                    HorizontalTextAlignment="Center"/>
-                <Label
-                    Text="Alles im Blick. Schritt für Schritt erledigt."
-                    FontSize="14"
-                    TextColor="#D5E9DD"
-                    HorizontalTextAlignment="Center"/>
-                <Label
-                    x:Name="ArtikelAnzahlText"
-                    Text="0 Artikel insgesamt"
-                    FontSize="13"
-                    TextColor="#D5E9DD"
-                    HorizontalTextAlignment="Center"
-                    Margin="0,5,0,0"/>
-            </VerticalStackLayout>
-
-        </Border>
+    <Grid Padding="20">
 
 
-        <Border 
-            Grid.Row="1"
-            BackgroundColor="White"
-            Stroke="#E3EBE5"
-            StrokeThickness="1"
-            StrokeShape="RoundRectangle 16"
-            Padding="16"
-            Margin="0,0,0,5">
-            <VerticalStackLayout Spacing="12">
-
-                <Grid ColumnDefinitions="*,Auto">
-                    <Label
-                        Grid.Column="0"
-                        Text="Dein Fortschritt"
-                        FontSize="16"
-                        FontAttributes="Bold"
-                        TextColor="#26352C"
-                        VerticalOptions="Center"/>
-
-                    <Label
-                        x:Name="FortschrittText"
-                        Grid.Column="1"
-                        Text="0 von 0 erledigt"
-                        FontSize="13"
-                        TextColor="#278653"
-                        VerticalOptions="Center"/>
-
-                </Grid>
-                <ProgressBar
-                    x:Name="FortschrittBalken"
-                    Progress="0"
-                    ProgressColor="#278653"
-                    BackgroundColor="#E3EBE5"
-                    HeightRequest="8"/>
-
-            </VerticalStackLayout>
-            
-        </Border>
-        
-        
-        
-        
-        <!-- Eingabefeld für neue Artikel  -->
-        <Border
-            Grid.Row="2"
-            BackgroundColor="White"
-            Stroke="#DCE5DF"
-            StrokeThickness="1"
-            StrokeShape="RoundRectangle 14"
-            Padding="12,2">
-
-            <Entry
-                x:Name="ArtikelEingabe"
-                Placeholder="Was brauchst du?"
-                FontSize="16"
-                TextColor="#26352C"
-                PlaceholderColor="#89968E"
-                BackgroundColor="Transparent"
-                ClearButtonVisibility="WhileEditing"
-                Keyboard="Text"/>
-        </Border>
-
-
-        <!-- Hinzufügen-Button -->
-        <Button
-            Grid.Row="3"
-            Text="Artikel hinzufügen"
-            FontSize="16"
-            FontAttributes="Bold"
-            BackgroundColor="#278653"
-            TextColor="White"
-            CornerRadius="14"
-            HeightRequest="54"
-            Padding="16,0"
-            Clicked="OnArtikelHinzufuegenClicked"/>
-        <Grid
-            Grid.Row="4"
-            ColumnDefinitions="*,Auto"
-            ColumnSpacing="12">
-        <!-- Liste der Artikel -->
-            <Label
-                Grid.Column="0"
-                Text="Deine Artikel"
-                FontSize="20"
-                FontAttributes="Bold"
-                TextColor="#222222"
-                VerticalOptions="Center"/>
-            <Button
-                Grid.Column="1"
-                Text="Kategorien"
-                BackgroundColor="#245B3D"
-                TextColor="White"
-                FontSize="13"
-                Padding="12,6"
-                CornerRadius="10"
-                Clicked="OnKategorienOeffnenClicked"/>
-        </Grid>
 
         <!-- Einkaufsliste -->
         <CollectionView
-            Grid.Row="5"
-            x:Name="ArtikelListe"
-            IsGrouped="True"
-            SelectionMode="None"
-            VerticalOptions="Fill">
-            
+                x:Name="ArtikelListe"
+                IsGrouped="True"
+                SelectionMode="None"
+                VerticalOptions="Fill">
+            <CollectionView.Header>
+                <VerticalStackLayout Spacing="16">
+                    <!-- Überschrift -->
+                    <Border    
+                        
+                        BackgroundColor="#1B5E43"
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 12"
+                        Padding="22"
+                        Margin="0,0,0,5">
+                        <VerticalStackLayout Spacing="8">
+
+                            <Label
+                                Text="&#x1F6D2; Meine Einkaufsliste"
+                                FontSize="26"
+                                FontAttributes="Bold"
+                                TextColor="White"
+                                LineBreakMode="WordWrap"
+                                HorizontalTextAlignment="Center"/>
+                            <Label
+                                Text="Alles im Blick. Schritt für Schritt erledigt."
+                                FontSize="14"
+                                TextColor="#D5E9DD"
+                                HorizontalTextAlignment="Center"/>      
+                            <Label
+                                x:Name="ArtikelAnzahlText"
+                                Text="0 Artikel insgesamt"
+                                FontSize="13"
+                                TextColor="#D5E9DD"
+                                HorizontalTextAlignment="Center"
+                                Margin="0,5,0,0"/>
+                        </VerticalStackLayout>
+
+                    </Border>
+
+
+                    <Border    
+                        
+                        BackgroundColor="White"
+                        Stroke="#E3EBE5"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 16"
+                        Padding="16"
+                        Margin="0,0,0,5">
+                        <VerticalStackLayout Spacing="12">
+
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label
+                                    Grid.Column="0"
+                                    Text="Dein Fortschritt"
+                                    FontSize="16"
+                                    FontAttributes="Bold"
+                                    TextColor="#26352C"
+                                    VerticalOptions="Center"/>
+
+                                <Label
+                                    x:Name="FortschrittText"
+                                    Grid.Column="1"
+                                    Text="0 von 0 erledigt"
+                                    FontSize="13"
+                                    TextColor="#278653"
+                                    VerticalOptions="Center"/>
+
+                            </Grid>
+                            <ProgressBar
+                                x:Name="FortschrittBalken"
+                                Progress="0"
+                                ProgressColor="#278653"
+                                BackgroundColor="#E3EBE5"
+                                HeightRequest="8"/>
+
+                        </VerticalStackLayout>
+
+                    </Border>
+
+
+
+
+                    <!-- Eingabefeld für neue Artikel  -->
+                    <Border
+                        
+                        BackgroundColor="White"
+                        Stroke="#DCE5DF"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 14"
+                        Padding="12,2">
+
+                        <Entry
+                            x:Name="ArtikelEingabe"
+                            Placeholder="Was brauchst du?"
+                            FontSize="16"
+                            TextColor="#26352C"
+                            PlaceholderColor="#89968E"
+                            BackgroundColor="Transparent"
+                            ClearButtonVisibility="WhileEditing"
+                            Keyboard="Text"/>
+                    </Border>
+
+
+                    <!-- Hinzufügen-Button -->
+                    <Button
+                        
+                        Text="Artikel hinzufügen"
+                        FontSize="16"
+                        FontAttributes="Bold"
+                        BackgroundColor="#278653"
+                        TextColor="White"
+                        CornerRadius="14"
+                        HeightRequest="54"
+                        Padding="16,0"
+                        Clicked="OnArtikelHinzufuegenClicked"/>
+                    <Grid
+                        
+                        ColumnDefinitions="*,Auto"
+                        ColumnSpacing="12">
+                        <!-- Liste der Artikel -->
+                        <Label
+                            Grid.Column="0"
+                            Text="Deine Artikel"
+                            FontSize="20"
+                            FontAttributes="Bold"
+                            TextColor="#222222"
+                            VerticalOptions="Center"/>
+                        <Button
+                            Grid.Column="1"
+                            Text="Kategorien"
+                            BackgroundColor="#245B3D"
+                            TextColor="White"
+                            FontSize="13"
+                            Padding="12,6"
+                            CornerRadius="10"
+                            Clicked="OnKategorienOeffnenClicked"/>
+                    </Grid>
+                </VerticalStackLayout>
+            </CollectionView.Header>
             <CollectionView.EmptyView>
                 <VerticalStackLayout
-                    Padding="20"
-                    Spacing="12"
-                    HorizontalOptions="Center"
-                    VerticalOptions="Center">
+                        Padding="20"
+                        Spacing="12"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center">
 
                     <Label
-                        Text="&#x1F6D2;"
-                        FontSize="48"
-                        HorizontalTextAlignment="Center"/>
-                    
+                            Text="&#x1F6D2;"
+                            FontSize="48"
+                            HorizontalTextAlignment="Center"/>
+
                     <Label
-                        Text="Deine Liste ist noch leer"
-                        FontSize="20"
-                        FontAttributes="Bold"
-                        TextColor="#26352C"
-                        HorizontalTextAlignment="Center" />
-                    
+                            Text="Deine Liste ist noch leer"
+                            FontSize="20"
+                            FontAttributes="Bold"
+                            TextColor="#26352C"
+                            HorizontalTextAlignment="Center" />
+
                     <Label
-                        Text="Was brauchst du heute? Füge deinen erstel Artikel hinzu! "
-                        FontSize="14"
-                        TextColor="#89968E"
-                        HorizontalTextAlignment="Center"
-                        HorizontalOptions="Center"
-                        LineBreakMode="WordWrap" />
-                
+                            Text="Was brauchst du heute? Füge deinen erstel Artikel hinzu! "
+                            FontSize="14"
+                            TextColor="#89968E"
+                            HorizontalTextAlignment="Center"
+                            HorizontalOptions="Center"
+                            LineBreakMode="WordWrap" />
+
                 </VerticalStackLayout>
             </CollectionView.EmptyView>
             <!-- Kategorie Überschrift-->
             <CollectionView.GroupHeaderTemplate>
                 <DataTemplate>
                     <Border
-                        BackgroundColor="#245B3D"
-                        StrokeThickness="0"
-                        StrokeShape="RoundRectangle 10"
-                        Padding="12,10"
-                        Margin="0,12,0,4">
-                        
+                            BackgroundColor="#245B3D"
+                            StrokeThickness="0"
+                            StrokeShape="RoundRectangle 10"
+                            Padding="12,10"
+                            Margin="0,12,0,4">
+
                         <Label
-                            Text="{Binding Ueberschrift}"
-                            FontSize="15"
-                            FontAttributes="Bold"
-                            TextColor="White"
-                            />
+                                Text="{Binding Ueberschrift}"
+                                FontSize="15"
+                                FontAttributes="Bold"
+                                TextColor="White"
+                                />
 
                     </Border>
                 </DataTemplate>
             </CollectionView.GroupHeaderTemplate>
-            
+
             <CollectionView.ItemTemplate>
                 <DataTemplate>
                     <Border
-                        BackgroundColor="White"
-                        Stroke="#E3EBE5"
-                        StrokeThickness="1"
-                        StrokeShape="RoundRectangle 16"
-                        Padding="12"
-                        Margin="0,5">
+                            BackgroundColor="White"
+                            Stroke="#E3EBE5"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 16"
+                            Padding="12"
+                            Margin="0,5">
 
                         <Grid ColumnDefinitions="48,*,44,44"
-                              ColumnSpacing="10">
+                                  ColumnSpacing="10">
 
                             <!-- Checkbox für Erledigt/Unerledigt -->
                             <CheckBox
-                                Grid.Column="0"
-                                IsChecked="{Binding IstErledigt, Mode=TwoWay}"
-                                CheckedChanged="OnArtikelErledigtGeaendert"
-                                WidthRequest="48"
-                                HeightRequest="48"
-                                VerticalOptions="Center"
-                                Color="#278653"/>
+                                    Grid.Column="0"
+                                    IsChecked="{Binding IstErledigt, Mode=TwoWay}"
+                                    CheckedChanged="OnArtikelErledigtGeaendert"
+                                    WidthRequest="48"
+                                    HeightRequest="48"
+                                    VerticalOptions="Center"
+                                    Color="#278653"/>
 
                             <!-- Artikelname -->
                             <VerticalStackLayout
-                                Grid.Column="1"
-                                Spacing="4"
-                                VerticalOptions="Center">
+                                    Grid.Column="1"
+                                    Spacing="4"
+                                    VerticalOptions="Center">
                                 <Label
-                                    Text="{Binding Name}"
-                                    FontSize="18"
-                                    TextColor="#222222"
-                                    LineBreakMode="WordWrap">
-                                    
-                                    
-                                    <Label.Triggers>
-                                    <DataTrigger
-                                            TargetType="Label"
-                                            Binding="{Binding IstErledigt}"
-                                            Value="True">
+                                        Text="{Binding Name}"
+                                        FontSize="18"
+                                        TextColor="#222222"
+                                        LineBreakMode="WordWrap">
+                                    <Label.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                                Tapped="OnArtikelDetailsAnzeigenClicked"/>
+                                    </Label.GestureRecognizers>
 
-                                        <Setter Property="TextDecorations"
-                                                    Value="Strikethrough"/>
-                                        <Setter Property="TextColor"
-                                                    Value="Gray"/>
-                                     </DataTrigger>
+                                    <Label.Triggers>
+                                        <DataTrigger
+                                                TargetType="Label"
+                                                Binding="{Binding IstErledigt}"
+                                                Value="True">
+
+                                            <Setter Property="TextDecorations"
+                                                        Value="Strikethrough"/>
+                                            <Setter Property="TextColor"
+                                                        Value="Gray"/>
+                                        </DataTrigger>
 
                                     </Label.Triggers>
-                                </Label>                              
-                               
+                                </Label>
+
                                 <Label
-                                    Text="{Binding DetailsAnzeige}"
-                                    FontSize="12"
-                                    TextColor="#64746A"
-                                    LineBreakMode="WordWrap"/>
+                                        Text="{Binding DetailsAnzeige}"
+                                        FontSize="12"
+                                        TextColor="#64746A"
+                                        LineBreakMode="WordWrap"/>
                             </VerticalStackLayout>
-                            
+
                             <!-- Bearbeiten Button-->
                             <Button
-                                Grid.Column="2"
-                                Text="&#x270E;"
-                                FontSize= "20"
-                                BackgroundColor="Transparent"
-                                TextColor="#244D38"
-                                Padding="0"
-                                CommandParameter="{Binding .}"
-                                Clicked="OnArtikelBearbeitenClicked"
-                                />
-                                
+                                    Grid.Column="2"
+                                    Text="&#x270E;"
+                                    FontSize= "20"
+                                    BackgroundColor="Transparent"
+                                    TextColor="#244D38"
+                                    Padding="0"
+                                    CommandParameter="{Binding .}"
+                                    Clicked="OnArtikelBearbeitenClicked"
+                                    />
 
 
-                                <!-- Löschen Button-->
+
+                            <!-- Löschen Button-->
                             <Button
-                                Grid.Column="3"
-                                Text="&#x1F5D1;"
-                                BackgroundColor="#FFF0F0"
-                                TextColor="#C62828"
-                                FontSize="20"
-                                WidthRequest="44"
-                                HeightRequest="44"
-                                Padding="0"
-                                CommandParameter="{Binding .}"
-                                Clicked="OnArtikelLoeschenClicked"
-                                CornerRadius="12"
-                                VerticalOptions="Center"
-                                />
+                                    Grid.Column="3"
+                                    Text="&#x1F5D1;"
+                                    BackgroundColor="#FFF0F0"
+                                    TextColor="#C62828"
+                                    FontSize="20"
+                                    WidthRequest="44"
+                                    HeightRequest="44"
+                                    Padding="0"
+                                    CommandParameter="{Binding .}"
+                                    Clicked="OnArtikelLoeschenClicked"
+                                    CornerRadius="12"
+                                    VerticalOptions="Center"
+                                    />
                         </Grid>
                     </Border>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
-        </CollectionView>
 
+        </CollectionView>
+        
     </Grid>
 
 
