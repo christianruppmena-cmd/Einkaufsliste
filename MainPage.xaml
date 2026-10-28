@@ -89,30 +89,6 @@
 
                     </Border>
 
-
-
-
-                    <!-- Eingabefeld für neue Artikel  -->
-                    <Border
-                        
-                        BackgroundColor="White"
-                        Stroke="#DCE5DF"
-                        StrokeThickness="1"
-                        StrokeShape="RoundRectangle 14"
-                        Padding="12,2">
-
-                        <Entry
-                            x:Name="ArtikelEingabe"
-                            Placeholder="Was brauchst du?"
-                            FontSize="16"
-                            TextColor="#26352C"
-                            PlaceholderColor="#89968E"
-                            BackgroundColor="Transparent"
-                            ClearButtonVisibility="WhileEditing"
-                            Keyboard="Text"/>
-                    </Border>
-
-
                     <!-- Hinzufügen-Button -->
                     <Button
                         

@@ -21,15 +21,9 @@ namespace Einkaufsliste
 
         private async void OnArtikelHinzufuegenClicked(object sender, EventArgs e)
         {
-            string artikelName = ArtikelEingabe.Text?.Trim() ?? string.Empty;
+ 
 
-            if (string.IsNullOrWhiteSpace(artikelName))
-            {
-                await DisplayAlertAsync("Hinweis", "Bitte geben Sie einen Artike ein.", "OK");
-                return;
-            }
-
-            var seite = new ArtikelEingabePage(artikelName);
+            var seite = new ArtikelEingabePage(string.Empty);
 
             await Navigation.PushModalAsync(new NavigationPage(seite));
 
