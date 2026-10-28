@@ -71,7 +71,7 @@ namespace Einkaufsliste
 
             AktualisiereFortschritt();
 
-            ArtikelEingabe.Text = string.Empty;
+          
         }
 
 
