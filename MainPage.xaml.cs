@@ -21,77 +21,66 @@ namespace Einkaufsliste
 
         private async void OnArtikelHinzufuegenClicked(object sender, EventArgs e)
         {
-            string neuerArtikel = ArtikelEingabe.Text ?? string.Empty;
+            string artikelName = ArtikelEingabe.Text?.Trim() ?? string.Empty;
 
-
-            if (string.IsNullOrWhiteSpace(neuerArtikel))
+            if (string.IsNullOrWhiteSpace(artikelName))
             {
-                await DisplayAlertAsync("Hinweis", "Bitte geben Sie einen Artikel ein.", "OK");
+                await DisplayAlertAsync("Hinweis", "Bitte geben Sie einen Artike ein.", "OK");
                 return;
             }
-            string artikelName = neuerArtikel.Trim();
 
-            Produkt? produkt = await datenbank.ProduktFindenAsync(artikelName);
+            var seite = new ArtikelEingabePage(artikelName);
 
-            string kategorie;
+            await Navigation.PushModalAsync(new NavigationPage(seite));
 
-            if(produkt != null)
+            Einkaufsartikel? neuerEintrag = await seite.ErgebnisTask;
+
+            if (neuerEintrag == null)
+                return;
+
+            Produkt? produkt = await datenbank.ProduktFindenAsync(neuerEintrag.Name);
+
+            if (produkt != null)
             {
-                //Bekannstes Produkt: Kategorie automatisch übernehmen
-                kategorie = produkt.Kategorie;
+                neuerEintrag.Kategorie = produkt.Kategorie;
             }
             else
             {
-                // Unbekanntes Produkt: Kategorien zur Auswahl laden
-                List<Kategorie> kategorien =
-                    await datenbank.AlleKategorieEintraegeLadenAsync();
+                List<Kategorie> kategorien = await datenbank.AlleKategorieEintraegeLadenAsync();
 
                 string[] kategorienNamen = kategorien.Select(k => k.Name).ToArray();
 
-                string? ausgewaehlteKategorie = await DisplayActionSheetAsync(
-                    $"Welche Kategorie gehört zu {artikelName} ?",
-                    "Abbrechen",
-                    null,
-                    kategorienNamen);
+                string? ausgewaehlteKategorie = await DisplayActionSheetAsync($"Welche Kategorie grhört zu {neuerEintrag.Name} ?", "Abbrechen", null, kategorienNamen);
 
-                if(string.IsNullOrWhiteSpace(ausgewaehlteKategorie) || ausgewaehlteKategorie == "Abbrechen")
+                if (string.IsNullOrWhiteSpace(ausgewaehlteKategorie) || ausgewaehlteKategorie == "Abbrechen") 
                 {
                     return;
                 }
-                kategorie = ausgewaehlteKategorie;
+                neuerEintrag.Kategorie = ausgewaehlteKategorie;
 
-                // Produkt für zukünftige Einkäufe speichern
-                Produkt neuesProdukt = new()
-                {
-                    Name = artikelName,
-                    Kategorie = kategorie
-                };
-
-                await datenbank.ProduktSpeichernAsync(neuesProdukt);
-                    
+                await datenbank.ProduktSpeichernAsync(new Produkt { Name = neuerEintrag.Name, Kategorie = neuerEintrag.Kategorie });
             }
 
-            Einkaufsartikel neuerEintrag = new()
-            {
-                Name = artikelName,
-                Kategorie = kategorie,
-                IstErledigt = false
-            };
-            
+            neuerEintrag.IstErledigt = false;
+
             await datenbank.ArtikelSpeichernAsync(neuerEintrag);
 
-            Artikelgruppe? gruppe = artikelGruppen.FirstOrDefault(g => g.Kategorie == kategorie);
+            Artikelgruppe? gruppe = artikelGruppen.FirstOrDefault(g => g.Kategorie == neuerEintrag.Kategorie);
 
-            if(gruppe == null)
+            if (gruppe == null)
             {
-                gruppe = new Artikelgruppe(kategorie);
+                gruppe = new Artikelgruppe(neuerEintrag.Kategorie);
                 artikelGruppen.Add(gruppe);
             }
 
             gruppe.Add(neuerEintrag);
+
             AktualisiereFortschritt();
+
             ArtikelEingabe.Text = string.Empty;
         }
+
+
 
         private async void OnArtikelLoeschenClicked(object sender, EventArgs e)
         {
@@ -335,30 +324,6 @@ namespace Einkaufsliste
                 ArtikelListe.ItemsSource = artikelGruppen;
             }
         }
-
-        /*private async void OnArtikelBearbeitenClicked(object sender, EventArgs e)
-         {
-             if (sender is not Button button ||
-                 button.BindingContext is not Einkaufsartikel artikel)
-             {
-                 return;
-             }
-
-             var seite = new ArtikeldetailsPage(artikel);
-
-             await Navigation.PushModalAsync(new NavigationPage(seite));
-
-             if (!seite.Gespeichert)
-             {
-                 return;
-             }
-
-             await datenbank.ArtikelSpeichernAsync(artikel);
-
-
-
-         }*/
-
 
         private async void OnArtikelBearbeitenClicked(object sender, EventArgs e)
         {
