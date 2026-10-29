@@ -162,21 +162,30 @@ public class EinkauflistenDatenbank
 
      public async Task<Produkt?> ProduktFindenAsync(string name)
     {
-        string suchname = name.Trim();
+        
+        static string Normalisieren(string text)
+        {
+            return string.Concat(
+                text.Where(c => !char.IsWhiteSpace(c))).ToLowerInvariant();
+        }
+        
+        
+        string suchname = Normalisieren(name);
 
         List<Produkt> produkte = 
             await datenbank.Table<Produkt>().ToListAsync();
 
+        // Den vollständigen Namen vergleichen
+
         Produkt? direktErgebnis = produkte.FirstOrDefault(
-            p => string.Equals(
-                p.Name.Trim(),
-                suchname,
-                StringComparison.OrdinalIgnoreCase));
+            p => Normalisieren(p.Name) == suchname);
 
         if (direktErgebnis != null)
             return direktErgebnis;
 
-        string grundform = suchname.ToLowerInvariant();
+        // Einfache Wortendungen brücksichtigen
+
+        string grundform = suchname;
 
         if (grundform.EndsWith("en"))
             grundform = grundform[..^2];
@@ -186,10 +195,7 @@ public class EinkauflistenDatenbank
             grundform = grundform[..^1];
 
         return produkte.FirstOrDefault(
-            p => string.Equals(
-                p.Name.Trim(),
-                grundform,
-                StringComparison.OrdinalIgnoreCase));
+            p => Normalisieren(p.Name) == grundform);
     }
 
     public async Task ProduktSpeichernAsync(Produkt produkt)

@@ -37,6 +37,7 @@ namespace Einkaufsliste
 
             if (produkt != null)
             {
+                neuerEintrag.Name = produkt.Name;
                 neuerEintrag.Kategorie = produkt.Kategorie;
             }
             else
