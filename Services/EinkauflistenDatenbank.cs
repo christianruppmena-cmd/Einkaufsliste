@@ -104,6 +104,12 @@ public class EinkauflistenDatenbank
             }
         }
     }
+    public async Task<List<Filiale>> AlleAktivenFilialenLadenAsync()
+    {
+        await InitialisierenAsync();
+
+        return await datenbank.Table<Filiale>().Where(f => f.IstAktiv).OrderBy(f => f.Name).ToListAsync();
+    }
     public async Task StandardkategorienAnlegenAsync()
     {
         await InitialisierenAsync();
