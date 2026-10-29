@@ -2,6 +2,7 @@
 using Einkaufsliste.Models;
 using Einkaufsliste.Services;
 using System.Linq;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Einkaufsliste
 {
@@ -47,11 +48,13 @@ namespace Einkaufsliste
 
                 string[] kategorienNamen = kategorien.Select(k => k.Name).ToArray();
 
+                string neueKategorieOption = "+ Neue Kategorie";
+
                 string? ausgewaehlteKategorie = await DisplayActionSheetAsync(
                     $"Welche Kategorie gehört zu {neuerEintrag.Name}?",
                     "Abbrechen",
                     null,
-                    kategorienNamen);
+                    kategorienNamen.Append(neueKategorieOption).ToArray());
 
                 if (string.IsNullOrWhiteSpace(ausgewaehlteKategorie) ||
                     ausgewaehlteKategorie == "Abbrechen")
@@ -59,7 +62,40 @@ namespace Einkaufsliste
                     return;
                 }
 
-                neuerEintrag.Kategorie = ausgewaehlteKategorie;
+                if (ausgewaehlteKategorie == neueKategorieOption)
+                {
+                    string? neueKategorie = await DisplayPromptAsync(
+                        "Neue Kategorie",
+                        "Wie soll die Kategorie heißen? ");
+
+                    if (string.IsNullOrWhiteSpace(neueKategorie))
+                        return;
+
+                    neueKategorie = neueKategorie.Trim();
+
+                    bool existiert = kategorien.Any(k =>
+                    string.Equals(
+                        k.Name.Trim(),
+                        neueKategorie,
+                        StringComparison.OrdinalIgnoreCase));
+
+                    if (existiert)
+                    {
+                        await DisplayAlertAsync(
+                            "Hinweis",
+                            "Diese Kategorie existiert bereits.",
+                            "OK");
+                        return;
+                    }
+
+                    await datenbank.KategorieSpeichernAsync(
+                        new Kategorie { Name = neueKategorie });
+                    neuerEintrag.Kategorie = neueKategorie;
+                }
+                else
+                {
+                    neuerEintrag.Kategorie = ausgewaehlteKategorie;
+                }
 
                 await datenbank.ProduktSpeichernAsync(new Produkt
                 {
