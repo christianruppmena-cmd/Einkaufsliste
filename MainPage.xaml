@@ -85,6 +85,16 @@
                                 BackgroundColor="#E3EBE5"
                                 HeightRequest="8"/>
 
+                        
+
+                            <Label
+                                x:Name="GesamtsummeText"
+                                Text="Gesamtsumme: 0,00 €"
+                                FontSize="18"
+                                FontAttributes="Bold"
+                                TextColor="#1B5E43"
+                                HorizontalTextAlignment="End"
+                                Margin="0,8,0,0"/>
                         </VerticalStackLayout>
 
                     </Border>
@@ -233,6 +243,16 @@
                                         FontSize="12"
                                         TextColor="#64746A"
                                         LineBreakMode="WordWrap"/>
+
+                                <Label
+                                    Text="{Binding Stueckpreis, StringFormat='Stückpreis: {0:N2} €'}"
+                                    FontSize="12"
+                                    TextColor="#64746A"/>
+
+                                <Label
+                                    Text="{Binding Gesamtpreis, StringFormat='Gesamt: {0:N2} €'}"
+                                    FontSize="14"
+                                    TextColor="#1B5E43"/>
                             </VerticalStackLayout>
 
                             <!-- Bearbeiten Button-->

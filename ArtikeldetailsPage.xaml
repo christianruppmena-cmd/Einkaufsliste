@@ -56,6 +56,14 @@
             </Picker>
 
             <Label
+                Text="Stückpreis (€)"
+                FontAttributes="Bold"/>
+            <Entry
+                x:Name="StueckpreisEingabe"
+                Placeholder="z. B. 1,29"
+                Keyboard="Numeric"/>
+
+            <Label
                 Text="Hinweis"
                 FontAttributes="Bold" />
 
