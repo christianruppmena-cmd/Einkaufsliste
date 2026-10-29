@@ -50,6 +50,39 @@ namespace Einkaufsliste.Models
         }
 
         public string Kategorie { get; set; } = "Sonstiges";
+
+        private decimal stueckpreis;
+        public decimal Stueckpreis
+        {
+            get => stueckpreis;
+            set
+            {
+                if (stueckpreis == value)
+                    return;
+
+                stueckpreis = value;
+                OnPropertyChanged(nameof(Stueckpreis));
+                OnPropertyChanged(nameof(Gesamtpreis));
+            }
+        }
+        public decimal Gesamtpreis
+        {
+            get
+            {
+                string mengeText = Menge.Trim().Replace(',', '.');
+
+                if(decimal.TryParse(
+                    mengeText,
+                    System.Globalization.NumberStyles.Number,
+                    System.Globalization.CultureInfo.InvariantCulture,
+                    out decimal mengeZahl))
+                {
+                    return mengeZahl * Stueckpreis;
+                }
+                return Stueckpreis;
+            }
+        }
+
         private string menge = "1";
         public string Menge
         {

@@ -23,6 +23,29 @@ public partial class ArtikelEingabePage : ContentPage
         string menge = MengeEingabe.Text?.Trim() ?? string.Empty;
         string? einheit = EinheitAuswahl.SelectedItem?.ToString();
         string details = DetailsEingabe.Text?.Trim() ?? string.Empty;
+        string preisText = StueckpreisEingabe.Text?.Trim() ?? string.Empty;
+
+        decimal stueckpreis = 0m;
+
+        if (!string.IsNullOrWhiteSpace(preisText) && !decimal.TryParse(preisText, System.Globalization.NumberStyles.Number,System.Globalization.CultureInfo.CurrentCulture, out stueckpreis))
+        {
+            await DisplayAlertAsync(
+                "Ungültiger Preis"
+                , "Bitte einen gültigen Preis eingeben, z. B. 1,29.",
+                "OK");
+            return;
+        }
+
+        if(stueckpreis < 0)
+        {
+            await DisplayAlertAsync(
+                "Ungültiger Preis",
+                "Der Preis darf nicht negativ sein.",
+                "OK");
+            return;
+        }
+
+
 
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -54,6 +77,7 @@ public partial class ArtikelEingabePage : ContentPage
             Menge = menge,
             Einheit = einheit,
             Hinweis = details,
+            Stueckpreis = stueckpreis,
             IstErledigt = false
         };
 
