@@ -192,12 +192,10 @@ namespace Einkaufsliste
             gruppe.Add(neuerEintrag);
 
             AktualisiereFortschritt();
+            await GesamtsummeAktualisierenAsync();
 
           
         }
-
-
-
         private async void OnArtikelLoeschenClicked(object sender, EventArgs e)
         {
             if(sender is Button button && 
@@ -218,11 +216,10 @@ namespace Einkaufsliste
                 }
 
                 AktualisiereFortschritt();
+                await GesamtsummeAktualisierenAsync();
             }
         }
-
-        private async void OnArtikelErledigtGeaendert(
-     object sender, CheckedChangedEventArgs e)
+        private async void OnArtikelErledigtGeaendert(object sender, CheckedChangedEventArgs e)
         {
             if (sender is not CheckBox checkbox ||
                 checkbox.BindingContext is not Einkaufsartikel artikel)
@@ -292,8 +289,6 @@ namespace Einkaufsliste
 
             AktualisiereFortschritt();
         }
-
-
         private async void LadeDatenAsync()
         {
             await datenbank.InitialisierenAsync();
@@ -307,15 +302,14 @@ namespace Einkaufsliste
             ArtikelGruppieren(gespeicherteArtikel);
 
             AktualisiereFortschritt();
+            await GesamtsummeAktualisierenAsync();
 
            
         }
-
         private async void OnKategorienOeffnenClicked(object sender, EventArgs e)
         {
             await Navigation.PushAsync(new KategorienPage());
         }
-
         private void AktualisiereFortschritt()
         {
             int gesamt = 0;
@@ -336,7 +330,16 @@ namespace Einkaufsliste
                 ? 0
                 : (double)erledigt / gesamt;
         }
+        private async Task GesamtsummeAktualisierenAsync()
+        {
+            List<Einkaufsartikel> alleArtikel =
+                await datenbank.AlleArtikelLadenAsync();
 
+            decimal gesamtsumme = alleArtikel.Sum(a => a.Gesamtpreis);
+
+            GesamtsummeText.Text = $"Gesamtsumme : {gesamtsumme:N2} €";
+
+        }
         private void ArtikelGruppieren(IEnumerable<Einkaufsartikel> alleArtikel)
         {
             artikelGruppen.Clear();
@@ -378,7 +381,6 @@ namespace Einkaufsliste
             }
         
         }
-
         private async Task ArtikeldetailsBearbeitenAsync(Einkaufsartikel artikel)
         {
             string? menge = await DisplayPromptAsync(
@@ -428,7 +430,6 @@ namespace Einkaufsliste
             artikel.Einheit = einheit;
             artikel.Hinweis = hinweis.Trim();
         }
-
         private async void OnArtikelDetailsAnzeigenClicked(object sender, TappedEventArgs e)
         {
             if (sender is Label label &&
@@ -441,7 +442,6 @@ namespace Einkaufsliste
                 ArtikelListe.ItemsSource = artikelGruppen;
             }
         }
-
         private async void OnArtikelBearbeitenClicked(object sender, EventArgs e)
         {
             if (sender is not Button button ||
@@ -462,6 +462,9 @@ namespace Einkaufsliste
             }
 
             await datenbank.ArtikelSpeichernAsync(artikel);
+            ArtikelGruppieren(await datenbank.AlleArtikelLadenAsync());
+            AktualisiereFortschritt();            
+            await GesamtsummeAktualisierenAsync();
         }
 
 

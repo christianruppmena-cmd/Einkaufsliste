@@ -59,6 +59,14 @@ public class EinkauflistenDatenbank
             await datenbank.ExecuteAsync(
                 "ALTER TABLE Einkaufsartikel ADD COLUMN Hinweis TEXT NOT NULL DEFAULT ''");
         }
+
+        spaltenAktuell = await datenbank.GetTableInfoAsync("Einkaufsartikel");
+
+        if(!spaltenAktuell.Any(s => s.Name == "Stueckpreis"))
+        {
+            await datenbank.ExecuteAsync(
+                "ALTER TABLE Einkaufsartikel ADD COLUMN Stueckpreis REAL NOT NULL DEFAULT 0");
+        }
     }
 
     public async Task StandardkategorienAnlegenAsync()
