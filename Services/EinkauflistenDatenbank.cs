@@ -111,6 +111,69 @@ public class EinkauflistenDatenbank
             await datenbank.UpdateAsync(kategorie);
         }
     }
+    
+    public async Task<bool> KategorieUmbenennenAsync(
+        Kategorie kategorie,
+        string neuerName)
+    {
+        await InitialisierenAsync();
+
+        string alterName = kategorie.Name.Trim();
+        neuerName = neuerName.Trim();
+
+        if (string.IsNullOrWhiteSpace(neuerName))
+            return false;
+
+        // Prüfen ob der neue Name bereits vergene ist
+
+        List<Kategorie> kategorien =
+            await datenbank.Table<Kategorie>().ToListAsync();
+
+        bool existiertBereits = kategorien.Any(k =>
+        k.Id != kategorie.Id &&
+        string.Equals(
+            k.Name.Trim(),
+            neuerName,
+            StringComparison.OrdinalIgnoreCase));
+
+        if (existiertBereits)
+            return false;
+
+        // Alle betroffenen Artikel aktualisieren
+
+        List<Einkaufsartikel> artikel =
+            await datenbank.Table<Einkaufsartikel>().ToListAsync();
+
+        List<Produkt> produkte =
+            await datenbank.Table<Produkt>().ToListAsync();
+
+        await datenbank.RunInTransactionAsync(conn =>
+        {
+            foreach (Einkaufsartikel eintrag in artikel.Where(a =>
+            string.Equals(
+                a.Kategorie?.Trim(),
+                alterName,
+                StringComparison.OrdinalIgnoreCase)))
+            {
+                eintrag.Kategorie = neuerName;
+                conn.Update(eintrag);
+            }
+            foreach (Produkt produkt in produkte.Where(p =>
+            string.Equals(
+                p.Kategorie?.Trim(),
+                alterName,
+                StringComparison.OrdinalIgnoreCase)))
+            {
+                produkt.Kategorie = neuerName;
+                conn.Update(produkt);
+            }
+
+            kategorie.Name = neuerName;
+            conn.Update(kategorie);
+        });
+        return true;
+    }
+    
     public async Task<List<Einkaufsartikel>> AlleArtikelLadenAsync()
     {
         return await datenbank.Table<Einkaufsartikel>().ToListAsync();
