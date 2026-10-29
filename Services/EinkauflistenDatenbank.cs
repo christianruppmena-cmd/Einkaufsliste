@@ -1,5 +1,7 @@
-﻿using SQLite;
+﻿
 using Einkaufsliste.Models;
+using SQLite;
+
 
 namespace Einkaufsliste.Services;
 
@@ -263,6 +265,63 @@ public class EinkauflistenDatenbank
     {
         await datenbank.InsertOrReplaceAsync(produkt);
     }
+
+    public async Task BestehendeProdukteNormalisierenAsync()
+    {
+        await InitialisierenAsync();
+
+        List<Produkt> produkte =
+            await datenbank.Table<Produkt>().ToListAsync();
+
+        List<Kategorie> kategorien =
+            await datenbank.Table<Kategorie>().ToListAsync();
+
+        List<Einkaufsartikel> artikel = await datenbank.Table<Einkaufsartikel>().ToListAsync();
+
+        await datenbank.RunInTransactionAsync(conn =>
+        {
+            foreach (Produkt produkt in produkte)
+            {
+                produkt.Name = TextHelfer.Normalisieren(produkt.Name);
+
+                Kategorie? passendeKategorie = kategorien.FirstOrDefault(k =>
+                    string.Equals(
+                        k.Name.Trim(),
+                        produkt.Kategorie?.Trim(),
+                        StringComparison.OrdinalIgnoreCase));
+
+                if (passendeKategorie != null)
+                {
+                    produkt.Kategorie = passendeKategorie.Name;
+                }
+                else
+                {
+                    produkt.Kategorie =
+                        TextHelfer.Normalisieren(produkt.Kategorie);
+                }
+
+                conn.Update(produkt);
+            }
+
+            foreach (Einkaufsartikel eintrag in artikel)
+            {
+                eintrag.Name = TextHelfer.Normalisieren(eintrag.Name);
+
+                Kategorie? passendeKategorie = kategorien.FirstOrDefault(k =>
+                    string.Equals(
+                        k.Name.Trim(),
+                        eintrag.Kategorie?.Trim(),
+                        StringComparison.OrdinalIgnoreCase));
+                if (passendeKategorie != null)
+                {
+                    eintrag.Kategorie = passendeKategorie.Name;
+                }
+
+                conn.Update(eintrag);
+            }
+        });
+    }
+
 
     public async Task StandardprodukteAnlegenAsync()
     {

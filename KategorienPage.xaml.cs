@@ -38,7 +38,7 @@ public partial class KategorienPage : ContentPage
         if (string.IsNullOrWhiteSpace(name))
             return;
 
-        name = name.Trim();
+        name = TextHelfer.Normalisieren(name);
 
         List<Kategorie> kategorien = await datenbank.AlleKategorieEintraegeLadenAsync();
 
@@ -68,7 +68,7 @@ public partial class KategorienPage : ContentPage
         if (string.IsNullOrWhiteSpace(neuerName))
             return;
 
-        neuerName = neuerName.Trim();
+        neuerName = TextHelfer.Normalisieren(neuerName);
 
         if (string.Equals(
             kategorie.Name,
