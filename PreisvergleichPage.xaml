@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Einkaufsliste.PreisvergleichPage"
+             Title="Preisvergleich">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="18">
+            <Label
+                Text="Preisvergleich"
+                FontSize="28"
+                FontAttributes="Bold"
+                HorizontalOptions="Center"/>
+
+            <Label
+                Text="Vergleiche deine offenen Einkaufsartikel bei beiden Märkten."
+                FontSize="14"
+                HorizontalTextAlignment="Center"/>
+
+            <Border
+                Padding="16"
+                Stroke="#D0D0D0"
+                StrokeThickness="1">
+
+                <VerticalStackLayout Spacing="10">
+                    <Label
+                        Text="EDEKA Karch - Waldalgesheim"
+                        FontSize="18"
+                        FontAttributes="Bold"/>
+                    <Label
+                        x:Name="EdekaSummeText"
+                        Text="Bekannte Zwischensumme: 0,00 €"
+                        FontSize="17" />
+
+                    <Label
+                        x:Name="EdekaFehlendePreiseText"
+                        Text="Artikel ohne Preis : 0"
+                        FontSize="14"/>
+
+                    <Label
+                        x:Name="EdekaStatusText"
+                        Text="Noch kein Preisvergleich durchgeführt."
+                        FontSize="13"/>
+                </VerticalStackLayout>
+            </Border>
+            <Border
+                Padding="16"
+                Stroke="#D0D0D0"
+                StrokeThickness="1">
+                <VerticalStackLayout Spacing="10">
+                    <Label
+                        Text="ALDI SÜD - Stromberg"
+                        FontSize="18"
+                        FontAttributes="Bold"/>
+                    <Label
+                        x:Name="AldiSummeText"
+                        Text="Bekannte Zwischensumme: 0,00 €"
+                        FontSize="17" />
+
+                    <Label
+                        x:Name="AldiFehlendePreiseText"
+                        Text="Artikel ohne Preis : 0"
+                        FontSize="14"/>
+
+                    <Label
+                        x:Name="AldiStatusText"
+                        Text="Noch kein Preisvergleich durchgeführt."
+                        FontSize="13"/>
+
+
+                </VerticalStackLayout>
+                
+            </Border>
+
+            <Button
+                x:Name="VergleichButton"
+                Text="Preise vergleichen"
+                Clicked="OnVergleichenClicked"/>
+            <Label
+                x:Name="VergleichErgebnisText"
+                FontSize="16"
+                FontAttributes="Bold"
+                HorizontalTextAlignment="Center"/>
+        </VerticalStackLayout>
+    </ScrollView>
+    
+</ContentPage>
