@@ -10,7 +10,6 @@ namespace Einkaufsliste
     {
         private ObservableCollection<Artikelgruppe> artikelGruppen = new();
         private readonly EinkauflistenDatenbank datenbank = new();
-
         public MainPage()
         {
             InitializeComponent();
@@ -19,7 +18,6 @@ namespace Einkaufsliste
 
             LadeDatenAsync();
         }
-
         private async void OnArtikelHinzufuegenClicked(object sender, EventArgs e)
         {
  
@@ -292,6 +290,7 @@ namespace Einkaufsliste
         private async void LadeDatenAsync()
         {
             await datenbank.InitialisierenAsync();
+            await datenbank.StandardfililialenAnlegenAsync();
             await datenbank.StandardkategorienAnlegenAsync();
             await datenbank.BestehendeProdukteNormalisierenAsync();
 

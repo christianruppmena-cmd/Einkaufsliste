@@ -8,7 +8,6 @@ namespace Einkaufsliste.Services;
 public class EinkauflistenDatenbank
 {
     private readonly SQLiteAsyncConnection datenbank;
-
     public EinkauflistenDatenbank()
     {
         string dateiPfad = Path.Combine(
@@ -21,6 +20,8 @@ public class EinkauflistenDatenbank
         await datenbank.CreateTableAsync<Einkaufsartikel>();
         await datenbank.CreateTableAsync<Produkt>();
         await datenbank.CreateTableAsync<Kategorie>();
+        await datenbank.CreateTableAsync<Filiale>();
+        await datenbank.CreateTableAsync<Produktpreis>();
 
         var spalten = await datenbank.GetTableInfoAsync("Einkaufsartikel");
 
@@ -68,7 +69,41 @@ public class EinkauflistenDatenbank
                 "ALTER TABLE Einkaufsartikel ADD COLUMN Stueckpreis REAL NOT NULL DEFAULT 0");
         }
     }
+    public async Task StandardfililialenAnlegenAsync()
+    {
+        await InitialisierenAsync();
 
+        List<Filiale> filialen =
+            await datenbank.Table<Filiale>().ToListAsync();
+
+        Filiale[] standardfilialen =
+        {
+            new Filiale
+            {
+                Haendler = "EDEKA",
+                Name = " EDEKA Karch - Waldalgesheim",
+                Adresse = "Provinzialstraße 2, 55425 Waldalgesheim"
+            },
+            new Filiale
+            {
+                Haendler = "ALDI SÜD",
+                Name = "ALDI SÜD - Stromberg",
+                Adresse = "Friedrichseck 31, 55442 Stromberg"
+            }
+        };
+        foreach (Filiale filiale in standardfilialen)
+        {
+            bool vorhanden = filialen.Any(f =>
+            string.Equals(
+                f.Name.Trim(),
+                filiale.Name.Trim(),
+                StringComparison.OrdinalIgnoreCase));
+            if (!vorhanden)
+            {
+                await datenbank.InsertAsync(filiale);
+            }
+        }
+    }
     public async Task StandardkategorienAnlegenAsync()
     {
         await InitialisierenAsync();
@@ -96,7 +131,6 @@ public class EinkauflistenDatenbank
             }
         }
     }
-
     public async Task<List<Kategorie>> AlleKategorieEintraegeLadenAsync()
     {
         await InitialisierenAsync();
@@ -106,7 +140,6 @@ public class EinkauflistenDatenbank
             .OrderBy(k => k.Name)
             .ToListAsync();
     }
-
     public async Task KategorieSpeichernAsync(Kategorie kategorie)
     {
         await InitialisierenAsync();
@@ -121,7 +154,6 @@ public class EinkauflistenDatenbank
             await datenbank.UpdateAsync(kategorie);
         }
     }
-    
     public async Task<bool> KategorieUmbenennenAsync(Kategorie kategorie,string neuerName)
     {
         await InitialisierenAsync();
@@ -181,12 +213,10 @@ public class EinkauflistenDatenbank
         });
         return true;
     }
-    
     public async Task<List<Einkaufsartikel>> AlleArtikelLadenAsync()
     {
         return await datenbank.Table<Einkaufsartikel>().ToListAsync();
     }
-
     public async Task ArtikelSpeichernAsync(Einkaufsartikel artikel)
     {
         int ergebnis;
@@ -205,18 +235,15 @@ public class EinkauflistenDatenbank
         $"Menge={artikel.Menge}, Einheit={artikel.Einheit}, " +
         $"Ergebnis={ergebnis}");
     }
-
     public async Task ArtikelLoeschenAsync(Einkaufsartikel artikel)
     {
         await datenbank.DeleteAsync(artikel);
     }
-
     public async Task<List<Produkt>> AlleProdukteLadenAsync()
     {
         return await datenbank.Table<Produkt>().ToListAsync();
 
     }
-
     public async Task<List<string>> AlleKategorienLadenAsync()
     {
         await InitialisierenAsync();
@@ -230,8 +257,7 @@ public class EinkauflistenDatenbank
             .OrderBy(k => k)
             .ToList();
     }
-
-     public async Task<Produkt?> ProduktFindenAsync(string name)
+    public async Task<Produkt?> ProduktFindenAsync(string name)
     {
         
         static string Normalisieren(string text)
@@ -268,12 +294,10 @@ public class EinkauflistenDatenbank
         return produkte.FirstOrDefault(
             p => Normalisieren(p.Name) == grundform);
     }
-
     public async Task ProduktSpeichernAsync(Produkt produkt)
     {
         await datenbank.InsertOrReplaceAsync(produkt);
     }
-
     public async Task BestehendeProdukteNormalisierenAsync()
     {
         await InitialisierenAsync();
@@ -329,8 +353,6 @@ public class EinkauflistenDatenbank
             }
         });
     }
-
-
     public async Task StandardprodukteAnlegenAsync()
     {
         List<Produkt> standardprodukte = new()
@@ -394,7 +416,6 @@ public class EinkauflistenDatenbank
             }
         }
     }
-
     public async Task<Einkaufsartikel?> ArtikelLadenNachIdAsync(int id)
     {
         return await datenbank
@@ -402,4 +423,49 @@ public class EinkauflistenDatenbank
             .Where(a => a.Id == id)
             .FirstOrDefaultAsync();
     }
+    public async Task<List<Produktpreis>> AlleProduktpreiseLadenAsync()
+    {
+        await InitialisierenAsync();
+
+        return await datenbank.Table<Produktpreis>().ToListAsync();
+    }
+    public async Task<List<Produktpreis>> ProduktpreiseFuerFilialeLadenAsync(int filialeId)
+    {
+        await InitialisierenAsync();
+
+        return await datenbank.Table<Produktpreis>().Where(p => p.FilialeId == filialeId).ToListAsync();
+    }
+    public async Task ProduktpreisSpeichernAsync(Produktpreis produktpreis)
+    {
+        await InitialisierenAsync();
+
+        if(produktpreis.Id == 0)
+        {
+            await datenbank.InsertAsync(produktpreis);
+        }
+        else
+        {
+            await datenbank.UpdateAsync(produktpreis);
+        }
+    }
+    public async Task<Produktpreis?> ProduktpreisFindenAsync(int produktId, int filialeId)
+    {
+        await InitialisierenAsync();
+
+        List<Produktpreis> presie =
+            await datenbank.Table<Produktpreis>().Where(p => p.ProduktId == produktId && p.FilialeId == filialeId).ToListAsync();
+
+        DateTime heute = DateTime.Today;
+
+        return presie
+            .Where(p => p.GueltigVon == null || p.GueltigVon.Value.Date <= heute)
+            .Where(p => p.GueltigBis == null || p.GueltigBis.Value.Date >= heute)
+            .OrderBy(p => p.Preisart == "Wochenangebot" ? 0 : 1)
+            .ThenByDescending(p => p.ErfasstAm)
+            .FirstOrDefault();
+    }
+
+
+
+
 }
