@@ -73,7 +73,7 @@
             </Border>
 
             <Button
-                x:Name="VergleichButton"
+                x:Name="VergleichenButton"
                 Text="Preise vergleichen"
                 Clicked="OnVergleichenClicked"/>
             <Label
