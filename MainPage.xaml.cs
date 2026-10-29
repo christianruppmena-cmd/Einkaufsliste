@@ -465,7 +465,10 @@ namespace Einkaufsliste
             AktualisiereFortschritt();            
             await GesamtsummeAktualisierenAsync();
         }
-
+        private async void OnPreisvergleichenClicked(object sender, EventArgs e)
+        {
+            await Navigation.PushAsync(new PreisvergleichPage());
+        }
 
 
 

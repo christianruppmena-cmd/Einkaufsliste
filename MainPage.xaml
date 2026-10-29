@@ -111,6 +111,13 @@
                         HeightRequest="54"
                         Padding="16,0"
                         Clicked="OnArtikelHinzufuegenClicked"/>
+                    <Button
+                        Text="Preivergleich"
+                        Clicked="OnPreisvergleichenClicked"
+                        BackgroundColor="#2E7D32"
+                        TextColor="White"
+                        CornerRadius="14"/>
+
                     <Grid
                         
                         ColumnDefinitions="*,Auto"
