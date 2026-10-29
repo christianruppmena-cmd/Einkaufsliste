@@ -33,6 +33,8 @@ namespace Einkaufsliste
             if (neuerEintrag == null)
                 return;
 
+            neuerEintrag.Name = TextHelfer.Normalisieren(neuerEintrag.Name);
+
             // Zuerst die Kategorie des Produkts ermitteln
             Produkt? produkt = await datenbank.ProduktFindenAsync(neuerEintrag.Name);
 
@@ -99,8 +101,8 @@ namespace Einkaufsliste
 
                 await datenbank.ProduktSpeichernAsync(new Produkt
                 {
-                    Name = neuerEintrag.Name,
-                    Kategorie = neuerEintrag.Kategorie
+                    Name = TextHelfer.Normalisieren(neuerEintrag.Name),
+                    Kategorie = TextHelfer.Normalisieren(neuerEintrag.Kategorie)
                 });
             }
 
@@ -296,6 +298,7 @@ namespace Einkaufsliste
         {
             await datenbank.InitialisierenAsync();
             await datenbank.StandardkategorienAnlegenAsync();
+            await datenbank.BestehendeProdukteNormalisierenAsync();
 
             
 
