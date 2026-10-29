@@ -37,6 +37,7 @@
             </CollectionView.EmptyView>
             <CollectionView.ItemTemplate>
                 <DataTemplate>
+                   
                     <Border
                         BackgroundColor="White"
                         Stroke="#E3EBE5"
@@ -44,12 +45,26 @@
                         StrokeShape="RoundRectangle 12"
                         Padding="16"
                         Margin="0,4">
+                        <Grid 
+                             ColumnDefinitions="*,Auto"
+                             ColumnSpacing="12">
 
-                        <Label
-                            Text="{Binding Name}"
-                            FontSize="17"
-                            TextColor="#26352C"
-                            VerticalOptions="Center"/>
+                            <Label
+                                Grid.Column="0"
+                                Text="{Binding Name}"
+                                FontSize="17"
+                                TextColor="#26352C"
+                                VerticalOptions="Center"/>
+                            <Button
+                                Grid.Column="1"
+                                Text="Bearbeiten"
+                                BackgroundColor="#E5EFE8"
+                                TextColor="#245B3D"
+                                CornerRadius="8"
+                                Padding="12,6"
+                                CommandParameter="{Binding .}"
+                                Clicked="OnKategorieBearbeitenClicked"/>
+                        </Grid>
                     </Border>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
