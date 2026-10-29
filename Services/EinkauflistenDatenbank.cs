@@ -112,9 +112,7 @@ public class EinkauflistenDatenbank
         }
     }
     
-    public async Task<bool> KategorieUmbenennenAsync(
-        Kategorie kategorie,
-        string neuerName)
+    public async Task<bool> KategorieUmbenennenAsync(Kategorie kategorie,string neuerName)
     {
         await InitialisierenAsync();
 
