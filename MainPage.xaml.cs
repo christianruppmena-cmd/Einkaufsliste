@@ -29,43 +29,89 @@ namespace Einkaufsliste
 
             Einkaufsartikel? neuerEintrag = await seite.ErgebnisTask;
 
+            if (neuerEintrag == null)
+                return;
+
+            // Zuerst die Kategorie des Produkts ermitteln
+            Produkt? produkt = await datenbank.ProduktFindenAsync(neuerEintrag.Name);
+
+            if (produkt != null)
+            {
+                neuerEintrag.Kategorie = produkt.Kategorie;
+            }
+            else
+            {
+                List<Kategorie> kategorien =
+                    await datenbank.AlleKategorieEintraegeLadenAsync();
+
+                string[] kategorienNamen = kategorien.Select(k => k.Name).ToArray();
+
+                string? ausgewaehlteKategorie = await DisplayActionSheetAsync(
+                    $"Welche Kategorie gehört zu {neuerEintrag.Name}?",
+                    "Abbrechen",
+                    null,
+                    kategorienNamen);
+
+                if (string.IsNullOrWhiteSpace(ausgewaehlteKategorie) ||
+                    ausgewaehlteKategorie == "Abbrechen")
+                {
+                    return;
+                }
+
+                neuerEintrag.Kategorie = ausgewaehlteKategorie;
+
+                await datenbank.ProduktSpeichernAsync(new Produkt
+                {
+                    Name = neuerEintrag.Name,
+                    Kategorie = neuerEintrag.Kategorie
+                });
+            }
+
+            // Erst jetzt nach einem doppelten Artikel suchen
             Einkaufsartikel? vorhandenerArtikel = artikelGruppen
                 .SelectMany(gruppe => gruppe)
-                .FirstOrDefault(artikel =>string.Equals(
+                .FirstOrDefault(artikel =>
+                    string.Equals(
                         artikel.Name.Trim(),
                         neuerEintrag.Name.Trim(),
-                        StringComparison.OrdinalIgnoreCase) 
+                        StringComparison.OrdinalIgnoreCase)
                     && string.Equals(
-                        artikel.Einheit, 
-                        neuerEintrag.Einheit, 
-                        StringComparison.OrdinalIgnoreCase) 
+                        artikel.Einheit,
+                        neuerEintrag.Einheit,
+                        StringComparison.OrdinalIgnoreCase)
+                    && string.Equals(
+                        artikel.Kategorie,
+                        neuerEintrag.Kategorie,
+                        StringComparison.OrdinalIgnoreCase)
                     && !artikel.IstErledigt);
 
             if (vorhandenerArtikel != null)
             {
                 bool zusammenfassen = await DisplayAlertAsync(
                     "Artikel bereits vorhanden",
-                    $"{vorhandenerArtikel.Name} ist bereits in der Einkaufsliste. \n\n" +
-                    $"Vorhanden:  {vorhandenerArtikel.Menge} {vorhandenerArtikel.Einheit}\n" +
+                    $"{vorhandenerArtikel.Name} ist bereits in deiner Einkaufsliste.\n\n" +
+                    $"Vorhanden: {vorhandenerArtikel.Menge} {vorhandenerArtikel.Einheit}\n" +
                     $"Neu: {neuerEintrag.Menge} {neuerEintrag.Einheit}\n\n" +
-                    "Möchtest du die Mengen zusammenfassen? ",
+                    "Möchtest du die Mengen zusammenfassen?",
                     "Zusammenfassen",
-                    "Separat hizufügen");
+                    "Separat hinzufügen");
 
-                if(zusammenfassen)
+                if (zusammenfassen)
                 {
-                    if(decimal.TryParse(
-                        vorhandenerArtikel.Menge,
-                        System.Globalization.NumberStyles.Number,
-                        System.Globalization.CultureInfo.CurrentCulture,
-                        out decimal alteMenge)
+                    if (decimal.TryParse(
+                            vorhandenerArtikel.Menge,
+                            System.Globalization.NumberStyles.Number,
+                            System.Globalization.CultureInfo.CurrentCulture,
+                            out decimal alteMenge)
                         && decimal.TryParse(
                             neuerEintrag.Menge,
                             System.Globalization.NumberStyles.Number,
                             System.Globalization.CultureInfo.CurrentCulture,
                             out decimal neueMenge))
                     {
-                        vorhandenerArtikel.Menge = (alteMenge + neueMenge).ToString(System.Globalization.CultureInfo.CurrentCulture);
+                        vorhandenerArtikel.Menge =
+                            (alteMenge + neueMenge).ToString(
+                                System.Globalization.CultureInfo.CurrentCulture);
 
                         if (string.IsNullOrWhiteSpace(vorhandenerArtikel.Hinweis))
                         {
@@ -77,7 +123,7 @@ namespace Einkaufsliste
                                 neuerEintrag.Hinweis,
                                 StringComparison.OrdinalIgnoreCase))
                         {
-                            vorhandenerArtikel.Hinweis += " / " + neuerEintrag.Hinweis;                        
+                            vorhandenerArtikel.Hinweis += " / " + neuerEintrag.Hinweis;
                         }
 
                         await datenbank.ArtikelSpeichernAsync(vorhandenerArtikel);
@@ -93,33 +139,6 @@ namespace Einkaufsliste
                 }
             }
 
-            if (neuerEintrag == null)
-                return;
-
-            Produkt? produkt = await datenbank.ProduktFindenAsync(neuerEintrag.Name);
-
-            if (produkt != null)
-            {
-                neuerEintrag.Kategorie = produkt.Kategorie;
-            }
-            else
-            {
-                List<Kategorie> kategorien = await datenbank.AlleKategorieEintraegeLadenAsync();
-
-                string[] kategorienNamen = kategorien.Select(k => k.Name).ToArray();
-
-                string? ausgewaehlteKategorie = await DisplayActionSheetAsync($"Welche Kategorie grhört zu {neuerEintrag.Name} ?", "Abbrechen", null, kategorienNamen);
-
-                if (string.IsNullOrWhiteSpace(ausgewaehlteKategorie) || ausgewaehlteKategorie == "Abbrechen") 
-                {
-                    return;
-                }
-                neuerEintrag.Kategorie = ausgewaehlteKategorie;
-
-                await datenbank.ProduktSpeichernAsync(new Produkt { Name = neuerEintrag.Name, Kategorie = neuerEintrag.Kategorie });
-            }
-
-            neuerEintrag.IstErledigt = false;
 
             await datenbank.ArtikelSpeichernAsync(neuerEintrag);
 
