@@ -13,7 +13,6 @@ namespace Einkaufsliste.Models
         public int Id { get; set; }
         private string name = string.Empty;
         private bool istErledigt;
-
         public string Name
         {
             get => name;
@@ -40,17 +39,13 @@ namespace Einkaufsliste.Models
             }
         }
         public event PropertyChangedEventHandler? PropertyChanged;
-
-        protected void OnPropertyChanged(
-            [CallerMemberName] string? propertyName = null)
+        protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
             PropertyChanged?.Invoke(
                 this,
                 new PropertyChangedEventArgs(propertyName));
         }
-
         public string Kategorie { get; set; } = "Sonstiges";
-
         private decimal stueckpreis;
         public decimal Stueckpreis
         {
@@ -82,7 +77,6 @@ namespace Einkaufsliste.Models
                 return Stueckpreis;
             }
         }
-
         private string menge = "1";
         public string Menge
         {
@@ -94,10 +88,10 @@ namespace Einkaufsliste.Models
 
                 menge = value;
                 OnPropertyChanged(nameof(Menge));
+                OnPropertyChanged(nameof(Gesamtpreis));
                 OnPropertyChanged(nameof(DetailsAnzeige));
             }
         }
-
         private string einheit = "Stück";
         public string Einheit
         {
@@ -112,7 +106,6 @@ namespace Einkaufsliste.Models
                 OnPropertyChanged(nameof(DetailsAnzeige));
             }
         }
-
         private string hinweis = string.Empty;
         public string Hinweis
         {
@@ -127,7 +120,6 @@ namespace Einkaufsliste.Models
                 OnPropertyChanged(nameof(DetailsAnzeige));
             }
         }
-
         public string DetailsAnzeige
 
         {
