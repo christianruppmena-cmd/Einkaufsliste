@@ -67,6 +67,32 @@ public class EinkauflistenDatenbank
             await datenbank.ExecuteAsync(
                 "ALTER TABLE Einkaufsartikel ADD COLUMN Stueckpreis REAL NOT NULL DEFAULT 0");
         }
+
+        // Neue Tabellen für den Preisvergleich
+        await datenbank.CreateTableAsync<Haendler>();
+        await datenbank.CreateTableAsync<Produktpreis>();
+        await datenbank.CreateTableAsync<PreisHistorie>();
+
+        // Neue Spalte für die Produktverknüpfung
+
+        spaltenAktuell =
+            await datenbank.GetTableInfoAsync("Einkaufsartikel");
+
+        if(!spaltenAktuell.Any(s => s.Name == "ProduktId"))
+        {
+            await datenbank.ExecuteAsync(
+                "ALTER TABLE Einkaufsartikel ADD COLUMN ProduktId INTEGER NULL");
+        }
+        // Produktbild-Pfad 
+
+        var produktSpalten =
+            await datenbank.GetTableInfoAsync("Produkt");
+
+        if (!produktSpalten.Any(s => s.Name == "BildPfad"))
+        {
+            await datenbank.ExecuteAsync(
+                "ALTER TABLE Produkt ADD COLUMN BildPfad TEXT NULL");
+        }
     }
 
     public async Task StandardkategorienAnlegenAsync()
