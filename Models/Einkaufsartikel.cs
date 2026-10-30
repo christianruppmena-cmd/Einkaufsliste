@@ -11,6 +11,8 @@ namespace Einkaufsliste.Models
     {
         [PrimaryKey, AutoIncrement]
         public int Id { get; set; }
+
+        public int? ProduktId { get; set; }
         private string name = string.Empty;
         private bool istErledigt;
 
