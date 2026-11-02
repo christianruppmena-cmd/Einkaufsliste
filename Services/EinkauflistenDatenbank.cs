@@ -16,108 +16,97 @@ public class EinkauflistenDatenbank
 
         datenbank = new SQLiteAsyncConnection(dateiPfad);
     }
+
     public async Task InitialisierenAsync()
     {
+        // Einkaufslisten
         await datenbank.CreateTableAsync<Einkaufsartikel>();
-        await datenbank.CreateTableAsync<Produkt>();
         await datenbank.CreateTableAsync<Kategorie>();
 
-        var spalten = await datenbank.GetTableInfoAsync("Einkaufsartikel");
+        // Produktverwaltung
+        await datenbank.CreateTableAsync<Produkt>();
 
-        bool kategorieExistiert = spalten.Any(spalte => spalte.Name == "Kategorie");
-
-        if (!kategorieExistiert)
-        {
-            await datenbank.ExecuteAsync
-                ("ALTER TABLE Einkaufsartikel ADD COLUMN Kategorie TEXT NOT NULL DEFAULT 'Sonstiges'");
-
-        }
-
-        var spaltenAktuell =
-            await datenbank.GetTableInfoAsync("Einkaufsartikel");
-
-        if (!spaltenAktuell.Any(s => s.Name == "Menge"))
-        {
-            await datenbank.ExecuteAsync(
-                "ALTER TABLE Einkaufsartikel ADD COLUMN Menge TEXT NOT NULL DEFAULT '1'");
-        }
-
-        spaltenAktuell =
-            await datenbank.GetTableInfoAsync("Einkaufsartikel");
-
-        if (!spaltenAktuell.Any(s => s.Name == "Einheit"))
-        {
-            await datenbank.ExecuteAsync(
-                "ALTER TABLE Einkaufsartikel ADD COLUMN Einheit TEXT NOT NULL DEFAULT 'Stück'");
-        }
-
-        spaltenAktuell =
-            await datenbank.GetTableInfoAsync("Einkaufsartikel");
-
-        if (!spaltenAktuell.Any(s => s.Name == "Hinweis"))
-        {
-            await datenbank.ExecuteAsync(
-                "ALTER TABLE Einkaufsartikel ADD COLUMN Hinweis TEXT NOT NULL DEFAULT ''");
-        }
-
-        spaltenAktuell = await datenbank.GetTableInfoAsync("Einkaufsartikel");
-
-        if(!spaltenAktuell.Any(s => s.Name == "Stueckpreis"))
-        {
-            await datenbank.ExecuteAsync(
-                "ALTER TABLE Einkaufsartikel ADD COLUMN Stueckpreis REAL NOT NULL DEFAULT 0");
-        }
-
-        // Neue Tabellen für den Preisvergleich
+        // Preisvergleich
         await datenbank.CreateTableAsync<Haendler>();
         await datenbank.CreateTableAsync<Produktpreis>();
         await datenbank.CreateTableAsync<PreisHistorie>();
 
-        // Neue Spalte für die Produktverknüpfung
+        // Verknüpfung zwischen Einkaufsartikel und Produkt
+        var spalten = await datenbank.GetTableInfoAsync("Einkaufsartikel");
 
-        spaltenAktuell =
-            await datenbank.GetTableInfoAsync("Einkaufsartikel");
-
-        if(!spaltenAktuell.Any(s => s.Name == "ProduktId"))
+        if (!spalten.Any(s => s.Name == "ProduktId"))
         {
             await datenbank.ExecuteAsync(
                 "ALTER TABLE Einkaufsartikel ADD COLUMN ProduktId INTEGER NULL");
         }
-        // Produktbild-Pfad 
+    }
 
-        var produktSpalten =
-            await datenbank.GetTableInfoAsync("Produkt");
 
-        if (!produktSpalten.Any(s => s.Name == "BildPfad"))
+    public async Task StandardHaendlerAnlegenAsync()
+    {
+        string[] haendlerNamen =
         {
-            await datenbank.ExecuteAsync(
-                "ALTER TABLE Produkt ADD COLUMN BildPfad TEXT NULL");
+        "ALDI SÜD",
+        "Lidl",
+        "REWE",
+        "EDEKA",
+        "Penny",
+        "Netto",
+        "dm",
+        "Rossmann",
+        "Kaufland"
+    };
+
+        for (int i = 0; i < haendlerNamen.Length; i++)
+        {
+            string name = haendlerNamen[i];
+
+            var vorhanden = await datenbank
+                .Table<Haendler>()
+                .Where(h => h.Name == name)
+                .FirstOrDefaultAsync();
+
+            if (vorhanden == null)
+            {
+                await datenbank.InsertAsync(new Haendler
+                {
+                    Name = name,
+                    IstAktiv = true,
+                    Sortierung = i + 1
+                });
+            }
         }
     }
 
     public async Task StandardkategorienAnlegenAsync()
     {
-        await InitialisierenAsync();
+        string[] standardkategorien =
+        {
+        "Obst",
+        "Gemüse",
+        "Milchprodukte",
+        "Fleisch & Fisch",
+        "Backwaren",
+        "Getränke",
+        "Tiefkühlprodukte",
+        "Süßigkeiten & Snacks",
+        "Haushalt",
+        "Drogerie",
+        "Sonstiges"
+    };
 
-        List<Produkt> produkte = await datenbank.Table<Produkt>().ToListAsync();
-
-        List<string> kategorien = produkte
-            .Select(p => p.Kategorie.Trim())
-            .Where(k => !string.IsNullOrWhiteSpace(k))
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToList();
-
-        foreach (string kategorienName in kategorien)
+        foreach (string name in standardkategorien)
         {
             Kategorie? vorhanden = await datenbank
                 .Table<Kategorie>()
-                .Where(k => k.Name == kategorienName)
+                .Where(k => k.Name == name)
                 .FirstOrDefaultAsync();
+
             if (vorhanden == null)
             {
                 await datenbank.InsertAsync(new Kategorie
                 {
-                    Name = kategorienName
+                    Name = name
                 });
             }
         }
@@ -257,7 +246,7 @@ public class EinkauflistenDatenbank
             .ToList();
     }
 
-     public async Task<Produkt?> ProduktFindenAsync(string name)
+    public async Task<Produkt?> ProduktFindenAsync(string name)
     {
         
         static string Normalisieren(string text)
@@ -297,127 +286,48 @@ public class EinkauflistenDatenbank
 
     public async Task ProduktSpeichernAsync(Produkt produkt)
     {
-        await datenbank.InsertOrReplaceAsync(produkt);
-    }
-
-    public async Task BestehendeProdukteNormalisierenAsync()
-    {
-        await InitialisierenAsync();
-
-        List<Produkt> produkte =
-            await datenbank.Table<Produkt>().ToListAsync();
-
-        List<Kategorie> kategorien =
-            await datenbank.Table<Kategorie>().ToListAsync();
-
-        List<Einkaufsartikel> artikel = await datenbank.Table<Einkaufsartikel>().ToListAsync();
-
-        await datenbank.RunInTransactionAsync(conn =>
+        if (string.IsNullOrWhiteSpace(produkt.Name))
         {
-            foreach (Produkt produkt in produkte)
-            {
-                produkt.Name = TextHelfer.Normalisieren(produkt.Name);
+            throw new ArgumentException("Der Produktname darf nicht leer sein.");
+        }
 
-                Kategorie? passendeKategorie = kategorien.FirstOrDefault(k =>
-                    string.Equals(
-                        k.Name.Trim(),
-                        produkt.Kategorie?.Trim(),
-                        StringComparison.OrdinalIgnoreCase));
-
-                if (passendeKategorie != null)
-                {
-                    produkt.Kategorie = passendeKategorie.Name;
-                }
-                else
-                {
-                    produkt.Kategorie =
-                        TextHelfer.Normalisieren(produkt.Kategorie);
-                }
-
-                conn.Update(produkt);
-            }
-
-            foreach (Einkaufsartikel eintrag in artikel)
-            {
-                eintrag.Name = TextHelfer.Normalisieren(eintrag.Name);
-
-                Kategorie? passendeKategorie = kategorien.FirstOrDefault(k =>
-                    string.Equals(
-                        k.Name.Trim(),
-                        eintrag.Kategorie?.Trim(),
-                        StringComparison.OrdinalIgnoreCase));
-                if (passendeKategorie != null)
-                {
-                    eintrag.Kategorie = passendeKategorie.Name;
-                }
-
-                conn.Update(eintrag);
-            }
-        });
-    }
-
-
-    public async Task StandardprodukteAnlegenAsync()
-    {
-        List<Produkt> standardprodukte = new()
+        string Normalisieren(string? wert)
         {
-            new Produkt {Name = "Apfel", Kategorie="Obst"},
-            new Produkt {Name = "Banane", Kategorie="Obst"},
-            new Produkt {Name = "Birne", Kategorie="Obst"},
-            new Produkt {Name = "Orange", Kategorie="Obst"},
+            return string.IsNullOrWhiteSpace(wert)
+                ? string.Empty
+                : wert.Trim().ToLowerInvariant();
+        }
 
-            new Produkt { Name = "Tomate", Kategorie = "Gemüse" },
-            new Produkt { Name = "Gurke", Kategorie = "Gemüse" },
-            new Produkt { Name = "Karotte", Kategorie = "Gemüse" },
-            new Produkt { Name = "Kartoffel", Kategorie = "Gemüse" },
+        string name = Normalisieren(produkt.Name);
+        string marke = Normalisieren(produkt.Marke);
+        string variante = Normalisieren(produkt.Variante);
+        string packung = produkt.Packungsgroesse?.ToString(
+            "0.################",
+            System.Globalization.CultureInfo.InvariantCulture) ?? "";
+        string einheit = Normalisieren(produkt.Basiseinheit);
 
-            new Produkt { Name = "Milch", Kategorie = "Milchprodukte" },
-            new Produkt { Name = "Käse", Kategorie = "Milchprodukte" },
-            new Produkt { Name = "Joghurt", Kategorie = "Milchprodukte" },
-            new Produkt { Name = "Butter", Kategorie = "Milchprodukte" },
+        produkt.ProduktSchluessel =
+            string.Join("|", name, marke, variante, packung, einheit);
 
-            new Produkt { Name = "Brot", Kategorie = "Backwaren" },
-            new Produkt { Name = "Brötchen", Kategorie = "Backwaren" },
-            new Produkt { Name = "Toast", Kategorie = "Backwaren" },
+        var vorhandenesProdukt = await datenbank
+            .Table<Produkt>()
+            .Where(p => p.ProduktSchluessel == produkt.ProduktSchluessel)
+            .FirstOrDefaultAsync();
 
-            new Produkt { Name = "Wasser", Kategorie = "Getränke" },
-            new Produkt { Name = "Orangensaft", Kategorie = "Getränke" },
-            new Produkt { Name = "Kaffee", Kategorie = "Getränke" },
-
-            new Produkt { Name = "Hähnchen", Kategorie = "Fleisch & Fisch" },
-            new Produkt { Name = "Hackfleisch", Kategorie = "Fleisch & Fisch" },
-            new Produkt { Name = "Lachs", Kategorie = "Fleisch & Fisch" },
-
-            new Produkt { Name = "Pizza", Kategorie = "Tiefkühlprodukte" },
-            new Produkt { Name = "Pommes", Kategorie = "Tiefkühlprodukte" },
-            new Produkt { Name = "Eis", Kategorie = "Tiefkühlprodukte" },
-
-            new Produkt { Name = "Schokolade", Kategorie = "Süßigkeiten & Snacks" },
-            new Produkt { Name = "Chips", Kategorie = "Süßigkeiten & Snacks" },
-
-            new Produkt { Name = "Spülmittel", Kategorie = "Haushalt" },
-            new Produkt { Name = "Waschmittel", Kategorie = "Haushalt" }
-
-        };
-
-        foreach (Produkt produkt in standardprodukte)
+        if (vorhandenesProdukt != null &&
+            vorhandenesProdukt.Id != produkt.Id)
         {
-            List<Produkt> produkte =
-                await datenbank.Table<Produkt>().ToListAsync();
+            throw new InvalidOperationException(
+                "Dieses Produkt existiert bereits.");
+        }
 
-            bool vorhanden = produkte.Any(
-                p => string.Equals(
-                    p.Name.Trim(),
-                    produkt.Name.Trim(),
-                    StringComparison.OrdinalIgnoreCase));
-
-            if (!vorhanden)
-            {
-                await datenbank.InsertAsync(produkt);
-
-                System.Diagnostics.Debug.WriteLine(
-                    $"Produkt gespeichert: {produkt.Name} - {produkt.Kategorie}");
-            }
+        if (produkt.Id == 0)
+        {
+            await datenbank.InsertAsync(produkt);
+        }
+        else
+        {
+            await datenbank.UpdateAsync(produkt);
         }
     }
 

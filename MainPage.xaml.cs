@@ -9,11 +9,13 @@ namespace Einkaufsliste
     public partial class MainPage : ContentPage
     {
         private ObservableCollection<Artikelgruppe> artikelGruppen = new();
-        private readonly EinkauflistenDatenbank datenbank = new();
+        private readonly EinkauflistenDatenbank datenbank ;
 
-        public MainPage()
+        public MainPage(EinkauflistenDatenbank datenbank)
         {
             InitializeComponent();
+
+            this.datenbank = datenbank;
 
             ArtikelListe.ItemsSource = artikelGruppen;
 
@@ -40,6 +42,7 @@ namespace Einkaufsliste
 
             if (produkt != null)
             {
+                neuerEintrag.ProduktId = produkt.Id;
                 neuerEintrag.Name = produkt.Name;
                 neuerEintrag.Kategorie = produkt.Kategorie;
             }
@@ -99,11 +102,14 @@ namespace Einkaufsliste
                     neuerEintrag.Kategorie = ausgewaehlteKategorie;
                 }
 
-                await datenbank.ProduktSpeichernAsync(new Produkt
+                Produkt neuesProdukt = new Produkt
                 {
                     Name = TextHelfer.Normalisieren(neuerEintrag.Name),
                     Kategorie = TextHelfer.Normalisieren(neuerEintrag.Kategorie)
-                });
+                };
+
+                await datenbank.ProduktSpeichernAsync(neuesProdukt);
+                neuerEintrag.ProduktId = neuesProdukt.Id;
             }
 
             // Erst jetzt nach einem doppelten Artikel suchen
@@ -291,12 +297,7 @@ namespace Einkaufsliste
         }
         private async void LadeDatenAsync()
         {
-            await datenbank.InitialisierenAsync();
-            await datenbank.StandardkategorienAnlegenAsync();
-            await datenbank.BestehendeProdukteNormalisierenAsync();
-
-            
-
+ 
             List<Einkaufsartikel> gespeicherteArtikel = await datenbank.AlleArtikelLadenAsync();
             
             ArtikelGruppieren(gespeicherteArtikel);
