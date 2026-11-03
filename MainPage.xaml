@@ -100,17 +100,97 @@
                     </Border>
 
                     <!-- Hinzufügen-Button -->
-                    <Button
-                        
-                        Text="Artikel hinzufügen"
-                        FontSize="16"
-                        FontAttributes="Bold"
-                        BackgroundColor="#278653"
-                        TextColor="White"
-                        CornerRadius="14"
-                        HeightRequest="54"
-                        Padding="16,0"
-                        Clicked="OnArtikelHinzufuegenClicked"/>
+                    <!-- Produktsuche -->
+                    <VerticalStackLayout Spacing="0">
+
+                        <Border
+                            BackgroundColor="White"
+                            Stroke="#DCE7DF"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 12"
+                            Padding="12"
+                            Margin="0,0,0,5">
+
+                            <Grid ColumnDefinitions="Auto,*"
+                                  ColumnSpacing="10">
+
+                                <Label
+                                    Text="&#x1F50D;"
+                                    FontSize="20"
+                                    VerticalOptions="Center"/>
+
+                                <Entry
+                                    x:Name="ProduktsucheEntry"
+                                    Grid.Column="1"
+                                    Placeholder="Produkt suchen ..."
+                                    FontSize="16"
+                                    TextChanged="OnProduktsucheTextChanged"
+                                    ClearButtonVisibility="WhileEditing"/>
+
+                            </Grid>
+                        </Border>
+
+                        <!-- Produktvorschläge -->
+                        <Border
+                            x:Name="ProduktVorschlaegeContainer"
+                            IsVisible="False"
+                            BackgroundColor="White"
+                            Stroke="#E3EBE5"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 12"
+                            Padding="5"
+                            Margin="0,0,0,10">
+
+                            <CollectionView
+                                x:Name="ProduktVorschlaegeListe"
+                                SelectionMode="Single"
+                                SelectionChanged="OnProduktVorschlagAusgewaehlt"
+                                MaximumHeightRequest="250">
+
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Padding="10"
+                                              RowDefinitions="Auto,Auto"
+                                              ColumnDefinitions="*">
+
+                                            <Label
+                                                Grid.Row="0"
+                                                Text="{Binding Name}"
+                                                FontSize="15"
+                                                FontAttributes="Bold"
+                                                TextColor="#222222"/>
+
+                                            <Label
+                                                Grid.Row="1"
+                                                Text="{Binding Marke}"
+                                                FontSize="12"
+                                                TextColor="#64746A"/>
+
+                                        </Grid>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+
+                            </CollectionView>
+                        </Border>
+
+                    </VerticalStackLayout>
+                    <!-- Gruppierung der Einkaufsliste -->
+                    <Picker
+                        x:Name="GruppierungsPicker"
+                        Title="Liste gruppieren nach"
+                        FontSize="14"
+                        BackgroundColor="White"
+                        TextColor="#26352C"
+                        Margin="0,0,0,10"
+                        SelectedIndexChanged="OnGruppierungGeaendert">
+
+                        <Picker.Items>
+                            <x:String>Produktkategorie</x:String>
+                            <x:String>Kaufort</x:String>
+                        </Picker.Items>
+
+                    </Picker>
+
                     <Grid
                         
                         ColumnDefinitions="*,Auto"
@@ -237,12 +317,18 @@
 
                                     </Label.Triggers>
                                 </Label>
+                                
+                                <Label
+                                    Text="{Binding HaendlerAnzeige, StringFormat= 'Kaufort: {0}'}"
+                                    FontSize="12"
+                                    TextColor="#3976A8"
+                                    LineBreakMode="WordWrap"/>
 
                                 <Label
-                                        Text="{Binding DetailsAnzeige}"
-                                        FontSize="12"
-                                        TextColor="#64746A"
-                                        LineBreakMode="WordWrap"/>
+                                    Text="{Binding DetailsAnzeige}"
+                                    FontSize="12"
+                                    TextColor="#64746A"
+                                    LineBreakMode="WordWrap"/>
 
                                 <Label
                                     Text="{Binding Stueckpreis, StringFormat='Stückpreis: {0:N2} €'}"

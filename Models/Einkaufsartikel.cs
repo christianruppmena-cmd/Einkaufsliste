@@ -14,6 +14,22 @@ namespace Einkaufsliste.Models
 
         public int? ProduktId { get; set; }
         public int? AusgewaehlterHaendlerId { get; set; }
+
+        private string haendlerAnzeige = string.Empty;
+
+        [Ignore]
+        public string HaendlerAnzeige
+        {
+            get => haendlerAnzeige;
+            set
+            {
+                if (haendlerAnzeige == value)
+                    return;
+
+                haendlerAnzeige = value;
+                OnPropertyChanged(nameof(HaendlerAnzeige));
+            }
+        }
         private string name = string.Empty;
         private bool istErledigt;
 

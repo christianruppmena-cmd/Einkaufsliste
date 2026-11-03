@@ -599,6 +599,23 @@ public class EinkauflistenDatenbank
         await LokaleSicherungErstellenAsync();
     }
 
+    public async Task EinkaufsartikelHaendlerAktualisierenAsync(int produktId,int? haendlerId)
+    {
+        List<Einkaufsartikel> artikel = await datenbank
+            .Table<Einkaufsartikel>()
+            .Where(a => a.ProduktId == produktId)
+            .ToListAsync();
+
+        foreach (Einkaufsartikel eintrag in artikel)
+        {
+            eintrag.AusgewaehlterHaendlerId = haendlerId;
+
+            await datenbank.UpdateAsync(eintrag);
+        }
+
+        await LokaleSicherungErstellenAsync();
+    }
+    
     public async Task ArtikelLoeschenAsync(Einkaufsartikel artikel)
     {
         await datenbank.DeleteAsync(artikel);

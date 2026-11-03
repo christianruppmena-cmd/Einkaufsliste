@@ -72,11 +72,15 @@
                 Title="Einheit auswählen"
                 TextColor="#222222">
                 <Picker.Items>
-                    <x:String>g</x:String>
-                    <x:String>kg</x:String>
-                    <x:String>ml</x:String>
-                    <x:String>l</x:String>
                     <x:String>Stück</x:String>
+                    <x:String>Packung</x:String>
+                    <x:String>Flasche</x:String>
+                    <x:String>Kg</x:String>
+                    <x:String>g</x:String>
+                    <x:String>Liter</x:String>
+                    <x:String>ml</x:String>
+                    <x:String>100 g</x:String>
+                    <x:String>100 ml</x:String>
                 </Picker.Items>
             </Picker>
 

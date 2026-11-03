@@ -119,7 +119,8 @@ public partial class ProduktverwaltungPage : ContentPage
         zuSpeicherndesProdukt.BevorzugterHaendlerId = bevorzugterHaendlerId;
         zuSpeicherndesProdukt.Packungsgroesse = packungsgroesse;
         zuSpeicherndesProdukt.Basiseinheit = einheit ?? "";
-
+        
+    
         if (bildEntfernen)
         {
             zuSpeicherndesProdukt.BildPfad = null;
@@ -132,6 +133,11 @@ public partial class ProduktverwaltungPage : ContentPage
         try
         {
             await datenbank.ProduktSpeichernAsync(zuSpeicherndesProdukt);
+
+            // Bevorzugten Händler bei vorhandenen Einkaufsartikeln übernehmen
+            await datenbank.EinkaufsartikelHaendlerAktualisierenAsync(
+                zuSpeicherndesProdukt.Id,
+                zuSpeicherndesProdukt.BevorzugterHaendlerId);
 
             produktZumBearbeiten = null;
             ausgewaehlterBildPfad = null;
