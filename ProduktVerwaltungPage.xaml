@@ -47,6 +47,13 @@
                 x:Name="KategoriePicker"
                 Title="Kategorie auswählen"
                 TextColor="#222222"/>
+            <Label 
+                Text="Bevorzugter Supermarkt"
+                TextColor="#222222"/>
+            <Picker
+                x:Name="BevorzugterHaendlerPicker"
+                Title="Supermarkt auswählen"
+                TextColor="#222222"/>
 
             <Label 
                 Text="Packungsgröße"

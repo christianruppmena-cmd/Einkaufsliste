@@ -48,6 +48,25 @@ public class EinkauflistenDatenbank
 
         // Produktverwaltung
         await datenbank.CreateTableAsync<Produkt>();
+        // Migration: Bevorzugten Händler beim Produkt ergänzen
+        var produktSpalten =
+            await datenbank.GetTableInfoAsync("Produkt");
+
+        if (!produktSpalten.Any(s => s.Name == "BevorzugterHaendlerId"))
+        {
+            await datenbank.ExecuteAsync(
+                "ALTER TABLE Produkt ADD COLUMN BevorzugterHaendlerId INTEGER NULL");
+        }
+
+        // Migration: Ausgewählten Händler beim Einkaufsartikel ergänzen
+        var artikelSpalten =
+            await datenbank.GetTableInfoAsync("Einkaufsartikel");
+
+        if (!artikelSpalten.Any(s => s.Name == "AusgewaehlterHaendlerId"))
+        {
+            await datenbank.ExecuteAsync(
+                "ALTER TABLE Einkaufsartikel ADD COLUMN AusgewaehlterHaendlerId INTEGER NULL");
+        }
 
         // Preisvergleich
         await datenbank.CreateTableAsync<Haendler>();

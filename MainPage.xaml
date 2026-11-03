@@ -195,8 +195,8 @@
                             Padding="12"
                             Margin="0,5">
 
-                        <Grid ColumnDefinitions="48,*,44,44"
-                                  ColumnSpacing="10">
+                        <Grid ColumnDefinitions="48,*,76,44,44"
+                                  ColumnSpacing="6">
 
                             <!-- Checkbox für Erledigt/Unerledigt -->
                             <CheckBox
@@ -254,10 +254,96 @@
                                     FontSize="14"
                                     TextColor="#1B5E43"/>
                             </VerticalStackLayout>
+                            <!-- Mengensteuerung mit Einheit -->
+                            <VerticalStackLayout
+                                Grid.Column="2"
+                                Spacing="2"
+                                VerticalOptions="Center"
+                                HorizontalOptions="Center">
+
+                                <!-- Mengen-Spinner -->
+                                <Grid
+                                    ColumnDefinitions="*,*"
+                                    RowDefinitions="12,28,12"
+                                    HorizontalOptions="Center"
+                                    WidthRequest="34">
+
+                                    <Button
+                                        Grid.Row="0"
+                                        Grid.ColumnSpan="2"
+                                        Text="▲"
+                                        FontSize="9"
+                                        Padding="0"
+                                        HeightRequest="12"
+                                        WidthRequest="30"
+                                        MinimumHeightRequest="12"
+                                        MinimumWidthRequest="30"
+                                        BackgroundColor="#E8F1EB"
+                                        TextColor="#3976A8"
+                                        CornerRadius="4"
+                                        Clicked="OnMengeErhoehenClicked"
+                                        CommandParameter="{Binding .}"/>
+
+                                    <Entry
+                                        Grid.Row="1"
+                                        Grid.ColumnSpan="2"
+                                        Text="{Binding Menge, Mode=TwoWay}"
+                                        Keyboard="Numeric"
+                                        WidthRequest="34"
+                                        HeightRequest="28"
+                                        FontSize="16"
+                                        HorizontalTextAlignment="Center"
+                                        VerticalTextAlignment="Center"
+                                        TextChanged="OnMengeGeaendert"
+                                        Margin="0"
+                                        />
+
+                                    <Button
+                                        Grid.Row="2"
+                                        Grid.ColumnSpan="2"
+                                        Text="▼"
+                                        FontSize="9"
+                                        Padding="0"
+                                        HeightRequest="12"
+                                        WidthRequest="30"
+                                        MinimumHeightRequest="12"
+                                        MinimumWidthRequest="30"
+                                        BackgroundColor="#E8F1EB"
+                                        TextColor="#3976A8"
+                                        CornerRadius="3"
+                                        Clicked="OnMengeVerringernClicked"
+                                        CommandParameter="{Binding .}"/>
+
+                                </Grid>
+
+                                <!-- Einheitenauswahl -->
+                                <Picker
+                                    Title="Einheit"
+                                    SelectedItem="{Binding Einheit, Mode=TwoWay}"
+                                    SelectedIndexChanged="OnEinheitGeaendert"
+                                    FontSize="11"
+                                    WidthRequest="76"
+                                    HorizontalOptions="Center">
+
+                                    <Picker.Items>
+                                        <x:String>Stück</x:String>
+                                        <x:String>Packung</x:String>
+                                        <x:String>Flasche</x:String>
+                                        <x:String>Kg</x:String>
+                                        <x:String>g</x:String>
+                                        <x:String>Liter</x:String>
+                                        <x:String>ml</x:String>
+                                        <x:String>100 g</x:String>
+                                        <x:String>100 ml</x:String>
+                                    </Picker.Items>
+
+                                </Picker>
+
+                            </VerticalStackLayout>
 
                             <!-- Bearbeiten Button-->
                             <Button
-                                    Grid.Column="2"
+                                    Grid.Column="3"
                                     Text="&#x270E;"
                                     FontSize= "20"
                                     BackgroundColor="Transparent"
@@ -271,7 +357,7 @@
 
                             <!-- Löschen Button-->
                             <Button
-                                    Grid.Column="3"
+                                    Grid.Column="4"
                                     Text="&#x1F5D1;"
                                     BackgroundColor="#FFF0F0"
                                     TextColor="#C62828"

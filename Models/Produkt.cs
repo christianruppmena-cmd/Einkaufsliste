@@ -20,6 +20,8 @@ public class Produkt
 
     public string Kategorie { get; set; } = "Sonstiges";
 
+    public int? BevorzugterHaendlerId { get; set; }
+
     public decimal? Packungsgroesse { get; set; }
 
     public string Basiseinheit { get; set; } = string.Empty;

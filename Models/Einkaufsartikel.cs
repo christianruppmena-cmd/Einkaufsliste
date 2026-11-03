@@ -13,6 +13,7 @@ namespace Einkaufsliste.Models
         public int Id { get; set; }
 
         public int? ProduktId { get; set; }
+        public int? AusgewaehlterHaendlerId { get; set; }
         private string name = string.Empty;
         private bool istErledigt;
 
@@ -97,6 +98,7 @@ namespace Einkaufsliste.Models
                 menge = value;
                 OnPropertyChanged(nameof(Menge));
                 OnPropertyChanged(nameof(DetailsAnzeige));
+                OnPropertyChanged(nameof(Gesamtpreis));
             }
         }
 

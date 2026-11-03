@@ -8,6 +8,7 @@ public partial class ProduktverwaltungPage : ContentPage
 {
     private readonly EinkauflistenDatenbank datenbank;
     private List<Produkt> alleProdukte = new();
+    private List<Haendler> alleHaendler = new();
     private string? ausgewaehlterBildPfad;
     private Produkt? produktZumBearbeiten;
     private bool bildEntfernen;
@@ -25,6 +26,7 @@ public partial class ProduktverwaltungPage : ContentPage
 
         await LadeKategorienAsync();
         await LadeProdukteAsync();
+        await LadeHaendlerAsync();
     }
 
     private async Task LadeKategorienAsync()
@@ -37,6 +39,21 @@ public partial class ProduktverwaltungPage : ContentPage
             .ToList();
     }
 
+    private async Task LadeHaendlerAsync()
+    {
+        alleHaendler = await datenbank.AlleHaendlerLadenAsync();
+
+        var haendlerNamen = new List<string>
+    {
+        "Kein bevorzugter Markt"
+    };
+
+        haendlerNamen.AddRange(
+            alleHaendler.Select(h => h.Name));
+
+        BevorzugterHaendlerPicker.ItemsSource = haendlerNamen;
+        BevorzugterHaendlerPicker.SelectedIndex = 0;
+    }
     private async void OnProduktSpeichernClicked(object sender, EventArgs e)
     {
         string name = NameEntry.Text?.Trim() ?? "";
@@ -45,6 +62,8 @@ public partial class ProduktverwaltungPage : ContentPage
 
         string? kategorie = KategoriePicker.SelectedItem?.ToString();
         string? einheit = BasiseinheitPicker.SelectedItem?.ToString();
+        string? ausgewaehlterHaendler = BevorzugterHaendlerPicker.SelectedItem?.ToString();
+        int? bevorzugterHaendlerId = alleHaendler.FirstOrDefault(h => h.Name == ausgewaehlterHaendler)?.Id;
 
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -97,6 +116,7 @@ public partial class ProduktverwaltungPage : ContentPage
         zuSpeicherndesProdukt.Marke = marke;
         zuSpeicherndesProdukt.Variante = variante;
         zuSpeicherndesProdukt.Kategorie = kategorie;
+        zuSpeicherndesProdukt.BevorzugterHaendlerId = bevorzugterHaendlerId;
         zuSpeicherndesProdukt.Packungsgroesse = packungsgroesse;
         zuSpeicherndesProdukt.Basiseinheit = einheit ?? "";
 
@@ -170,6 +190,16 @@ public partial class ProduktverwaltungPage : ContentPage
         VarianteEntry.Text = produkt.Variante;
 
         KategoriePicker.SelectedItem = produkt.Kategorie;
+
+        if(produkt.BevorzugterHaendlerId.HasValue)
+        {
+            var bevorzugterHaendler = alleHaendler.FirstOrDefault(h => h.Id == produkt.BevorzugterHaendlerId.Value);
+            BevorzugterHaendlerPicker.SelectedItem = bevorzugterHaendler?.Name ?? "Kein bevorzugter Markt";
+        }
+        else
+        {
+            BevorzugterHaendlerPicker.SelectedIndex = 0; 
+        }
 
         PackungsgroesseEntry.Text =
             produkt.Packungsgroesse?.ToString(

@@ -467,9 +467,97 @@ namespace Einkaufsliste
             AktualisiereFortschritt();            
             await GesamtsummeAktualisierenAsync();
         }
+        private async void OnMengeErhoehenClicked(object sender, EventArgs e)
+        {
+            if (sender is not Button button ||
+                button.CommandParameter is not Einkaufsartikel artikel)
+                return;
 
+            if (!decimal.TryParse(
+                artikel.Menge,
+                System.Globalization.NumberStyles.Number,
+                System.Globalization.CultureInfo.CurrentCulture,
+                out decimal menge))
+            {
+                menge = 1;
+            }
 
+            menge++;
 
+            artikel.Menge = menge.ToString(
+                System.Globalization.CultureInfo.CurrentCulture);
+
+            await datenbank.ArtikelSpeichernAsync(artikel);
+
+            await GesamtsummeAktualisierenAsync();
+        }
+        private async void OnMengeVerringernClicked(object sender, EventArgs e)
+        {
+            if (sender is not Button button ||
+                button.CommandParameter is not Einkaufsartikel artikel)
+                return;
+
+            if (!decimal.TryParse(
+                artikel.Menge,
+                System.Globalization.NumberStyles.Number,
+                System.Globalization.CultureInfo.CurrentCulture,
+                out decimal menge))
+            {
+                menge = 1;
+            }
+
+            if (menge <= 1)
+                return;
+
+            menge--;
+
+            artikel.Menge = menge.ToString(
+                System.Globalization.CultureInfo.CurrentCulture);
+
+            await datenbank.ArtikelSpeichernAsync(artikel);
+
+            await GesamtsummeAktualisierenAsync();
+        }
+        private async void OnMengeGeaendert(object sender, TextChangedEventArgs e)
+        {
+            if (sender is not Entry entry ||
+                entry.BindingContext is not Einkaufsartikel artikel)
+                return;
+
+            string eingabe = e.NewTextValue?.Trim() ?? string.Empty;
+
+            // Während der Eingabe leere oder ungültige Werte ignorieren
+            if (!decimal.TryParse(
+                eingabe,
+                System.Globalization.NumberStyles.Number,
+                System.Globalization.CultureInfo.CurrentCulture,
+                out decimal menge))
+                return;
+
+            if (menge <= 0)
+                return;
+
+            await datenbank.ArtikelSpeichernAsync(artikel);
+
+            await GesamtsummeAktualisierenAsync();
+        }
+        private async void OnEinheitGeaendert(object sender, EventArgs e)
+        {
+            if (sender is not Picker picker ||
+                picker.BindingContext is not Einkaufsartikel artikel)
+                return;
+
+            string? neueEinheit = picker.SelectedItem?.ToString();
+
+            if (string.IsNullOrWhiteSpace(neueEinheit))
+                return;
+
+            artikel.Einheit = neueEinheit;
+
+            await datenbank.ArtikelSpeichernAsync(artikel);
+
+            await GesamtsummeAktualisierenAsync();
+        }
 
 
 
