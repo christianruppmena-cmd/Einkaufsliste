@@ -172,6 +172,14 @@
                                         HeightRequest="42"
                                         HorizontalOptions="End"
                                         Clicked="OnProduktBearbeitenClicked"/>
+                                    <Button 
+                                        Text="Preise verwalten"
+                                        BackgroundColor="#E8F1EB"
+                                        TextColor="#245C43"
+                                        CornerRadius="10"
+                                        HeightRequest="42"
+                                        HorizontalOptions="End"
+                                        Clicked="OnPreiseVerwaltenClicked"/>
 
                                 </VerticalStackLayout>
 

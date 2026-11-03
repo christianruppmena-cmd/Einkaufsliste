@@ -35,12 +35,20 @@ namespace Einkaufsliste
                 Content = new ProduktverwaltungPage(datenbank)
             };
 
+            var datensicherung = new ShellContent
+            {
+                Title = "Datensicherung",
+                Route = "DatenbanksicherungPage",
+                Content = new DatenbanksicherungPage(datenbank)
+            };
+
             var bereich = new ShellSection
             {
                 Items =
                 {
                     einkaufsliste,
-                    produktverwaltung
+                    produktverwaltung,
+                    datensicherung
                 }
             };
 

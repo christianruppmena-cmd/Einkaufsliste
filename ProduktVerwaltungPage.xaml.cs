@@ -347,4 +347,21 @@ public partial class ProduktverwaltungPage : ContentPage
             File.Delete(bildPfad);
     }
 
+    private async void OnPreiseVerwaltenClicked( object sender,EventArgs e)
+    {
+        if (sender is not Button button ||
+            button.BindingContext is not Produkt produkt)
+        {
+            return;
+        }
+
+        await Navigation.PushAsync(
+            new ProduktpreisePage(datenbank, produkt));
+    }
+
+
+
+
+
+
 }

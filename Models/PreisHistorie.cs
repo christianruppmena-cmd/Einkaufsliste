@@ -10,6 +10,8 @@ public class PreisHistorie
 
     public int ProduktpreisId { get; set; }
 
+    public int Versionsnummer { get; set; }
+    
     public int ProduktId { get; set; }
 
     public int HaendlerId { get; set; }
