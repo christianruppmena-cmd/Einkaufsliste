@@ -80,9 +80,41 @@
                 </VerticalStackLayout>
             </Border>
 
+           <Border
+               BackgroundColor="White"
+               Stroke="#D8E5DC"
+               Padding="18"
+               StrokeShape="RoundRectangle 12">
+
+               <VerticalStackLayout Spacing="12">
+
+                   <Label
+                       Text="Lokale Sicherungen"
+                       FontSize="20"
+                       FontAttributes="Bold"
+                       TextColor="#245C43"/>
+
+                   <Label
+                       Text="Deine letzten 10 automatisch erstellten Sicherungen."
+                       FontSize="14"
+                       TextColor="#333333"/>
+
+                   <Label
+                       x:Name="KeineSicherungenLabel"
+                       Text="Noch keine lokalen Sicherungen vorhanden."
+                       TextColor="#777777"
+                       HorizontalTextAlignment="Center"
+                       IsVisible="False"/>
+                    <VerticalStackLayout
+                        x:Name="SicherungenListe"
+                        Spacing="10"
+                        />
+                </VerticalStackLayout>
+           </Border>
+
             <Label
                 x:Name="StatusLabel"
-                Text="Noch keine Sicherungsaktion durchgeführt."
+                Text="Noch keine Sicherungsaktion durchgeführt"
                 TextColor="#555555"
                 HorizontalTextAlignment="Center"/>
 

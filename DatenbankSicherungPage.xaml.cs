@@ -1,9 +1,98 @@
 using Einkaufsliste.Services;
+using Microsoft.Maui.Controls.Shapes;
 
 namespace Einkaufsliste;
 
 public partial class DatenbanksicherungPage : ContentPage
 {
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+        await SicherungenAnzeigenAsync();
+    }
+    private async Task SicherungenAnzeigenAsync()
+    {
+        SicherungenListe.Children.Clear();
+
+        var sicherungen = 
+            await datenbank.LokaleSicherungenLadenAsync();
+
+        KeineSicherungenLabel.IsVisible = sicherungen.Count == 0;
+
+        foreach (var sicherung in sicherungen)
+        {
+            var karte = new Border
+            {
+                BackgroundColor = Color.FromArgb("#F5F8F5"),
+                Stroke = Color.FromArgb("#D8E5DC"),
+                StrokeShape = new RoundRectangle
+                {
+                    CornerRadius = 10
+                },
+                Padding = 12,
+                Content = new VerticalStackLayout
+                {
+                    Spacing = 5,
+                    Children =
+                    {
+                        new Label
+                        {
+                            Text = sicherung.LastWriteTime.ToString("dd.MM.yyyy - HH:mm 'Uhr'"),
+                            FontAttributes = FontAttributes.Bold,
+                            TextColor = Color.FromArgb("#245C43"),
+                            FontSize = 16
+                        },
+                        new Label
+                        {
+                            Text = $"Dateigröße: {Math.Round(sicherung.Length / 1024.0, 1)} KB",
+                            FontSize = 13,
+                            TextColor = Color.FromArgb("#555555")
+                        },
+                        new Button
+                        {
+                            Text = "Diese Sicherung wiederherstellen",
+                            BackgroundColor = Color.FromArgb("#777777"),
+                            TextColor = Colors.White,
+                            CornerRadius = 8,
+                            HeightRequest = 42,
+                            FontSize = 14,
+                            Command = new Command(async () => await LokaleSicherungenWiederherstellenAsync(sicherung))
+                        }
+
+                    }
+                }
+            };
+            SicherungenListe.Children.Add(karte);
+        }
+    }
+    private async Task LokaleSicherungenWiederherstellenAsync(FileInfo sicherung)
+    {
+        bool bestaetigt = await DisplayAlertAsync(
+            "Sicherung wiederherstellen",
+            "Möchtest du diese Sicherung vom {sicherung.LastWriteTime:dd.MM.yyyy - HH:mm} Uhr wiederherstellen?",
+            "Ja, wiederherstellen",
+            "Abbrechen");
+        if (!bestaetigt)
+            return;
+        try
+        {
+            await datenbank.DatenbankImportierenAsync(sicherung.FullName);
+            StatusLabel.Text = "Lokale Sicherung erfolgreich wiederhergestellt.";
+
+            await DisplayAlertAsync(
+                "Erfolgreich",
+                "Die Datenbank und Produktbilder wurden wiederhergestellt. Bitte starte die App neu.",
+                "OK");
+
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlertAsync(
+                "Wiederherstellungsfehler",
+                $"Die Sicherung konnte nicht wiederhergestellt werden: {ex.Message}",
+                "OK");
+        }
+    }
     private readonly EinkauflistenDatenbank datenbank;
 
     public DatenbanksicherungPage(EinkauflistenDatenbank datenbank)
@@ -76,7 +165,7 @@ public partial class DatenbanksicherungPage : ContentPage
                 return;
 
             // ZIP-Datei temporär speichern
-            importPfad = Path.Combine(
+            importPfad = System.IO.Path.Combine(
                 FileSystem.CacheDirectory,
                 $"import_{Guid.NewGuid()}.zip");
 
