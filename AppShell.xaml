@@ -3,5 +3,33 @@
     x:Class="Einkaufsliste.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    FlyoutBehavior="Flyout"
+    FlyoutBackgroundColor="#F4F7F5"
     Title="Einkaufsliste">
+
+    <Shell.FlyoutHeader>
+        <Grid
+            BackgroundColor="#1B5E43"
+            HeightRequest="120"
+            Padding="20">
+
+            <VerticalStackLayout
+                VerticalOptions="Center"
+                Spacing="6">
+
+                <Label
+                    Text="&#x1F6D2; Einkaufsliste"
+                    FontSize="24"
+                    FontAttributes="Bold"
+                    TextColor="White"/>
+
+                <Label
+                    Text="Dein Einkaufsmanager"
+                    FontSize="13"
+                    TextColor="#D5E9DD"/>
+
+            </VerticalStackLayout>
+        </Grid>
+    </Shell.FlyoutHeader>
+
 </Shell>

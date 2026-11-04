@@ -12,14 +12,66 @@ public partial class ProduktverwaltungPage : ContentPage
     private string? ausgewaehlterBildPfad;
     private Produkt? produktZumBearbeiten;
     private bool bildEntfernen;
+    private readonly bool nurNeuesProduktFormular;
 
-    public ProduktverwaltungPage(EinkauflistenDatenbank datenbank)
+
+    public ProduktverwaltungPage(EinkauflistenDatenbank datenbank, bool nurNeuesProduktFormular = false)
     {
         InitializeComponent();
 
         this.datenbank = datenbank;
-    }
+        this.nurNeuesProduktFormular = nurNeuesProduktFormular;
 
+        if(nurNeuesProduktFormular)
+        {
+            GespeicherteProdukteBereich.IsVisible = false;
+            ProduktFormularBereich.IsVisible = true;
+            FormularTitel.Text = "Neues Produkt";
+        }
+        else
+        {
+            GespeicherteProdukteBereich.IsVisible = true;
+            ProduktFormularBereich.IsVisible = false;
+        }
+    }
+    private void OnNeuesProduktClicked(object sender, EventArgs e)
+    {
+        produktZumBearbeiten = null;
+        ausgewaehlterBildPfad = null;
+        bildEntfernen = false;
+
+        NameEntry.Text = "";
+        MarkeEntry.Text = "";
+        VarianteEntry.Text = "";
+        KategoriePicker.SelectedItem = null;
+        BevorzugterHaendlerPicker.SelectedIndex = 0;
+        PackungsgroesseEntry.Text = "";
+        BasiseinheitPicker.SelectedItem = null;
+
+        FormularTitel.Text = "Neues Produkt";
+        ProduktLoeschenButton.IsVisible = false;
+
+        GespeicherteProdukteBereich.IsVisible = false;
+        ProduktFormularBereich.IsVisible = true;
+    }
+    private void OnFormularAbbrechenClicked(object sender, EventArgs e)
+    {
+        produktZumBearbeiten = null;
+        ausgewaehlterBildPfad = null;
+        bildEntfernen = false;
+
+        ProduktFormularBereich.IsVisible = false;
+        GespeicherteProdukteBereich.IsVisible = true;
+    }
+    private void ZurProduktlisteZurueckkehren()
+    {
+        produktZumBearbeiten = null;
+        ausgewaehlterBildPfad = null;
+        bildEntfernen = false;
+
+        ProduktFormularBereich.IsVisible = false;
+        GespeicherteProdukteBereich.IsVisible = true;
+    }
     protected override async void OnAppearing()
     {
         base.OnAppearing();
@@ -153,13 +205,13 @@ public partial class ProduktverwaltungPage : ContentPage
                 "Gespeichert",
                 $"{name} wurde erfolgreich gespeichert.",
                 "OK");
-
-            NameEntry.Text = "";
-            MarkeEntry.Text = "";
-            VarianteEntry.Text = "";
-            KategoriePicker.SelectedItem = null;
-            PackungsgroesseEntry.Text = "";
-            BasiseinheitPicker.SelectedItem = null;
+            // Bei direktem Aufruf über den Plus-Button zurückkehren
+            if (nurNeuesProduktFormular)
+            {
+                await Navigation.PopAsync();
+                return;
+            }
+            ZurProduktlisteZurueckkehren();
         }
         catch (InvalidOperationException ex)
         {
@@ -190,6 +242,10 @@ public partial class ProduktverwaltungPage : ContentPage
 
         produktZumBearbeiten = produkt;
         bildEntfernen = false;
+        ausgewaehlterBildPfad = null;
+
+        FormularTitel.Text = "Produkt bearbeiten";
+        ProduktLoeschenButton.IsVisible = true;
 
         NameEntry.Text = produkt.Name;
         MarkeEntry.Text = produkt.Marke;
@@ -197,23 +253,64 @@ public partial class ProduktverwaltungPage : ContentPage
 
         KategoriePicker.SelectedItem = produkt.Kategorie;
 
-        if(produkt.BevorzugterHaendlerId.HasValue)
+        if (produkt.BevorzugterHaendlerId.HasValue)
         {
-            var bevorzugterHaendler = alleHaendler.FirstOrDefault(h => h.Id == produkt.BevorzugterHaendlerId.Value);
-            BevorzugterHaendlerPicker.SelectedItem = bevorzugterHaendler?.Name ?? "Kein bevorzugter Markt";
+            var bevorzugterHaendler = alleHaendler.FirstOrDefault(
+                h => h.Id == produkt.BevorzugterHaendlerId.Value);
+
+            BevorzugterHaendlerPicker.SelectedItem =
+                bevorzugterHaendler?.Name ?? "Kein bevorzugter Markt";
         }
         else
         {
-            BevorzugterHaendlerPicker.SelectedIndex = 0; 
+            BevorzugterHaendlerPicker.SelectedIndex = 0;
         }
 
         PackungsgroesseEntry.Text =
             produkt.Packungsgroesse?.ToString(
-                System.Globalization.CultureInfo.CurrentCulture) ?? "";
+                CultureInfo.CurrentCulture) ?? "";
 
         BasiseinheitPicker.SelectedItem = produkt.Basiseinheit;
-    }
 
+        GespeicherteProdukteBereich.IsVisible = false;
+        ProduktFormularBereich.IsVisible = true;
+    }
+    private async void OnProduktLoeschenClicked(object sender, EventArgs e)
+    {
+        if (produktZumBearbeiten == null)
+            return;
+
+        bool bestaetigen = await DisplayAlertAsync(
+            "Produkt löschen",
+            $"Möchtest du „{produktZumBearbeiten.Name}“ wirklich aus der Produktverwaltung entfernen?\n\nBereits vorhandene Einkaufsartikel bleiben erhalten.",
+            "Löschen",
+            "Abbrechen");
+
+        if (!bestaetigen)
+            return;
+
+        try
+        {
+            produktZumBearbeiten.IstAktiv = false;
+
+            await datenbank.ProduktSpeichernAsync(produktZumBearbeiten);
+            await LadeProdukteAsync();
+
+            ZurProduktlisteZurueckkehren();
+
+            await DisplayAlertAsync(
+                "Produkt entfernt",
+                "Das Produkt wurde aus der Produktverwaltung entfernt. Vorhandene Einkaufsartikel bleiben erhalten.",
+                "OK");
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlertAsync(
+                "Fehler",
+                $"Das Produkt konnte nicht entfernt werden:\n{ex.Message}",
+                "OK");
+        }
+    }
     private async void OnProduktbildAuswaehlenClicked(object sender, EventArgs e)
     {
         try

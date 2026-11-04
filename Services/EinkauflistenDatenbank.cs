@@ -2,7 +2,7 @@
 using Einkaufsliste.Models;
 using SQLite;
 using System.IO.Compression;
-
+using System.Diagnostics;
 
 namespace Einkaufsliste.Services;
 
@@ -23,8 +23,10 @@ public class EinkauflistenDatenbank
         await Task.Run(() =>
         {
             Directory.CreateDirectory(sicherungsOrdner);
+            
         });
     }
+   
     private async Task<bool> DatenbankEnthaeltDatenAsync()
     {
         var produkte = await datenbank
@@ -120,9 +122,10 @@ public class EinkauflistenDatenbank
         try
         {
             // Aktuelle Datenbank sichern
+            string sichererPfad = tempDatenbank.Replace("'", "''");
             await datenbank.ExecuteAsync(
                 "VACUUM INTO ?",
-                tempDatenbank);
+                sichererPfad);
 
             // ZIP-Archiv erstellen
             using (var datei = new FileStream(
@@ -439,6 +442,32 @@ public class EinkauflistenDatenbank
         });
         await LokaleSicherungErstellenAsync();
     }
+    public async Task ProduktpreisDeaktivierenAsync(int produktpreisId)
+    {
+        await InitialisierenAsync();
+
+        if (produktpreisId <= 0)
+            return;
+
+        await datenbank.RunInTransactionAsync(conn =>
+        {
+            Produktpreis? preis = conn.Find<Produktpreis>(produktpreisId);
+
+            if (preis == null || !preis.IstAktiv)
+                return;
+
+            // Bisherigen Preisstand in der Historie sichern
+            PreisInHistorieUebernehmen(conn, preis);
+
+            // Angebot deaktivieren
+            preis.IstAktiv = false;
+            preis.ErfasstAm = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
+            conn.Update(preis);
+        });
+
+        await LokaleSicherungErstellenAsync();
+    }
     public async Task<List<PreisHistorie>> PreisHistorieLadenAsync(int produktId, int haendlerId)
     {
         await InitialisierenAsync();
@@ -603,19 +632,35 @@ public class EinkauflistenDatenbank
     {
         List<Einkaufsartikel> artikel = await datenbank
             .Table<Einkaufsartikel>()
-            .Where(a => a.ProduktId == produktId)
+            .Where(a => a.ProduktId == produktId && !a.IstErledigt)
             .ToListAsync();
+
+        Produktpreis? aktuellerPreis = null;
+
+        if (haendlerId.HasValue)
+        {
+            aktuellerPreis = await GuenstigstenAktuellenPreisLadenAsync(
+                produktId,
+                haendlerId.Value);
+        }
 
         foreach (Einkaufsartikel eintrag in artikel)
         {
             eintrag.AusgewaehlterHaendlerId = haendlerId;
+            eintrag.HaendlerAnzeige = haendlerId.HasValue
+                ? (await datenbank.Table<Haendler>()
+                    .Where(h => h.Id == haendlerId.Value)
+                    .FirstOrDefaultAsync())?.Name ?? string.Empty
+                : string.Empty;
+
+            eintrag.Stueckpreis = aktuellerPreis?.PreisEuro ?? 0m;
 
             await datenbank.UpdateAsync(eintrag);
         }
 
         await LokaleSicherungErstellenAsync();
     }
-    
+
     public async Task ArtikelLoeschenAsync(Einkaufsartikel artikel)
     {
         await datenbank.DeleteAsync(artikel);
@@ -1102,4 +1147,4 @@ public class EinkauflistenDatenbank
             }
         }
     }
-} 
+}

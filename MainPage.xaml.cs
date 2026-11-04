@@ -217,6 +217,11 @@ namespace Einkaufsliste
 
           
         }
+        private async void OnProduktNeuAnlegenClicked(object sender, EventArgs e)
+        {
+            await Navigation.PushAsync(
+                new ProduktverwaltungPage(datenbank, true));
+        }
         private async void OnArtikelLoeschenClicked(object sender, EventArgs e)
         {
             if(sender is Button button && 
@@ -726,6 +731,8 @@ namespace Einkaufsliste
                     : produkt.Basiseinheit,
 
                 AusgewaehlterHaendlerId = produkt.BevorzugterHaendlerId,
+
+                HaendlerAnzeige = alleHaendler.FirstOrDefault(h => h.Id == produkt.BevorzugterHaendlerId)?.Name ?? string.Empty,
 
                 Stueckpreis = aktuellerPreis?.PreisEuro ?? 0m,
 

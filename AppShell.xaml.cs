@@ -13,9 +13,10 @@ namespace Einkaufsliste
 
             this.datenbank = datenbank;
 
+            // Einkaufsliste
             var einkaufsliste = new ShellContent
             {
-                Title = "Einkaufsliste",
+                Title = "🛒 Einkaufsliste",
                 Route = "MainPage",
                 Content = new ContentPage
                 {
@@ -28,37 +29,106 @@ namespace Einkaufsliste
                 }
             };
 
+            // Produktverwaltung
             var produktverwaltung = new ShellContent
             {
-                Title = "Produktverwaltung",
+                Title = "📦 Produktverwaltung",
                 Route = "ProduktverwaltungPage",
                 Content = new ProduktverwaltungPage(datenbank)
             };
 
+            // Kategorienverwaltung
+            var kategorien = new ShellContent
+            {
+                Title = "🏷️ Kategorien",
+                Route = "KategorienPage",
+                Content = new KategorienPage()
+            };
+
+            // Datensicherung
             var datensicherung = new ShellContent
             {
-                Title = "Datensicherung",
+                Title = "💾 Datensicherung",
                 Route = "DatenbanksicherungPage",
                 Content = new DatenbanksicherungPage(datenbank)
             };
 
-            var bereich = new ShellSection
+            // Eigene Menüeinträge
+            var einkaufslisteMenue = new FlyoutItem
             {
+                Title = "🛒 Einkaufsliste",
                 Items =
                 {
-                    einkaufsliste,
-                    produktverwaltung,
-                    datensicherung
+                    new ShellSection
+                    {
+                        Items = { einkaufsliste }
+                    }
                 }
             };
 
-            var menuepunkt = new FlyoutItem
+            var produktverwaltungMenue = new FlyoutItem
             {
-                Title = "Verwaltung",
-                Items = { bereich }
+                Title = "📦 Produktverwaltung",
+                Items =
+                {
+                    new ShellSection
+                    {
+                        Items = { produktverwaltung }
+                    }
+                }
             };
 
-            Items.Add(menuepunkt);
+            // Händlerverwaltung (in Arbeit)
+            var haendlerMenue = new FlyoutItem
+            {
+                Title = "🏪 Händlerverwaltung (in Arbeit)",
+                IsEnabled = false,
+                Items =
+                {
+                    new ShellSection
+                    {
+                        Items =
+                        {
+                            new ShellContent
+                            {
+                                Title = "Händlerverwaltung",
+                                Content = new ContentPage()
+                            }
+                        }
+                    }
+                }
+            };
+
+            var datensicherungMenue = new FlyoutItem
+            {
+                Title = "💾 Datensicherung",
+                Items =
+                {
+                    new ShellSection
+                    {
+                        Items = { datensicherung }
+                    }
+                }
+            };
+
+            // Kategorien
+            var kategorienMenue = new FlyoutItem
+            {
+                Title = "🏷️ Kategorien",
+                Items =
+                {
+                    new ShellSection
+                    {
+                        Items = { kategorien }
+                    }
+                }
+            };
+
+            Items.Add(einkaufslisteMenue);
+            Items.Add(produktverwaltungMenue);
+            Items.Add(kategorienMenue);
+            Items.Add(haendlerMenue);
+            Items.Add(datensicherungMenue);
 
             startInhalt = einkaufsliste;
         }

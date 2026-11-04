@@ -1,131 +1,64 @@
 <?xml version="1.0" encoding="utf-8" ?>
+
 <ContentPage
-    x:Class="Einkaufsliste.ProduktverwaltungPage"
-    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    Title="Produktverwaltung"
-    BackgroundColor="#F5F5F5">
+ x:Class="Einkaufsliste.ProduktverwaltungPage"
+ xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+ xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+ Title="Produktverwaltung"
+ BackgroundColor="#F5F5F5">
 
+    
     <ScrollView>
-        <VerticalStackLayout Padding="20" Spacing="15">
+        <VerticalStackLayout
+        Padding="20"
+        Spacing="15">
 
-            <Label
-                Text="Neues Produkt"
-                FontSize="26"
-                FontAttributes="Bold"
-                TextColor="#245C43"/>
+            <!-- LISTENANSICHT -->
 
-            <Label 
-                Text="Produktname *"
-                TextColor="#222222"/>
-            <Entry
-                x:Name="NameEntry"
-                Placeholder="z. B. Milch"
-                TextColor="#222222"
-                />
+            <VerticalStackLayout
+            x:Name="GespeicherteProdukteBereich"
+            Spacing="15">
 
-            <Label 
-                Text="Marke"
-                TextColor="#222222"/>
-            <Entry
-                x:Name="MarkeEntry"
-                Placeholder="z. B. Milbona"
-                TextColor="#222222"/>
+                <Grid ColumnDefinitions="*,Auto">
 
-            <Label 
-                Text="Variante"
-                TextColor="#222222"/>
-            <Entry
-                x:Name="VarianteEntry"
-                Placeholder="z. B. H-Milch 3,5 %"
-                TextColor="#222222"/>
+                    <Label
+                    Text="Meine Produkte"
+                    FontSize="24"
+                    FontAttributes="Bold"
+                    TextColor="#245C43"
+                    VerticalOptions="Center"/>
 
-            <Label 
-                Text="Kategorie *"
-                   TextColor="#222222"/>
-            <Picker
-                x:Name="KategoriePicker"
-                Title="Kategorie auswählen"
-                TextColor="#222222"/>
-            <Label 
-                Text="Bevorzugter Supermarkt"
-                TextColor="#222222"/>
-            <Picker
-                x:Name="BevorzugterHaendlerPicker"
-                Title="Supermarkt auswählen"
-                TextColor="#222222"/>
+                    <Button
+                    Grid.Column="1"
+                    Text="+"
+                    FontSize="28"
+                    FontAttributes="Bold"
+                    TextColor="White"
+                    BackgroundColor="#278653"
+                    WidthRequest="52"
+                    HeightRequest="52"
+                    CornerRadius="26"
+                    Padding="0"
+                    Clicked="OnNeuesProduktClicked"/>
 
-            <Label 
-                Text="Packungsgröße"
-                TextColor="#222222"/>
-            <Entry
-                x:Name="PackungsgroesseEntry"
-                Placeholder="z. B. 1000"
-                Keyboard="Numeric"
-                TextColor="#222222"/>
+                </Grid>
 
-            <Label 
-                Text="Basiseinheit"
-                TextColor="#222222"/>
-            <Picker
-                x:Name="BasiseinheitPicker"
-                Title="Einheit auswählen"
-                TextColor="#222222">
-                <Picker.Items>
-                    <x:String>Stück</x:String>
-                    <x:String>Packung</x:String>
-                    <x:String>Flasche</x:String>
-                    <x:String>Kg</x:String>
-                    <x:String>g</x:String>
-                    <x:String>Liter</x:String>
-                    <x:String>ml</x:String>
-                    <x:String>100 g</x:String>
-                    <x:String>100 ml</x:String>
-                </Picker.Items>
-            </Picker>
-
-            <Button
-                Text="Produktbild verwalten"
-                HeightRequest="48"
-                CornerRadius="10"
-                TextColor="#E8F1EB"
-                BackgroundColor="#245C43"
-                Clicked="OnProduktbildVerwaltenClicked"/>
-
-            <Button
-                Text="Produkt speichern"
-                HeightRequest="52"
-                CornerRadius="12"
-                TextColor="#E8F1EB"
-                BackgroundColor="#245C43"
-                Clicked="OnProduktSpeichernClicked"/>
-
-            <BoxView
-                HeightRequest="1"
-                BackgroundColor="#D8E5DC"
-                Margin="0,10"/>
-
-            <Label
-                Text="Gespeicherte Produkte"
-                FontSize="22"
-                FontAttributes="Bold"
-                TextColor="#245C43"/>
-
-            <CollectionView
+                <CollectionView
                 x:Name="ProduktListe"
                 SelectionMode="None">
 
-                <CollectionView.EmptyView>
-                    <Label
+                    <CollectionView.EmptyView>
+                        <Label
                         Text="Noch keine Produkte vorhanden."
                         TextColor="Gray"
                         HorizontalOptions="Center"
                         Margin="10"/>
-                </CollectionView.EmptyView>
+                    </CollectionView.EmptyView>
 
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <Border
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+
+                            <Border
                             BackgroundColor="White"
                             Stroke="#D8E5DC"
                             StrokeThickness="1"
@@ -133,9 +66,11 @@
                             Margin="0,5"
                             StrokeShape="RoundRectangle 12">
 
-                            <Grid ColumnDefinitions="75,*" ColumnSpacing="12">
+                                <Grid
+                                ColumnDefinitions="75,*"
+                                ColumnSpacing="12">
 
-                                <Border
+                                    <Border
                                     Grid.Column="0"
                                     WidthRequest="75"
                                     HeightRequest="75"
@@ -143,39 +78,40 @@
                                     Stroke="#D8E5DC"
                                     StrokeShape="RoundRectangle 10">
 
-                                    <Image
+                                        <Image
                                         Source="{Binding BildPfad}"
                                         Aspect="AspectFill"
                                         HeightRequest="75"
                                         WidthRequest="75"/>
-                                </Border>
 
-                                <VerticalStackLayout
-                                        Grid.Column="1"
-                                        Spacing="5">
+                                    </Border>
 
-                                    <Label
+                                    <VerticalStackLayout
+                                    Grid.Column="1"
+                                    Spacing="5">
+
+                                        <Label
                                         Text="{Binding Name}"
                                         FontSize="18"
                                         FontAttributes="Bold"
                                         TextColor="#245C43"/>
 
-                                    <Label
+                                        <Label
                                         Text="{Binding Marke}"
                                         FontSize="14"
                                         TextColor="#555555"/>
 
-                                    <Label
+                                        <Label
                                         Text="{Binding Variante}"
                                         FontSize="14"
                                         TextColor="#555555"/>
 
-                                    <Label
+                                        <Label
                                         Text="{Binding Kategorie}"
                                         FontSize="13"
                                         TextColor="#777777"/>
 
-                                    <Button
+                                        <Button
                                         Text="Bearbeiten"
                                         BackgroundColor="#E8F1EB"
                                         TextColor="#245C43"
@@ -183,7 +119,8 @@
                                         HeightRequest="42"
                                         HorizontalOptions="End"
                                         Clicked="OnProduktBearbeitenClicked"/>
-                                    <Button 
+
+                                        <Button
                                         Text="Preise verwalten"
                                         BackgroundColor="#E8F1EB"
                                         TextColor="#245C43"
@@ -192,16 +129,150 @@
                                         HorizontalOptions="End"
                                         Clicked="OnPreiseVerwaltenClicked"/>
 
-                                </VerticalStackLayout>
+                                    </VerticalStackLayout>
 
-                            </Grid>
-                        </Border>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
+                                </Grid>
 
-            </CollectionView>
+                            </Border>
+
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+
+                </CollectionView>
+
+            </VerticalStackLayout>
+
+
+            <!-- PRODUKTFORMULAR -->
+
+            <VerticalStackLayout
+            x:Name="ProduktFormularBereich"
+            IsVisible="False"
+            Spacing="12">
+
+                <Label
+                x:Name="FormularTitel"
+                Text="Neues Produkt"
+                FontSize="26"
+                FontAttributes="Bold"
+                TextColor="#245C43"/>
+
+                <Label
+                Text="Produktname *"
+                TextColor="#222222"/>
+
+                <Entry
+                x:Name="NameEntry"
+                Placeholder="z. B. Milch"
+                TextColor="#222222"/>
+
+                <Label
+                Text="Marke"
+                TextColor="#222222"/>
+
+                <Entry
+                x:Name="MarkeEntry"
+                Placeholder="z. B. Milbona"
+                TextColor="#222222"/>
+
+                <Label
+                Text="Variante"
+                TextColor="#222222"/>
+
+                <Entry
+                x:Name="VarianteEntry"
+                Placeholder="z. B. H-Milch 3,5 %"
+                TextColor="#222222"/>
+
+                <Label
+                Text="Kategorie *"
+                TextColor="#222222"/>
+
+                <Picker
+                x:Name="KategoriePicker"
+                Title="Kategorie auswählen"
+                TextColor="#222222"/>
+
+                <Label
+                Text="Bevorzugter Supermarkt"
+                TextColor="#222222"/>
+
+                <Picker
+                x:Name="BevorzugterHaendlerPicker"
+                Title="Supermarkt auswählen"
+                TextColor="#222222"/>
+
+                <Label
+                Text="Packungsgröße"
+                TextColor="#222222"/>
+
+                <Entry
+                x:Name="PackungsgroesseEntry"
+                Placeholder="z. B. 1000"
+                Keyboard="Numeric"
+                TextColor="#222222"/>
+
+                <Label
+                Text="Basiseinheit"
+                TextColor="#222222"/>
+
+                <Picker
+                x:Name="BasiseinheitPicker"
+                Title="Einheit auswählen"
+                TextColor="#222222">
+
+                    <Picker.Items>
+                        <x:String>Stück</x:String>
+                        <x:String>Packung</x:String>
+                        <x:String>Flasche</x:String>
+                        <x:String>Kg</x:String>
+                        <x:String>g</x:String>
+                        <x:String>Liter</x:String>
+                        <x:String>ml</x:String>
+                        <x:String>100 g</x:String>
+                        <x:String>100 ml</x:String>
+                    </Picker.Items>
+
+                </Picker>
+
+                <Button
+                Text="Produktbild verwalten"
+                HeightRequest="48"
+                CornerRadius="10"
+                TextColor="#E8F1EB"
+                BackgroundColor="#245C43"
+                Clicked="OnProduktbildVerwaltenClicked"/>
+
+                <Button
+                Text="Produkt speichern"
+                HeightRequest="52"
+                CornerRadius="12"
+                TextColor="#E8F1EB"
+                BackgroundColor="#245C43"
+                Clicked="OnProduktSpeichernClicked"/>
+
+                <Button
+                x:Name="ProduktLoeschenButton"
+                Text="Produkt löschen"
+                IsVisible="False"
+                HeightRequest="48"
+                CornerRadius="10"
+                TextColor="White"
+                BackgroundColor="#B83232"
+                Clicked="OnProduktLoeschenClicked"/>
+
+                <Button
+                Text="Abbrechen"
+                HeightRequest="48"
+                CornerRadius="10"
+                TextColor="#245C43"
+                BackgroundColor="#E8F1EB"
+                Clicked="OnFormularAbbrechenClicked"/>
+
+            </VerticalStackLayout>
 
         </VerticalStackLayout>
     </ScrollView>
+    
 
 </ContentPage>
