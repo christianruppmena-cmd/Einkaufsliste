@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="Einkaufsliste.ProduktpreisePage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Preisverwaltung"
+    BackgroundColor="#F5F5F5">
+
+    <ScrollView>
+        <VerticalStackLayout
+            Padding="15"
+            Spacing="12">
+
+            <Label
+                x:Name="ProduktNameLabel"
+                FontSize="24"
+                FontAttributes="Bold"
+                TextColor="#245C43"/>
+
+            <Label
+                Text="Preise nach Händler"
+                FontSize="17"
+                FontAttributes="Bold"
+                TextColor="#245C43"/>
+
+            <CollectionView
+                x:Name="HaendlerPreisListe"
+                SelectionMode="None">
+
+                <CollectionView.EmptyView>
+                    <Label
+                        Text="Keine Händler vorhanden."
+                        TextColor="Gray"
+                        HorizontalOptions="Center"
+                        Margin="10"/>
+                </CollectionView.EmptyView>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+
+                        <Border
+                            BackgroundColor="White"
+                            Stroke="#D8E5DC"
+                            StrokeThickness="1"
+                            Padding="12"
+                            Margin="0,4"
+                            StrokeShape="RoundRectangle 12">
+
+                            <VerticalStackLayout Spacing="10">
+
+                                <Label
+                                    Text="{Binding Haendler}"
+                                    FontSize="18"
+                                    FontAttributes="Bold"
+                                    TextColor="#245C43"/>
+
+                                <Grid
+                                    ColumnDefinitions="*,*"
+                                    ColumnSpacing="10">
+
+                                    <VerticalStackLayout Grid.Column="0" Spacing="4">
+                                        <Label
+                                            Text="Normalpreis"
+                                            FontSize="13"
+                                            TextColor="#555555"/>
+
+                                        <Entry
+                                            Text="{Binding NormalpreisText}"
+                                            Placeholder="0,00 €"
+                                            Keyboard="Numeric"
+                                            BackgroundColor="#F5F5F5"
+                                            TextColor="#222222"/>
+                                    </VerticalStackLayout>
+
+                                    <VerticalStackLayout Grid.Column="1" Spacing="4">
+                                        <Label
+                                            Text="Angebot"
+                                            FontSize="13"
+                                            TextColor="#245C43"/>
+
+                                        <Entry
+                                            Text="{Binding AngebotText}"
+                                            Placeholder="0,00 €"
+                                            Keyboard="Numeric"
+                                            BackgroundColor="#F5F5F5"
+                                            TextColor="#222222"/>
+                                    </VerticalStackLayout>
+
+                                </Grid>
+
+                                <Label
+                                    Text="Angebot gültig bis (optional)"
+                                    FontSize="13"
+                                    TextColor="#555555"/>
+
+                                <HorizontalStackLayout Spacing="8">
+                                    <CheckBox
+                                        IsChecked="{Binding GueltigBisAktiviert}"
+                                        VerticalOptions="Center"/>
+
+                                    <DatePicker
+                                        Date="{Binding GueltigBis}"
+                                        Format="dd.MM.yyyy"
+                                        IsEnabled="{Binding GueltigBisAktiviert}"
+                                        HorizontalOptions="FillAndExpand"/>
+                                </HorizontalStackLayout>
+
+                                <Button
+                                    Text="Preise speichern"
+                                    BackgroundColor="#245C43"
+                                    TextColor="White"
+                                    CornerRadius="8"
+                                    HeightRequest="42"
+                                    Clicked="OnHaendlerPreisSpeichernClicked"/>
+
+                            </VerticalStackLayout>
+
+                        </Border>
+
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+
+            </CollectionView>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

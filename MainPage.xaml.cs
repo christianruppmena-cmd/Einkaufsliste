@@ -3,23 +3,45 @@ using Einkaufsliste.Models;
 using Einkaufsliste.Services;
 using System.Linq;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.Maui.Storage;
 
 namespace Einkaufsliste
 {
     public partial class MainPage : ContentPage
     {
         private ObservableCollection<Artikelgruppe> artikelGruppen = new();
-        private readonly EinkauflistenDatenbank datenbank = new();
-
-        public MainPage()
+        private readonly EinkauflistenDatenbank datenbank ;
+        private const string GruppierungsEinstellung = "Gruppierungsart";
+        private string aktuelleGruppierung = "Produktkategorie";
+        private List<Produkt> alleProdukte = new();
+        private List<Haendler> alleHaendler = new();
+        public MainPage(EinkauflistenDatenbank datenbank)
         {
             InitializeComponent();
 
+            this.datenbank = datenbank;
+
             ArtikelListe.ItemsSource = artikelGruppen;
 
-            LadeDatenAsync();
-        }
+            aktuelleGruppierung = Preferences.Get(
+                GruppierungsEinstellung,
+                "Produktkategorie");
 
+            GruppierungsPicker.SelectedItem = aktuelleGruppierung;
+
+          
+        }
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+            LadeDatenAsync();
+            LadeProdukteFuerSucheAsync();
+
+        }
+        private async void LadeProdukteFuerSucheAsync()
+        {
+            alleProdukte = await datenbank.AlleProdukteLadenAsync();
+        }
         private async void OnArtikelHinzufuegenClicked(object sender, EventArgs e)
         {
  
@@ -40,6 +62,7 @@ namespace Einkaufsliste
 
             if (produkt != null)
             {
+                neuerEintrag.ProduktId = produkt.Id;
                 neuerEintrag.Name = produkt.Name;
                 neuerEintrag.Kategorie = produkt.Kategorie;
             }
@@ -99,11 +122,14 @@ namespace Einkaufsliste
                     neuerEintrag.Kategorie = ausgewaehlteKategorie;
                 }
 
-                await datenbank.ProduktSpeichernAsync(new Produkt
+                Produkt neuesProdukt = new Produkt
                 {
                     Name = TextHelfer.Normalisieren(neuerEintrag.Name),
                     Kategorie = TextHelfer.Normalisieren(neuerEintrag.Kategorie)
-                });
+                };
+
+                await datenbank.ProduktSpeichernAsync(neuesProdukt);
+                neuerEintrag.ProduktId = neuesProdukt.Id;
             }
 
             // Erst jetzt nach einem doppelten Artikel suchen
@@ -181,20 +207,20 @@ namespace Einkaufsliste
 
             await datenbank.ArtikelSpeichernAsync(neuerEintrag);
 
-            Artikelgruppe? gruppe = artikelGruppen.FirstOrDefault(g => g.Kategorie == neuerEintrag.Kategorie);
-
-            if (gruppe == null)
-            {
-                gruppe = new Artikelgruppe(neuerEintrag.Kategorie);
-                artikelGruppen.Add(gruppe);
-            }
-
-            gruppe.Add(neuerEintrag);
+            // Einkaufsliste entsprechend der gewählten Gruppierung aktualisieren
+            List<Einkaufsartikel> alleArtikel = await datenbank.AlleArtikelLadenAsync();
+                
+            ArtikelGruppieren(alleArtikel);
 
             AktualisiereFortschritt();
             await GesamtsummeAktualisierenAsync();
 
           
+        }
+        private async void OnProduktNeuAnlegenClicked(object sender, EventArgs e)
+        {
+            await Navigation.PushAsync(
+                new ProduktverwaltungPage(datenbank, true));
         }
         private async void OnArtikelLoeschenClicked(object sender, EventArgs e)
         {
@@ -219,7 +245,7 @@ namespace Einkaufsliste
                 await GesamtsummeAktualisierenAsync();
             }
         }
-        private async void OnArtikelErledigtGeaendert(object sender, CheckedChangedEventArgs e)
+        private async void OnArtikelErledigtGeaendert(object sender,CheckedChangedEventArgs e)
         {
             if (sender is not CheckBox checkbox ||
                 checkbox.BindingContext is not Einkaufsartikel artikel)
@@ -229,73 +255,53 @@ namespace Einkaufsliste
 
             await datenbank.ArtikelSpeichernAsync(artikel);
 
-            // Aktuelle Gruppe des Artikels finden
             Artikelgruppe? alteGruppe = artikelGruppen
                 .FirstOrDefault(g => g.Contains(artikel));
 
             if (alteGruppe == null)
-            {
-                AktualisiereFortschritt();
                 return;
-            }
 
-            // Artikel aus der bisherigen Gruppe entfernen
             alteGruppe.Remove(artikel);
 
-            // Leere Gruppe entfernen, außer bei der Gruppe "Erledigt"
-            if (alteGruppe.Count == 0 &&
-                alteGruppe.Kategorie != "Erledigt")
+            if (alteGruppe.Count == 0 )
             {
                 artikelGruppen.Remove(alteGruppe);
             }
 
+            string zielGruppenName;
+
             if (artikel.IstErledigt)
             {
-                // Erledigte Artikel in die Gruppe "Erledigt" verschieben
-                Artikelgruppe? erledigtGruppe = artikelGruppen
-                    .FirstOrDefault(g => g.Kategorie == "Erledigt");
-
-                if (erledigtGruppe == null)
-                {
-                    erledigtGruppe = new Artikelgruppe("Erledigt");
-                    artikelGruppen.Add(erledigtGruppe);
-                }
-
-                erledigtGruppe.Add(artikel);
+                zielGruppenName = "Erledigt";
+            }
+            else if (aktuelleGruppierung == "Kaufort")
+            {
+                zielGruppenName = alleHaendler
+                    .FirstOrDefault(h => h.Id == artikel.AusgewaehlterHaendlerId)
+                    ?.Name ?? "Ohne festgelegten Kaufort";
             }
             else
             {
-                // Artikel zurück in seine ursprüngliche Kategorie verschieben
-                Artikelgruppe? zielGruppe = artikelGruppen
-                    .FirstOrDefault(g => g.Kategorie == artikel.Kategorie);
-
-                if (zielGruppe == null)
-                {
-                    zielGruppe = new Artikelgruppe(artikel.Kategorie);
-                    artikelGruppen.Add(zielGruppe);
-                }
-
-                zielGruppe.Add(artikel);
+                zielGruppenName = artikel.Kategorie;
             }
 
-            // Leere Erledigt-Gruppe entfernen
-            Artikelgruppe? erledigt = artikelGruppen
-                .FirstOrDefault(g => g.Kategorie == "Erledigt");
+            Artikelgruppe? zielGruppe = artikelGruppen
+                .FirstOrDefault(g => g.Kategorie == zielGruppenName);
 
-            if (erledigt != null && erledigt.Count == 0)
+            if (zielGruppe == null)
             {
-                artikelGruppen.Remove(erledigt);
+                zielGruppe = new Artikelgruppe(zielGruppenName);
+                artikelGruppen.Add(zielGruppe);
             }
+
+            zielGruppe.Add(artikel);
 
             AktualisiereFortschritt();
+            await GesamtsummeAktualisierenAsync();
         }
         private async void LadeDatenAsync()
         {
-            await datenbank.InitialisierenAsync();
-            await datenbank.StandardkategorienAnlegenAsync();
-            await datenbank.BestehendeProdukteNormalisierenAsync();
-
-            
+            alleHaendler = await datenbank.AlleHaendlerLadenAsync();
 
             List<Einkaufsartikel> gespeicherteArtikel = await datenbank.AlleArtikelLadenAsync();
             
@@ -343,32 +349,74 @@ namespace Einkaufsliste
         private void ArtikelGruppieren(IEnumerable<Einkaufsartikel> alleArtikel)
         {
             artikelGruppen.Clear();
-            // Unerledigte Artikel nach ihrer Kategorie gruppieren
 
-            var offeneGruppen = alleArtikel
-                .Where(a => !a.IstErledigt)
-                .GroupBy(a => a.Kategorie)
-                .OrderBy(g => g.Key);
-
-            foreach(var gruppe in offeneGruppen)
+            // Händlernamen für die Artikelanzeige ermitteln
+            foreach (Einkaufsartikel artikel in alleArtikel)
             {
-                Artikelgruppe neueGruppe = new(gruppe.Key);
+                Haendler? haendler = alleHaendler.FirstOrDefault(
+                    h => h.Id == artikel.AusgewaehlterHaendlerId);
 
-                foreach(Einkaufsartikel einzelnerArtikel in gruppe)
-                {
-                    neueGruppe.Add(einzelnerArtikel);
-                }
-
-                artikelGruppen.Add(neueGruppe);
+                artikel.HaendlerAnzeige = haendler?.Name ?? string.Empty;
             }
 
-            // Alle erledigten Artikel in einer eigenen Gruppe sammeln
 
+            // Nur offene Artikel berücksichtigen
+            var offeneArtikel = alleArtikel
+                .Where(a => !a.IstErledigt)
+                .ToList();
+
+            if (aktuelleGruppierung == "Kaufort")
+            {
+                // Artikel nach Händler gruppieren
+                var offeneGruppen = offeneArtikel
+                    .GroupBy(a =>
+                        alleHaendler
+                            .FirstOrDefault(h => h.Id == a.AusgewaehlterHaendlerId)
+                            ?.Name ?? "Ohne festgelegten Kaufort")
+                    .OrderBy(g =>
+                        alleHaendler
+                            .FirstOrDefault(h => h.Name == g.Key)
+                            ?.Sortierung ?? int.MaxValue)
+                    .ThenBy(g => g.Key);
+
+                foreach (var gruppe in offeneGruppen)
+                {
+                    Artikelgruppe neueGruppe = new(gruppe.Key);
+
+                    foreach (Einkaufsartikel artikel in gruppe)
+                    {
+                        neueGruppe.Add(artikel);
+                    }
+
+                    artikelGruppen.Add(neueGruppe);
+                }
+            }
+            else
+            {
+                // Artikel nach Produktkategorie gruppieren
+                var offeneGruppen = offeneArtikel
+                    .GroupBy(a => a.Kategorie)
+                    .OrderBy(g => g.Key);
+
+                foreach (var gruppe in offeneGruppen)
+                {
+                    Artikelgruppe neueGruppe = new(gruppe.Key);
+
+                    foreach (Einkaufsartikel artikel in gruppe)
+                    {
+                        neueGruppe.Add(artikel);
+                    }
+
+                    artikelGruppen.Add(neueGruppe);
+                }
+            }
+
+            // Erledigte Artikel bleiben immer in einer eigenen Gruppe
             var erledigteArtikel = alleArtikel
                 .Where(a => a.IstErledigt)
                 .ToList();
 
-            if(erledigteArtikel.Count > 0)
+            if (erledigteArtikel.Count > 0)
             {
                 Artikelgruppe erledigtGruppe = new("Erledigt");
 
@@ -379,7 +427,6 @@ namespace Einkaufsliste
 
                 artikelGruppen.Add(erledigtGruppe);
             }
-        
         }
         private async Task ArtikeldetailsBearbeitenAsync(Einkaufsartikel artikel)
         {
@@ -457,20 +504,271 @@ namespace Einkaufsliste
             bool gespeichert = await seite.ErgebnisTask;
 
             if (!gespeichert)
+                return;
+
+            await datenbank.ArtikelSpeichernAsync(artikel);
+
+            // Aktuelle Gruppe des Artikels finden
+            Artikelgruppe? alteGruppe = artikelGruppen
+                .FirstOrDefault(g => g.Contains(artikel));
+
+            if (alteGruppe != null)
             {
+                string neueGruppenBezeichnung;
+
+                if (artikel.IstErledigt)
+                {
+                    neueGruppenBezeichnung = "Erledigt";
+                }
+                else if (aktuelleGruppierung == "Kaufort")
+                {
+                    neueGruppenBezeichnung = alleHaendler
+                        .FirstOrDefault(h => h.Id == artikel.AusgewaehlterHaendlerId)
+                        ?.Name ?? "Ohne festgelegten Kaufort";
+                }
+                else
+                {
+                    neueGruppenBezeichnung = artikel.Kategorie;
+                }
+
+                // Nur verschieben, wenn sich die Gruppe geändert hat
+                if (alteGruppe.Kategorie != neueGruppenBezeichnung)
+                {
+                    alteGruppe.Remove(artikel);
+
+                    if (alteGruppe.Count == 0 &&
+                        alteGruppe.Kategorie != "Erledigt")
+                    {
+                        artikelGruppen.Remove(alteGruppe);
+                    }
+
+                    Artikelgruppe? neueGruppe = artikelGruppen
+                        .FirstOrDefault(g => g.Kategorie == neueGruppenBezeichnung);
+
+                    if (neueGruppe == null)
+                    {
+                        neueGruppe = new Artikelgruppe(neueGruppenBezeichnung);
+                        artikelGruppen.Add(neueGruppe);
+                    }
+
+                    neueGruppe.Add(artikel);
+                }
+            }
+
+            AktualisiereFortschritt();
+            await GesamtsummeAktualisierenAsync();
+        }
+        private async void OnMengeErhoehenClicked(object sender, EventArgs e)
+        {
+            if (sender is not Button button ||
+                button.CommandParameter is not Einkaufsartikel artikel)
+                return;
+
+            if (!decimal.TryParse(
+                artikel.Menge,
+                System.Globalization.NumberStyles.Number,
+                System.Globalization.CultureInfo.CurrentCulture,
+                out decimal menge))
+            {
+                menge = 1;
+            }
+
+            menge++;
+
+            artikel.Menge = menge.ToString(
+                System.Globalization.CultureInfo.CurrentCulture);
+
+            await datenbank.ArtikelSpeichernAsync(artikel);
+
+            await GesamtsummeAktualisierenAsync();
+        }
+        private async void OnMengeVerringernClicked(object sender, EventArgs e)
+        {
+            if (sender is not Button button ||
+                button.CommandParameter is not Einkaufsartikel artikel)
+                return;
+
+            if (!decimal.TryParse(
+                artikel.Menge,
+                System.Globalization.NumberStyles.Number,
+                System.Globalization.CultureInfo.CurrentCulture,
+                out decimal menge))
+            {
+                menge = 1;
+            }
+
+            if (menge <= 1)
+                return;
+
+            menge--;
+
+            artikel.Menge = menge.ToString(
+                System.Globalization.CultureInfo.CurrentCulture);
+
+            await datenbank.ArtikelSpeichernAsync(artikel);
+
+            await GesamtsummeAktualisierenAsync();
+        }
+        private async void OnMengeGeaendert(object sender, TextChangedEventArgs e)
+        {
+            if (sender is not Entry entry ||
+                entry.BindingContext is not Einkaufsartikel artikel)
+                return;
+
+            string eingabe = e.NewTextValue?.Trim() ?? string.Empty;
+
+            // Während der Eingabe leere oder ungültige Werte ignorieren
+            if (!decimal.TryParse(
+                eingabe,
+                System.Globalization.NumberStyles.Number,
+                System.Globalization.CultureInfo.CurrentCulture,
+                out decimal menge))
+                return;
+
+            if (menge <= 0)
+                return;
+
+            await datenbank.ArtikelSpeichernAsync(artikel);
+
+            await GesamtsummeAktualisierenAsync();
+        }
+        private async void OnEinheitGeaendert(object sender, EventArgs e)
+        {
+            if (sender is not Picker picker ||
+                picker.BindingContext is not Einkaufsartikel artikel)
+                return;
+
+            string? neueEinheit = picker.SelectedItem?.ToString();
+
+            if (string.IsNullOrWhiteSpace(neueEinheit))
+                return;
+
+            artikel.Einheit = neueEinheit;
+
+            await datenbank.ArtikelSpeichernAsync(artikel);
+
+            await GesamtsummeAktualisierenAsync();
+        }
+        private async void OnGruppierungGeaendert(object sender, EventArgs e)
+        {
+            if (GruppierungsPicker.SelectedItem is not string neueGruppierung)
+                return;
+
+            if (neueGruppierung != "Produktkategorie" &&
+                neueGruppierung != "Kaufort")
+                return;
+
+            aktuelleGruppierung = neueGruppierung;
+
+            Preferences.Set(
+                GruppierungsEinstellung,
+                aktuelleGruppierung);
+
+            List<Einkaufsartikel> alleArtikel =
+                await datenbank.AlleArtikelLadenAsync();
+
+            ArtikelGruppieren(alleArtikel);
+
+            AktualisiereFortschritt();
+        }
+        private void OnProduktsucheTextChanged(object sender, TextChangedEventArgs e)
+        {
+            string suchtext = e.NewTextValue?.Trim() ?? string.Empty;
+
+            if (suchtext.Length == 0)
+            {
+                ProduktVorschlaegeContainer.IsVisible = false;
+                ProduktVorschlaegeListe.ItemsSource = null;
                 return;
             }
 
-            await datenbank.ArtikelSpeichernAsync(artikel);
-            ArtikelGruppieren(await datenbank.AlleArtikelLadenAsync());
-            AktualisiereFortschritt();            
+            var treffer = alleProdukte
+                .Where(p =>
+                    p.IstAktiv &&
+                    (
+                        p.Name.Contains(suchtext, StringComparison.OrdinalIgnoreCase) ||
+                        p.Marke.Contains(suchtext, StringComparison.OrdinalIgnoreCase) ||
+                        p.Variante.Contains(suchtext, StringComparison.OrdinalIgnoreCase)
+                    ))
+                .OrderBy(p => p.Name)
+                .Take(15)
+                .ToList();
+
+            ProduktVorschlaegeListe.ItemsSource = treffer;
+
+            ProduktVorschlaegeContainer.IsVisible = treffer.Count > 0;
+        }
+        private async void OnProduktVorschlagAusgewaehlt(object sender,SelectionChangedEventArgs e)
+        {
+            if (e.CurrentSelection.FirstOrDefault() is not Produkt produkt)
+                return;
+
+            ProduktVorschlaegeListe.SelectedItem = null;
+            ProduktVorschlaegeContainer.IsVisible = false;
+            ProduktsucheEntry.Text = string.Empty;
+            
+    
+            // Aktuellen Preis beim bevorzugten Händler laden
+            Produktpreis? aktuellerPreis = null;
+
+            if (produkt.BevorzugterHaendlerId.HasValue)
+            {
+                aktuellerPreis = await datenbank.GuenstigstenAktuellenPreisLadenAsync(
+                    produkt.Id,
+                    produkt.BevorzugterHaendlerId.Value);
+            }
+
+            // Einkaufsartikel mit Produktdaten erstellen
+            Einkaufsartikel neuerArtikel = new()
+            {
+                ProduktId = produkt.Id,
+                Name = produkt.Name,
+                Kategorie = produkt.Kategorie,
+                Menge = "1",
+
+                Einheit = string.IsNullOrWhiteSpace(produkt.Basiseinheit)
+                    ? "Stück"
+                    : produkt.Basiseinheit,
+
+                AusgewaehlterHaendlerId = produkt.BevorzugterHaendlerId,
+
+                HaendlerAnzeige = alleHaendler.FirstOrDefault(h => h.Id == produkt.BevorzugterHaendlerId)?.Name ?? string.Empty,
+
+                Stueckpreis = aktuellerPreis?.PreisEuro ?? 0m,
+
+                IstErledigt = false
+            };
+
+            await datenbank.ArtikelSpeichernAsync(neuerArtikel);
+
+            // Passende Gruppe ermitteln
+            string gruppenName;
+
+            if (aktuelleGruppierung == "Kaufort")
+            {
+                gruppenName = alleHaendler
+                    .FirstOrDefault(h => h.Id == neuerArtikel.AusgewaehlterHaendlerId)
+                    ?.Name ?? "Ohne festgelegten Kaufort";
+            }
+            else
+            {
+                gruppenName = neuerArtikel.Kategorie;
+            }
+
+            Artikelgruppe? gruppe = artikelGruppen
+                .FirstOrDefault(g => g.Kategorie == gruppenName);
+
+            if (gruppe == null)
+            {
+                gruppe = new Artikelgruppe(gruppenName);
+                artikelGruppen.Add(gruppe);
+            }
+
+            gruppe.Add(neuerArtikel);
+
+            AktualisiereFortschritt();
             await GesamtsummeAktualisierenAsync();
         }
-
-
-
-
-
 
 
 

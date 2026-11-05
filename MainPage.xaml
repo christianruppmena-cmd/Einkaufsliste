@@ -22,29 +22,24 @@
                         BackgroundColor="#1B5E43"
                         StrokeThickness="0"
                         StrokeShape="RoundRectangle 12"
-                        Padding="22"
+                        Padding="12,10"
                         Margin="0,0,0,5">
                         <VerticalStackLayout Spacing="8">
 
                             <Label
                                 Text="&#x1F6D2; Meine Einkaufsliste"
-                                FontSize="26"
+                                FontSize="21"
                                 FontAttributes="Bold"
-                                TextColor="White"
-                                LineBreakMode="WordWrap"
+                                TextColor="White"                                
                                 HorizontalTextAlignment="Center"/>
-                            <Label
-                                Text="Alles im Blick. Schritt für Schritt erledigt."
-                                FontSize="14"
-                                TextColor="#D5E9DD"
-                                HorizontalTextAlignment="Center"/>      
+                                 
                             <Label
                                 x:Name="ArtikelAnzahlText"
                                 Text="0 Artikel insgesamt"
-                                FontSize="13"
+                                FontSize="12"
                                 TextColor="#D5E9DD"
                                 HorizontalTextAlignment="Center"
-                                Margin="0,5,0,0"/>
+                                Margin="0,2,0,0"/>
                         </VerticalStackLayout>
 
                     </Border>
@@ -56,9 +51,9 @@
                         Stroke="#E3EBE5"
                         StrokeThickness="1"
                         StrokeShape="RoundRectangle 16"
-                        Padding="16"
+                        Padding="12"
                         Margin="0,0,0,5">
-                        <VerticalStackLayout Spacing="12">
+                        <VerticalStackLayout Spacing="6">
 
                             <Grid ColumnDefinitions="*,Auto">
                                 <Label
@@ -83,38 +78,143 @@
                                 Progress="0"
                                 ProgressColor="#278653"
                                 BackgroundColor="#E3EBE5"
-                                HeightRequest="8"/>
-
-                        
+                                HeightRequest="6"/>                        
 
                             <Label
                                 x:Name="GesamtsummeText"
                                 Text="Gesamtsumme: 0,00 €"
-                                FontSize="18"
+                                FontSize="16"
                                 FontAttributes="Bold"
                                 TextColor="#1B5E43"
                                 HorizontalTextAlignment="End"
-                                Margin="0,8,0,0"/>
+                                Margin="0,2,0,0"/>
                         </VerticalStackLayout>
 
                     </Border>
 
                     <!-- Hinzufügen-Button -->
-                    <Button
-                        
-                        Text="Artikel hinzufügen"
-                        FontSize="16"
-                        FontAttributes="Bold"
-                        BackgroundColor="#278653"
-                        TextColor="White"
-                        CornerRadius="14"
-                        HeightRequest="54"
-                        Padding="16,0"
-                        Clicked="OnArtikelHinzufuegenClicked"/>
+                    <!-- Produktsuche -->
+                    <VerticalStackLayout Spacing="0">
+
+                        <Border
+                            BackgroundColor="White"
+                            Stroke="#DCE7DF"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 12"
+                            Padding="12"
+                            Margin="0,0,0,5">
+
+                            <Grid ColumnDefinitions="Auto,*,44"
+                                  ColumnSpacing="8">
+
+                                <Label
+                                    Text="&#x1F50D;"
+                                    FontSize="20"
+                                    VerticalOptions="Center"/>
+
+                                <Entry
+                                    x:Name="ProduktsucheEntry"
+                                    Grid.Column="1"
+                                    Placeholder="Produkt suchen ..."
+                                    FontSize="16"
+                                    TextChanged="OnProduktsucheTextChanged"
+                                    ClearButtonVisibility="WhileEditing"/>
+                                <Button
+                                    Grid.Column="2"
+                                    Text="+"
+                                    FontSize="26"
+                                    FontAttributes="Bold"
+                                    BackgroundColor="#1B5E43"
+                                    TextColor="White"
+                                    WidthRequest="44"
+                                    HeightRequest="44"
+                                    CornerRadius="22"
+                                    Padding="0"
+                                    VerticalOptions="Center"
+                                    Clicked="OnProduktNeuAnlegenClicked"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- Produktvorschläge -->
+                        <Border
+                            x:Name="ProduktVorschlaegeContainer"
+                            IsVisible="False"
+                            BackgroundColor="White"
+                            Stroke="#E3EBE5"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 12"
+                            Padding="5"
+                            Margin="0,0,0,10">
+
+                            <CollectionView
+                                x:Name="ProduktVorschlaegeListe"
+                                SelectionMode="Single"
+                                SelectionChanged="OnProduktVorschlagAusgewaehlt"
+                                MaximumHeightRequest="250">
+
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Padding="10"
+                                              RowDefinitions="Auto,Auto"
+                                              ColumnDefinitions="*">
+
+                                            <Label
+                                                Grid.Row="0"
+                                                Text="{Binding Name}"
+                                                FontSize="15"
+                                                FontAttributes="Bold"
+                                                TextColor="#222222"/>
+
+                                            <Label
+                                                Grid.Row="1"
+                                                Text="{Binding Marke}"
+                                                FontSize="12"
+                                                TextColor="#64746A"/>
+
+                                        </Grid>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+
+                            </CollectionView>
+                        </Border>
+
+                    </VerticalStackLayout>
+                    <!-- Gruppierung der Einkaufsliste -->
                     <Grid
-                        
-                        ColumnDefinitions="*,Auto"
-                        ColumnSpacing="12">
+                        ColumnDefinitions="Auto,*"
+                        ColumnSpacing="10"
+                        Margin="0,0,0,5"
+                        VerticalOptions="Center">
+
+                        <Label
+                            Grid.Column="0"
+                            Text="Sortieren nach:"
+                            FontSize="14"
+                            TextColor="#26352C"
+                            VerticalOptions="Center"/>
+
+                        <Picker
+                            x:Name="GruppierungsPicker"
+                            Grid.Column="1"
+                            Title="Auswählen"
+                            FontSize="14"
+                            BackgroundColor="White"
+                            TextColor="#26352C"
+                            HeightRequest="42"
+                            SelectedIndexChanged="OnGruppierungGeaendert">
+
+                            <Picker.Items>
+                                <x:String>Produktkategorie</x:String>
+                                <x:String>Kaufort</x:String>
+                            </Picker.Items>
+
+                        </Picker>
+
+                    </Grid>
+
+                    <Grid              
+                        ColumnDefinitions="*,Auto">
+
                         <!-- Liste der Artikel -->
                         <Label
                             Grid.Column="0"
@@ -123,15 +223,7 @@
                             FontAttributes="Bold"
                             TextColor="#222222"
                             VerticalOptions="Center"/>
-                        <Button
-                            Grid.Column="1"
-                            Text="Kategorien"
-                            BackgroundColor="#245B3D"
-                            TextColor="White"
-                            FontSize="13"
-                            Padding="12,6"
-                            CornerRadius="10"
-                            Clicked="OnKategorienOeffnenClicked"/>
+                      
                     </Grid>
                 </VerticalStackLayout>
             </CollectionView.Header>
@@ -188,102 +280,200 @@
             <CollectionView.ItemTemplate>
                 <DataTemplate>
                     <Border
-                            BackgroundColor="White"
-                            Stroke="#E3EBE5"
-                            StrokeThickness="1"
-                            StrokeShape="RoundRectangle 16"
-                            Padding="12"
-                            Margin="0,5">
+            BackgroundColor="White"
+            Stroke="#E3EBE5"
+            StrokeThickness="1"
+            StrokeShape="RoundRectangle 16"
+            Padding="12"
+            Margin="0,5">
 
-                        <Grid ColumnDefinitions="48,*,44,44"
-                                  ColumnSpacing="10">
+                        <Grid
+                RowDefinitions="Auto,Auto,Auto"
+                ColumnDefinitions="48,*,44"
+                RowSpacing="8"
+                ColumnSpacing="6">
 
-                            <!-- Checkbox für Erledigt/Unerledigt -->
+                            <!-- Checkbox -->
                             <CheckBox
-                                    Grid.Column="0"
-                                    IsChecked="{Binding IstErledigt, Mode=TwoWay}"
-                                    CheckedChanged="OnArtikelErledigtGeaendert"
-                                    WidthRequest="48"
-                                    HeightRequest="48"
-                                    VerticalOptions="Center"
-                                    Color="#278653"/>
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    IsChecked="{Binding IstErledigt, Mode=TwoWay}"
+                    CheckedChanged="OnArtikelErledigtGeaendert"
+                    WidthRequest="48"
+                    HeightRequest="48"
+                    VerticalOptions="Center"
+                    Color="#278653"/>
 
-                            <!-- Artikelname -->
+                            <!-- Produktname und Details -->
                             <VerticalStackLayout
-                                    Grid.Column="1"
-                                    Spacing="4"
-                                    VerticalOptions="Center">
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    Spacing="4"
+                    VerticalOptions="Center">
+
                                 <Label
-                                        Text="{Binding Name}"
-                                        FontSize="18"
-                                        TextColor="#222222"
-                                        LineBreakMode="WordWrap">
+                        Text="{Binding Name}"
+                        FontSize="18"
+                        TextColor="#222222"
+                        LineBreakMode="WordWrap">
+
                                     <Label.GestureRecognizers>
                                         <TapGestureRecognizer
-                                                Tapped="OnArtikelDetailsAnzeigenClicked"/>
+                                Tapped="OnArtikelDetailsAnzeigenClicked"/>
                                     </Label.GestureRecognizers>
 
                                     <Label.Triggers>
                                         <DataTrigger
-                                                TargetType="Label"
-                                                Binding="{Binding IstErledigt}"
-                                                Value="True">
-
-                                            <Setter Property="TextDecorations"
-                                                        Value="Strikethrough"/>
-                                            <Setter Property="TextColor"
-                                                        Value="Gray"/>
+                                TargetType="Label"
+                                Binding="{Binding IstErledigt}"
+                                Value="True">
+                                            <Setter Property="TextDecorations" Value="Strikethrough"/>
+                                            <Setter Property="TextColor" Value="Gray"/>
                                         </DataTrigger>
-
                                     </Label.Triggers>
                                 </Label>
 
                                 <Label
-                                        Text="{Binding DetailsAnzeige}"
-                                        FontSize="12"
-                                        TextColor="#64746A"
-                                        LineBreakMode="WordWrap"/>
-
-                                <Label
-                                    Text="{Binding Stueckpreis, StringFormat='Stückpreis: {0:N2} €'}"
-                                    FontSize="12"
-                                    TextColor="#64746A"/>
-
-                                <Label
-                                    Text="{Binding Gesamtpreis, StringFormat='Gesamt: {0:N2} €'}"
-                                    FontSize="14"
-                                    TextColor="#1B5E43"/>
+                        Text="{Binding HaendlerAnzeige, StringFormat='Kaufort: {0}'}"
+                        FontSize="12"
+                        TextColor="#3976A8"
+                        LineBreakMode="WordWrap"/>
+                                
                             </VerticalStackLayout>
 
-                            <!-- Bearbeiten Button-->
+                            <!-- Löschen -->
                             <Button
-                                    Grid.Column="2"
-                                    Text="&#x270E;"
-                                    FontSize= "20"
-                                    BackgroundColor="Transparent"
-                                    TextColor="#244D38"
-                                    Padding="0"
-                                    CommandParameter="{Binding .}"
-                                    Clicked="OnArtikelBearbeitenClicked"
-                                    />
+                    Grid.Row="0"
+                    Grid.Column="2"
+                    Text="&#x1F5D1;"
+                    BackgroundColor="#FFF0F0"
+                    TextColor="#C62828"
+                    FontSize="20"
+                    WidthRequest="44"
+                    HeightRequest="44"
+                    Padding="0"
+                    CommandParameter="{Binding .}"
+                    Clicked="OnArtikelLoeschenClicked"
+                    CornerRadius="12"
+                    VerticalOptions="Center"/>
 
+                            <!-- Mengensteuerung und Einheit -->
+                            <Grid
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Grid.ColumnSpan="2"
+                    ColumnDefinitions="40,110,*"
+                    ColumnSpacing="10"
+                    VerticalOptions="Center">
 
+                                <!-- Menge -->
+                                <Grid
+                        Grid.Column="0"
+                        RowDefinitions="16,28,16"
+                        WidthRequest="40">
 
-                            <!-- Löschen Button-->
-                            <Button
-                                    Grid.Column="3"
-                                    Text="&#x1F5D1;"
-                                    BackgroundColor="#FFF0F0"
-                                    TextColor="#C62828"
-                                    FontSize="20"
-                                    WidthRequest="44"
-                                    HeightRequest="44"
-                                    Padding="0"
-                                    CommandParameter="{Binding .}"
-                                    Clicked="OnArtikelLoeschenClicked"
-                                    CornerRadius="12"
-                                    VerticalOptions="Center"
-                                    />
+                                    <Button
+                            Grid.Row="0"
+                            Text="+"
+                            FontSize="12"
+                            Padding="0"
+                            HeightRequest="16"
+                            WidthRequest="36"
+                            MinimumHeightRequest="16"
+                            MinimumWidthRequest="36"
+                            BackgroundColor="#E8F1EB"
+                            TextColor="#3976A8"
+                            CornerRadius="4"
+                            Clicked="OnMengeErhoehenClicked"
+                            CommandParameter="{Binding .}"/>
+
+                                    <Entry
+                            Grid.Row="1"
+                            Text="{Binding Menge, Mode=TwoWay}"
+                            Keyboard="Numeric"
+                            WidthRequest="40"
+                            HeightRequest="28"
+                            FontSize="16"
+                            HorizontalTextAlignment="Center"
+                            VerticalTextAlignment="Center"
+                            TextChanged="OnMengeGeaendert"
+                            Margin="0"/>
+
+                                    <Button
+                            Grid.Row="2"
+                            Text="−"
+                            FontSize="12"
+                            Padding="0"
+                            HeightRequest="16"
+                            WidthRequest="36"
+                            MinimumHeightRequest="16"
+                            MinimumWidthRequest="36"
+                            BackgroundColor="#E8F1EB"
+                            TextColor="#3976A8"
+                            CornerRadius="4"
+                            Clicked="OnMengeVerringernClicked"
+                            CommandParameter="{Binding .}"/>
+                                </Grid>
+
+                                <!-- Einheit -->
+                                <Picker
+                        Grid.Column="1"
+                        Title="Einheit"
+                        SelectedItem="{Binding Einheit, Mode=TwoWay}"
+                        SelectedIndexChanged="OnEinheitGeaendert"
+                        FontSize="12"
+                        WidthRequest="110"
+                        HorizontalOptions="Start"
+                        VerticalOptions="Center">
+
+                                    <Picker.Items>
+                                        <x:String>Stück</x:String>
+                                        <x:String>Packung</x:String>
+                                        <x:String>Flasche</x:String>
+                                        <x:String>Kg</x:String>
+                                        <x:String>g</x:String>
+                                        <x:String>Liter</x:String>
+                                        <x:String>ml</x:String>
+                                        <x:String>100 g</x:String>
+                                        <x:String>100 ml</x:String>
+                                    </Picker.Items>
+                                </Picker>
+                            </Grid>
+
+                            <!-- Preise -->
+                            <HorizontalStackLayout
+                    Grid.Row="2"
+                    Grid.Column="1"
+                    Grid.ColumnSpan="2"
+                    Spacing="6"
+                    VerticalOptions="Center">
+
+                                <Label
+                        Text="Stück / Gesamt:"
+                        FontSize="12"
+                        TextColor="#64746A"
+                        VerticalOptions="Center"/>
+
+                                <Label
+                        Text="{Binding Stueckpreis, StringFormat='{0:N2} €'}"
+                        FontSize="13"
+                        TextColor="#64746A"
+                        VerticalOptions="Center"/>
+
+                                <Label
+                        Text="/"
+                        FontSize="13"
+                        TextColor="#64746A"
+                        VerticalOptions="Center"/>
+
+                                <Label
+                        Text="{Binding Gesamtpreis, StringFormat='{0:N2} €'}"
+                        FontSize="14"
+                        FontAttributes="Bold"
+                        TextColor="#1B5E43"
+                        VerticalOptions="Center"/>
+                            </HorizontalStackLayout>
+
                         </Grid>
                     </Border>
                 </DataTemplate>

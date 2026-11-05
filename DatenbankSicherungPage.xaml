@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="Einkaufsliste.DatenbanksicherungPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Datensicherung"
+    BackgroundColor="#F5F5F5">
+
+    <ScrollView>
+        <VerticalStackLayout
+            Padding="20"
+            Spacing="18">
+
+            <Label
+                Text="Datensicherung"
+                FontSize="28"
+                FontAttributes="Bold"
+                TextColor="#245C43"/>
+
+            <Label
+                Text="Sichere deine Einkaufsliste und stelle sie bei Bedarf wieder her."
+                FontSize="15"
+                TextColor="#555555"/>
+
+            <Border
+                BackgroundColor="White"
+                Stroke="#D8E5DC"
+                Padding="18"
+                StrokeShape="RoundRectangle 12">
+
+                <VerticalStackLayout Spacing="12">
+
+                    <Label
+                        Text="Datenbank exportieren"
+                        FontSize="20"
+                        FontAttributes="Bold"
+                        TextColor="#245C43"/>
+
+                    <Label
+                        Text="Speichere eine Sicherung deiner Datenbank auf deinem Gerät oder PC."
+                        TextColor="#333333"/>
+
+                    <Button
+                        Text="Datenbank exportieren"
+                        BackgroundColor="#245C43"
+                        TextColor="White"
+                        CornerRadius="10"
+                        HeightRequest="50"
+                        Clicked="OnExportierenClicked"/>
+
+                </VerticalStackLayout>
+            </Border>
+
+            <Border
+                BackgroundColor="White"
+                Stroke="#D8E5DC"
+                Padding="18"
+                StrokeShape="RoundRectangle 12">
+
+                <VerticalStackLayout Spacing="12">
+
+                    <Label
+                        Text="Datenbank importieren"
+                        FontSize="20"
+                        FontAttributes="Bold"
+                        TextColor="#245C43"/>
+
+                    <Label
+                        Text="Stelle deine Einkaufsliste aus einer vorhandenen Sicherungsdatei wieder her."
+                        TextColor="#333333"/>
+
+                    <Button
+                        Text="Datenbank importieren"
+                        BackgroundColor="#777777"
+                        TextColor="White"
+                        CornerRadius="10"
+                        HeightRequest="50"
+                        Clicked="OnImportierenClicked"/>
+
+                </VerticalStackLayout>
+            </Border>
+
+           <Border
+               BackgroundColor="White"
+               Stroke="#D8E5DC"
+               Padding="18"
+               StrokeShape="RoundRectangle 12">
+
+               <VerticalStackLayout Spacing="12">
+
+                   <Label
+                       Text="Lokale Sicherungen"
+                       FontSize="20"
+                       FontAttributes="Bold"
+                       TextColor="#245C43"/>
+
+                   <Label
+                       Text="Deine letzten 10 automatisch erstellten Sicherungen."
+                       FontSize="14"
+                       TextColor="#333333"/>
+
+                   <Label
+                       x:Name="KeineSicherungenLabel"
+                       Text="Noch keine lokalen Sicherungen vorhanden."
+                       TextColor="#777777"
+                       HorizontalTextAlignment="Center"
+                       IsVisible="False"/>
+                    <VerticalStackLayout
+                        x:Name="SicherungenListe"
+                        Spacing="10"
+                        />
+                </VerticalStackLayout>
+           </Border>
+
+            <Label
+                x:Name="StatusLabel"
+                Text="Noch keine Sicherungsaktion durchgeführt"
+                TextColor="#555555"
+                HorizontalTextAlignment="Center"/>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
