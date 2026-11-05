@@ -78,23 +78,22 @@ namespace Einkaufsliste
                 }
             };
 
-            // Händlerverwaltung (in Arbeit)
+            // Händlerverwaltung
+            var haendler = new ShellContent
+            {
+                Title = "Händlerverwaltung",
+                Route = "HaendlerPage",
+                Content = new HaendlerPage(datenbank)
+            };
+
             var haendlerMenue = new FlyoutItem
             {
-                Title = "🏪 Händlerverwaltung (in Arbeit)",
-                IsEnabled = false,
+                Title = "🏪 Händlerverwaltung",
                 Items =
                 {
                     new ShellSection
                     {
-                        Items =
-                        {
-                            new ShellContent
-                            {
-                                Title = "Händlerverwaltung",
-                                Content = new ContentPage()
-                            }
-                        }
+                        Items = { haendler }
                     }
                 }
             };

@@ -1,5 +1,4 @@
-﻿
-using SQLite;
+﻿using SQLite;
 
 namespace Einkaufsliste.Models;
 
@@ -10,6 +9,8 @@ public class Haendler
 
     [Unique, NotNull]
     public string Name { get; set; } = string.Empty;
+
+    public string? LogoPfad { get; set; }
 
     public bool IstAktiv { get; set; } = true;
 

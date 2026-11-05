@@ -81,6 +81,9 @@
 	  <MauiXaml Update="DatenbankSicherungPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="HaendlerPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="KategorienPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>

@@ -23,10 +23,10 @@ public class EinkauflistenDatenbank
         await Task.Run(() =>
         {
             Directory.CreateDirectory(sicherungsOrdner);
-            
+
         });
     }
-   
+
     private async Task<bool> DatenbankEnthaeltDatenAsync()
     {
         var produkte = await datenbank
@@ -39,6 +39,7 @@ public class EinkauflistenDatenbank
 
         return produkte > 0 || artikel > 0;
     }
+    
     public async Task InitialisierenAsync()
     {
         await SicherungsOrdnerErstellenAsync();
@@ -75,6 +76,16 @@ public class EinkauflistenDatenbank
         await datenbank.CreateTableAsync<Produktpreis>();
         await datenbank.CreateTableAsync<PreisHistorie>();
 
+        // Migration: Logo-Pfad beim Händler ergänzen
+        var haendlerSpalten =
+            await datenbank.GetTableInfoAsync("Haendler");
+
+        if (!haendlerSpalten.Any(s => s.Name == "LogoPfad"))
+        {
+            await datenbank.ExecuteAsync(
+                "ALTER TABLE Haendler ADD COLUMN LogoPfad TEXT NULL");
+        }
+
         // Verknüpfung zwischen Einkaufsartikel und Produkt
         var spalten = await datenbank.GetTableInfoAsync("Einkaufsartikel");
 
@@ -95,6 +106,7 @@ public class EinkauflistenDatenbank
 
 
     }
+    
     public async Task LokaleSicherungErstellenAsync()
     {
         await SicherungsOrdnerErstellenAsync();
@@ -210,6 +222,7 @@ public class EinkauflistenDatenbank
             }
         }
     }
+    
     public async Task<List<FileInfo>> LokaleSicherungenLadenAsync()
     {
         await SicherungsOrdnerErstellenAsync();
@@ -220,6 +233,7 @@ public class EinkauflistenDatenbank
             .Take(10)
             .ToList();
     }
+    
     public async Task StandardHaendlerAnlegenAsync()
     {
         string[] haendlerNamen =
@@ -255,6 +269,7 @@ public class EinkauflistenDatenbank
             }
         }
     }
+    
     public async Task<List<Haendler>> AlleHaendlerLadenAsync()
     {
         await InitialisierenAsync();
@@ -265,6 +280,39 @@ public class EinkauflistenDatenbank
             .OrderBy(h => h.Sortierung)
             .ToListAsync();
     }
+
+    public async Task HaendlerSpeichernAsync(Haendler haendler)
+    {
+        await InitialisierenAsync();
+
+        if (haendler == null)
+            return;
+
+        haendler.Name = haendler.Name.Trim();
+
+        if (string.IsNullOrWhiteSpace(haendler.Name))
+            return;
+
+        if (haendler.Id == 0)
+        {
+            await datenbank.InsertAsync(haendler);
+        }
+        else
+        {
+            await datenbank.UpdateAsync(haendler);
+        }
+
+        await LokaleSicherungErstellenAsync();
+    }
+
+    public async Task<List<Haendler>> AlleHaendlerVerwaltenLadenAsync()
+    {
+        await InitialisierenAsync();
+
+        return await datenbank.QueryAsync<Haendler>(
+            "SELECT * FROM Haendler ORDER BY name COLLATE NOCASE ASC");
+    }
+    
     public async Task<List<Produktpreis>> AlleProduktpreiseLadenAsync(int produktId)
     {
         await InitialisierenAsync();
@@ -274,6 +322,7 @@ public class EinkauflistenDatenbank
             .Where(p => p.ProduktId == produktId && p.IstAktiv)
             .ToListAsync();
     }
+    
     public async Task<Produktpreis?> AktuellenProduktpreisLadenAsync(int produktId, int haendlerId, string preisart)
     {
         await InitialisierenAsync();
@@ -297,6 +346,7 @@ public class EinkauflistenDatenbank
             .OrderByDescending(p => p.GueltigVon)
             .FirstOrDefault();
     }
+    
     public async Task<Produktpreis?> GuenstigstenAktuellenPreisLadenAsync(int produktId, int haendlerId)
     {
         Produktpreis? angebot = await AktuellenProduktpreisLadenAsync(
@@ -312,6 +362,7 @@ public class EinkauflistenDatenbank
             haendlerId,
             "Normalpreis");
     }
+    
     private static void PreisInHistorieUebernehmen(SQLiteConnection conn, Produktpreis preis)
     {
         int naechsteVersion = conn.Table<PreisHistorie>()
@@ -334,6 +385,7 @@ public class EinkauflistenDatenbank
             GueltigBis = preis.GueltigBis
         });
     }
+    
     public async Task ProduktpreisSpeichernAsync(Produktpreis produktpreis)
     {
         await InitialisierenAsync();
@@ -442,6 +494,7 @@ public class EinkauflistenDatenbank
         });
         await LokaleSicherungErstellenAsync();
     }
+    
     public async Task ProduktpreisDeaktivierenAsync(int produktpreisId)
     {
         await InitialisierenAsync();
@@ -468,6 +521,7 @@ public class EinkauflistenDatenbank
 
         await LokaleSicherungErstellenAsync();
     }
+    
     public async Task<List<PreisHistorie>> PreisHistorieLadenAsync(int produktId, int haendlerId)
     {
         await InitialisierenAsync();
@@ -480,6 +534,7 @@ public class EinkauflistenDatenbank
             .OrderByDescending(h => h.ErfasstAm)
             .ToListAsync();
     }
+    
     public async Task StandardkategorienAnlegenAsync()
     {
         string[] standardkategorien =
@@ -628,7 +683,7 @@ public class EinkauflistenDatenbank
         await LokaleSicherungErstellenAsync();
     }
 
-    public async Task EinkaufsartikelHaendlerAktualisierenAsync(int produktId,int? haendlerId)
+    public async Task EinkaufsartikelHaendlerAktualisierenAsync(int produktId, int? haendlerId)
     {
         List<Einkaufsartikel> artikel = await datenbank
             .Table<Einkaufsartikel>()

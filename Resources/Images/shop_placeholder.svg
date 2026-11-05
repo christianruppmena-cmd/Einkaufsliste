@@ -1,0 +1,42 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg"
+     width="128"
+     height="128"
+     viewBox="0 0 128 128">
+
+	<g fill="#1B5E43">
+
+		<!-- Dach -->
+		<path d="M20 35 L29 15 H99 L108 35 Z"/>
+
+		<!-- Markise -->
+		<path d="M20 35
+                 H108
+                 V43
+                 C108 51 96 51 96 43
+                 C96 51 84 51 84 43
+                 C84 51 72 51 72 43
+                 C72 51 60 51 60 43
+                 C60 51 48 51 48 43
+                 C48 51 36 51 36 43
+                 C36 51 20 51 20 43 Z"/>
+
+		<!-- Geschäft -->
+		<path d="M27 50 H101 V105 H27 Z"/>
+
+		<!-- Schaufenster -->
+		<path d="M36 58 H92 V86 H36 Z"
+              fill="#F4F7F5"/>
+
+		<!-- Eingang -->
+		<path d="M52 72 H76 V105 H52 Z"/>
+
+		<!-- Türgriff -->
+		<circle cx="70" cy="89" r="2"
+                fill="#1B5E43"/>
+
+		<!-- Sockel -->
+		<path d="M20 105 H108 V113 H20 Z"/>
+
+	</g>
+
+</svg>
