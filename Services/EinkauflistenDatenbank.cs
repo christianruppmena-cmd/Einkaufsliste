@@ -8,15 +8,17 @@ namespace Einkaufsliste.Services;
 
 public class EinkauflistenDatenbank
 {
-    private SQLiteAsyncConnection datenbank;
-    private readonly string datenbankPfad =
-    Path.Combine(FileSystem.AppDataDirectory, "einkaufliste.db3");
+    private readonly DatenbankService datenbankService;
+    private SQLiteAsyncConnection datenbank 
+        => datenbankService.Verbindung;
+    private string datenbankPfad =>
+        datenbankService.DatenbankPfad;
 
-    private readonly string sicherungsOrdner =
+    private string sicherungsOrdner =
         Path.Combine(FileSystem.AppDataDirectory, "Sicherungen");
     public EinkauflistenDatenbank()
     {
-        datenbank = new SQLiteAsyncConnection(datenbankPfad);
+        this.datenbankService = datenbankService;
     }
     private async Task SicherungsOrdnerErstellenAsync()
     {
@@ -39,74 +41,12 @@ public class EinkauflistenDatenbank
 
         return produkte > 0 || artikel > 0;
     }
-    
+
     public async Task InitialisierenAsync()
     {
-        await SicherungsOrdnerErstellenAsync();
-
-
-        // Einkaufslisten
-        await datenbank.CreateTableAsync<Einkaufsartikel>();
-        await datenbank.CreateTableAsync<Kategorie>();
-
-        // Produktverwaltung
-        await datenbank.CreateTableAsync<Produkt>();
-        // Migration: Bevorzugten Händler beim Produkt ergänzen
-        var produktSpalten =
-            await datenbank.GetTableInfoAsync("Produkt");
-
-        if (!produktSpalten.Any(s => s.Name == "BevorzugterHaendlerId"))
-        {
-            await datenbank.ExecuteAsync(
-                "ALTER TABLE Produkt ADD COLUMN BevorzugterHaendlerId INTEGER NULL");
-        }
-
-        // Migration: Ausgewählten Händler beim Einkaufsartikel ergänzen
-        var artikelSpalten =
-            await datenbank.GetTableInfoAsync("Einkaufsartikel");
-
-        if (!artikelSpalten.Any(s => s.Name == "AusgewaehlterHaendlerId"))
-        {
-            await datenbank.ExecuteAsync(
-                "ALTER TABLE Einkaufsartikel ADD COLUMN AusgewaehlterHaendlerId INTEGER NULL");
-        }
-
-        // Preisvergleich
-        await datenbank.CreateTableAsync<Haendler>();
-        await datenbank.CreateTableAsync<Produktpreis>();
-        await datenbank.CreateTableAsync<PreisHistorie>();
-
-        // Migration: Logo-Pfad beim Händler ergänzen
-        var haendlerSpalten =
-            await datenbank.GetTableInfoAsync("Haendler");
-
-        if (!haendlerSpalten.Any(s => s.Name == "LogoPfad"))
-        {
-            await datenbank.ExecuteAsync(
-                "ALTER TABLE Haendler ADD COLUMN LogoPfad TEXT NULL");
-        }
-
-        // Verknüpfung zwischen Einkaufsartikel und Produkt
-        var spalten = await datenbank.GetTableInfoAsync("Einkaufsartikel");
-
-        if (!spalten.Any(s => s.Name == "ProduktId"))
-        {
-            await datenbank.ExecuteAsync(
-                "ALTER TABLE Einkaufsartikel ADD COLUMN ProduktId INTEGER NULL");
-        }
-        // Migration PreisHistorie: Versionsnummer ergänzen
-        var historieSpalten =
-            await datenbank.GetTableInfoAsync("PreisHistorie");
-
-        if (!historieSpalten.Any(s => s.Name == "Versionsnummer"))
-        {
-            await datenbank.ExecuteAsync(
-                "ALTER TABLE PreisHistorie ADD COLUMN Versionsnummer INTEGER NOT NULL DEFAULT 0");
-        }
-
-
+       await datenbankService.InitialisierenAsync();
     }
-    
+
     public async Task LokaleSicherungErstellenAsync()
     {
         await SicherungsOrdnerErstellenAsync();
@@ -1066,7 +1006,7 @@ public class EinkauflistenDatenbank
                     overwrite: true);
 
                 // Neue Verbindung herstellen
-                datenbank = new SQLiteAsyncConnection(datenbankPfad);
+                datenbankService.VerbindungNeuErstellen();
 
                 // Vorhandene Produktbilder entfernen
                 string bildOrdner = FileSystem.AppDataDirectory;
@@ -1140,7 +1080,7 @@ public class EinkauflistenDatenbank
                 }
 
                 // Ursprüngliche Datenbankverbindung wiederherstellen
-                datenbank = new SQLiteAsyncConnection(datenbankPfad);
+                datenbankService.VerbindungNeuErstellen();
 
                 // Importierte Produktbilder entfernen
                 foreach (string datei in Directory.GetFiles(
