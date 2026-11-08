@@ -1,6 +1,6 @@
 using Einkaufsliste.Models;
 
-namespace Einkaufsliste;
+namespace Einkaufsliste.Application.Pages.Artikel;
 
 public partial class ArtikeldetailsPage : ContentPage
 {

@@ -1,7 +1,4 @@
-﻿
-using SQLite;
-
-namespace Einkaufsliste.Models;
+﻿namespace Einkaufsliste.Models;
 
 public class PreisHistorie
 {
@@ -29,7 +26,7 @@ public class PreisHistorie
 
     public string GueltigVon { get; set; } = string.Empty;
 
-    public string? GueltigBis { get; set; }
+    public string GueltigBis { get; set; }
 
     [Ignore]
     public decimal PreisEuro => PreisInCent / 100m;

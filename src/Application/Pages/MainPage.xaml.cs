@@ -1,25 +1,23 @@
-﻿using System.Collections.ObjectModel;
+﻿using Einkaufsliste.Services;
 using Einkaufsliste.Models;
-using Einkaufsliste.Services;
-using System.Linq;
-using System.Diagnostics.CodeAnalysis;
-using Microsoft.Maui.Storage;
+using Einkaufsliste.Utilities;
 
-namespace Einkaufsliste
+namespace Einkaufsliste.Application.Pages
 {
     public partial class MainPage : ContentPage
     {
         private ObservableCollection<Artikelgruppe> artikelGruppen = new();
-        private readonly EinkauflistenDatenbank datenbank ;
+        private readonly EinkauflistenDatenbank _datenbank ;
         private const string GruppierungsEinstellung = "Gruppierungsart";
         private string aktuelleGruppierung = "Produktkategorie";
         private List<Produkt> alleProdukte = new();
         private List<Haendler> alleHaendler = new();
+
         public MainPage(EinkauflistenDatenbank datenbank)
         {
             InitializeComponent();
 
-            this.datenbank = datenbank;
+            _datenbank = datenbank;
 
             ArtikelListe.ItemsSource = artikelGruppen;
 
@@ -28,9 +26,8 @@ namespace Einkaufsliste
                 "Produktkategorie");
 
             GruppierungsPicker.SelectedItem = aktuelleGruppierung;
-
-          
         }
+
         protected override void OnAppearing()
         {
             base.OnAppearing();
@@ -38,19 +35,18 @@ namespace Einkaufsliste
             LadeProdukteFuerSucheAsync();
 
         }
+
         private async void LadeProdukteFuerSucheAsync()
         {
-            alleProdukte = await datenbank.AlleProdukteLadenAsync();
+            alleProdukte = await _datenbank.AlleProdukteLadenAsync();
         }
         private async void OnArtikelHinzufuegenClicked(object sender, EventArgs e)
         {
- 
-
             var seite = new ArtikelEingabePage(string.Empty);
 
             await Navigation.PushModalAsync(new NavigationPage(seite));
 
-            Einkaufsartikel? neuerEintrag = await seite.ErgebnisTask;
+            Einkaufsartikel neuerEintrag = await seite.ErgebnisTask;
 
             if (neuerEintrag == null)
                 return;
@@ -58,7 +54,7 @@ namespace Einkaufsliste
             neuerEintrag.Name = TextHelfer.Normalisieren(neuerEintrag.Name);
 
             // Zuerst die Kategorie des Produkts ermitteln
-            Produkt? produkt = await datenbank.ProduktFindenAsync(neuerEintrag.Name);
+            Produkt produkt = await _datenbank.ProduktFindenAsync(neuerEintrag.Name);
 
             if (produkt != null)
             {
@@ -69,13 +65,13 @@ namespace Einkaufsliste
             else
             {
                 List<Kategorie> kategorien =
-                    await datenbank.AlleKategorieEintraegeLadenAsync();
+                    await _datenbank.AlleKategorieEintraegeLadenAsync();
 
                 string[] kategorienNamen = kategorien.Select(k => k.Name).ToArray();
 
                 string neueKategorieOption = "+ Neue Kategorie";
 
-                string? ausgewaehlteKategorie = await DisplayActionSheetAsync(
+                string ausgewaehlteKategorie = await DisplayActionSheetAsync(
                     $"Welche Kategorie gehört zu {neuerEintrag.Name}?",
                     "Abbrechen",
                     null,
@@ -89,7 +85,7 @@ namespace Einkaufsliste
 
                 if (ausgewaehlteKategorie == neueKategorieOption)
                 {
-                    string? neueKategorie = await DisplayPromptAsync(
+                    string neueKategorie = await DisplayPromptAsync(
                         "Neue Kategorie",
                         "Wie soll die Kategorie heißen? ");
 
@@ -113,7 +109,7 @@ namespace Einkaufsliste
                         return;
                     }
 
-                    await datenbank.KategorieSpeichernAsync(
+                    await _datenbank.KategorieSpeichernAsync(
                         new Kategorie { Name = neueKategorie });
                     neuerEintrag.Kategorie = neueKategorie;
                 }
@@ -128,12 +124,12 @@ namespace Einkaufsliste
                     Kategorie = TextHelfer.Normalisieren(neuerEintrag.Kategorie)
                 };
 
-                await datenbank.ProduktSpeichernAsync(neuesProdukt);
+                await _datenbank.ProduktSpeichernAsync(neuesProdukt);
                 neuerEintrag.ProduktId = neuesProdukt.Id;
             }
 
             // Erst jetzt nach einem doppelten Artikel suchen
-            Einkaufsartikel? vorhandenerArtikel = artikelGruppen
+            Einkaufsartikel vorhandenerArtikel = artikelGruppen
                 .SelectMany(gruppe => gruppe)
                 .FirstOrDefault(artikel =>
                     string.Equals(
@@ -191,7 +187,7 @@ namespace Einkaufsliste
                             vorhandenerArtikel.Hinweis += " / " + neuerEintrag.Hinweis;
                         }
 
-                        await datenbank.ArtikelSpeichernAsync(vorhandenerArtikel);
+                        await _datenbank.ArtikelSpeichernAsync(vorhandenerArtikel);
                         AktualisiereFortschritt();
                         return;
                     }
@@ -204,32 +200,30 @@ namespace Einkaufsliste
                 }
             }
 
-
-            await datenbank.ArtikelSpeichernAsync(neuerEintrag);
+            await _datenbank.ArtikelSpeichernAsync(neuerEintrag);
 
             // Einkaufsliste entsprechend der gewählten Gruppierung aktualisieren
-            List<Einkaufsartikel> alleArtikel = await datenbank.AlleArtikelLadenAsync();
+            List<Einkaufsartikel> alleArtikel = await _datenbank.AlleArtikelLadenAsync();
                 
             ArtikelGruppieren(alleArtikel);
 
             AktualisiereFortschritt();
             await GesamtsummeAktualisierenAsync();
-
-          
         }
+
         private async void OnProduktNeuAnlegenClicked(object sender, EventArgs e)
         {
             await Navigation.PushAsync(
-                new ProduktverwaltungPage(datenbank, true));
+                new ProduktverwaltungPage(_datenbank, true));
         }
         private async void OnArtikelLoeschenClicked(object sender, EventArgs e)
         {
             if(sender is Button button && 
                 button.CommandParameter is Einkaufsartikel artikelZumLoeschen)
             {
-                await datenbank.ArtikelLoeschenAsync(artikelZumLoeschen);
+                await _datenbank.ArtikelLoeschenAsync(artikelZumLoeschen);
 
-                Artikelgruppe? gruppe = artikelGruppen.FirstOrDefault(g => g.Contains(artikelZumLoeschen));
+                Artikelgruppe gruppe = artikelGruppen.FirstOrDefault(g => g.Contains(artikelZumLoeschen));
 
                 if(gruppe != null)
                 {
@@ -245,6 +239,7 @@ namespace Einkaufsliste
                 await GesamtsummeAktualisierenAsync();
             }
         }
+
         private async void OnArtikelErledigtGeaendert(object sender,CheckedChangedEventArgs e)
         {
             if (sender is not CheckBox checkbox ||
@@ -253,9 +248,9 @@ namespace Einkaufsliste
                 return;
             }
 
-            await datenbank.ArtikelSpeichernAsync(artikel);
+            await _datenbank.ArtikelSpeichernAsync(artikel);
 
-            Artikelgruppe? alteGruppe = artikelGruppen
+            Artikelgruppe alteGruppe = artikelGruppen
                 .FirstOrDefault(g => g.Contains(artikel));
 
             if (alteGruppe == null)
@@ -285,7 +280,7 @@ namespace Einkaufsliste
                 zielGruppenName = artikel.Kategorie;
             }
 
-            Artikelgruppe? zielGruppe = artikelGruppen
+            Artikelgruppe zielGruppe = artikelGruppen
                 .FirstOrDefault(g => g.Kategorie == zielGruppenName);
 
             if (zielGruppe == null)
@@ -301,9 +296,9 @@ namespace Einkaufsliste
         }
         private async void LadeDatenAsync()
         {
-            alleHaendler = await datenbank.AlleHaendlerLadenAsync();
+            alleHaendler = await _datenbank.AlleHaendlerLadenAsync();
 
-            List<Einkaufsartikel> gespeicherteArtikel = await datenbank.AlleArtikelLadenAsync();
+            List<Einkaufsartikel> gespeicherteArtikel = await _datenbank.AlleArtikelLadenAsync();
             
             ArtikelGruppieren(gespeicherteArtikel);
 
@@ -339,7 +334,7 @@ namespace Einkaufsliste
         private async Task GesamtsummeAktualisierenAsync()
         {
             List<Einkaufsartikel> alleArtikel =
-                await datenbank.AlleArtikelLadenAsync();
+                await _datenbank.AlleArtikelLadenAsync();
 
             decimal gesamtsumme = alleArtikel.Sum(a => a.Gesamtpreis);
 
@@ -353,7 +348,7 @@ namespace Einkaufsliste
             // Händlernamen für die Artikelanzeige ermitteln
             foreach (Einkaufsartikel artikel in alleArtikel)
             {
-                Haendler? haendler = alleHaendler.FirstOrDefault(
+                Haendler haendler = alleHaendler.FirstOrDefault(
                     h => h.Id == artikel.AusgewaehlterHaendlerId);
 
                 artikel.HaendlerAnzeige = haendler?.Name ?? string.Empty;
@@ -430,7 +425,7 @@ namespace Einkaufsliste
         }
         private async Task ArtikeldetailsBearbeitenAsync(Einkaufsartikel artikel)
         {
-            string? menge = await DisplayPromptAsync(
+            string menge = await DisplayPromptAsync(
                 "Menge Bearbeiten",
                 $"Menge für {artikel.Name} :",
                 initialValue: artikel.Menge,
@@ -455,7 +450,7 @@ namespace Einkaufsliste
                 "Stück","Packung", "Flasche", "Kg", "g", "Liter", "ml"
             };
 
-            string? einheit = await DisplayActionSheetAsync(
+            string einheit = await DisplayActionSheetAsync(
                 "Einheit auswählen",
                 "Abbrechen",
                 null,
@@ -465,7 +460,7 @@ namespace Einkaufsliste
             { 
                 return;
             }
-            string? hinweis = await DisplayPromptAsync(
+            string hinweis = await DisplayPromptAsync(
                 "Hinweis bearbeiten",
                 "Zusätzliche Angaben, z.B. TK oder Vollkorn: ",
                 initialValue: artikel.Hinweis);
@@ -506,10 +501,10 @@ namespace Einkaufsliste
             if (!gespeichert)
                 return;
 
-            await datenbank.ArtikelSpeichernAsync(artikel);
+            await _datenbank.ArtikelSpeichernAsync(artikel);
 
             // Aktuelle Gruppe des Artikels finden
-            Artikelgruppe? alteGruppe = artikelGruppen
+            Artikelgruppe alteGruppe = artikelGruppen
                 .FirstOrDefault(g => g.Contains(artikel));
 
             if (alteGruppe != null)
@@ -542,7 +537,7 @@ namespace Einkaufsliste
                         artikelGruppen.Remove(alteGruppe);
                     }
 
-                    Artikelgruppe? neueGruppe = artikelGruppen
+                    Artikelgruppe neueGruppe = artikelGruppen
                         .FirstOrDefault(g => g.Kategorie == neueGruppenBezeichnung);
 
                     if (neueGruppe == null)
@@ -578,7 +573,7 @@ namespace Einkaufsliste
             artikel.Menge = menge.ToString(
                 System.Globalization.CultureInfo.CurrentCulture);
 
-            await datenbank.ArtikelSpeichernAsync(artikel);
+            await _datenbank.ArtikelSpeichernAsync(artikel);
 
             await GesamtsummeAktualisierenAsync();
         }
@@ -605,7 +600,7 @@ namespace Einkaufsliste
             artikel.Menge = menge.ToString(
                 System.Globalization.CultureInfo.CurrentCulture);
 
-            await datenbank.ArtikelSpeichernAsync(artikel);
+            await _datenbank.ArtikelSpeichernAsync(artikel);
 
             await GesamtsummeAktualisierenAsync();
         }
@@ -628,7 +623,7 @@ namespace Einkaufsliste
             if (menge <= 0)
                 return;
 
-            await datenbank.ArtikelSpeichernAsync(artikel);
+            await _datenbank.ArtikelSpeichernAsync(artikel);
 
             await GesamtsummeAktualisierenAsync();
         }
@@ -638,14 +633,14 @@ namespace Einkaufsliste
                 picker.BindingContext is not Einkaufsartikel artikel)
                 return;
 
-            string? neueEinheit = picker.SelectedItem?.ToString();
+            string neueEinheit = picker.SelectedItem?.ToString();
 
             if (string.IsNullOrWhiteSpace(neueEinheit))
                 return;
 
             artikel.Einheit = neueEinheit;
 
-            await datenbank.ArtikelSpeichernAsync(artikel);
+            await _datenbank.ArtikelSpeichernAsync(artikel);
 
             await GesamtsummeAktualisierenAsync();
         }
@@ -665,7 +660,7 @@ namespace Einkaufsliste
                 aktuelleGruppierung);
 
             List<Einkaufsartikel> alleArtikel =
-                await datenbank.AlleArtikelLadenAsync();
+                await _datenbank.AlleArtikelLadenAsync();
 
             ArtikelGruppieren(alleArtikel);
 
@@ -709,11 +704,11 @@ namespace Einkaufsliste
             
     
             // Aktuellen Preis beim bevorzugten Händler laden
-            Produktpreis? aktuellerPreis = null;
+            Produktpreis aktuellerPreis = null;
 
             if (produkt.BevorzugterHaendlerId.HasValue)
             {
-                aktuellerPreis = await datenbank.GuenstigstenAktuellenPreisLadenAsync(
+                aktuellerPreis = await _datenbank.GuenstigstenAktuellenPreisLadenAsync(
                     produkt.Id,
                     produkt.BevorzugterHaendlerId.Value);
             }
@@ -739,7 +734,7 @@ namespace Einkaufsliste
                 IstErledigt = false
             };
 
-            await datenbank.ArtikelSpeichernAsync(neuerArtikel);
+            await _datenbank.ArtikelSpeichernAsync(neuerArtikel);
 
             // Passende Gruppe ermitteln
             string gruppenName;
@@ -755,7 +750,7 @@ namespace Einkaufsliste
                 gruppenName = neuerArtikel.Kategorie;
             }
 
-            Artikelgruppe? gruppe = artikelGruppen
+            Artikelgruppe gruppe = artikelGruppen
                 .FirstOrDefault(g => g.Kategorie == gruppenName);
 
             if (gruppe == null)
@@ -769,9 +764,5 @@ namespace Einkaufsliste
             AktualisiereFortschritt();
             await GesamtsummeAktualisierenAsync();
         }
-
-
-
-
     }
 }

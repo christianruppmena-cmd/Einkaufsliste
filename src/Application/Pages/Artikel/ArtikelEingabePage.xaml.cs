@@ -1,13 +1,12 @@
-
 using Einkaufsliste.Models;
 
-namespace Einkaufsliste;
+namespace Einkaufsliste.Application.Pages.Artikel;
 
 public partial class ArtikelEingabePage : ContentPage
 {
-    private readonly TaskCompletionSource<Einkaufsartikel?> ergebnisQuelle = new();
+    private readonly TaskCompletionSource<Einkaufsartikel> ergebnisQuelle = new();
 
-    public Task<Einkaufsartikel?> ErgebnisTask => ergebnisQuelle.Task;
+    public Task<Einkaufsartikel> ErgebnisTask => ergebnisQuelle.Task;
 
     public ArtikelEingabePage(string artikelName)
     {
@@ -21,7 +20,7 @@ public partial class ArtikelEingabePage : ContentPage
     {
         string name = ArtikelNameEingabe.Text?.Trim() ?? string.Empty;
         string menge = MengeEingabe.Text?.Trim() ?? string.Empty;
-        string? einheit = EinheitAuswahl.SelectedItem?.ToString();
+        string einheit = EinheitAuswahl.SelectedItem?.ToString();
         string details = DetailsEingabe.Text?.Trim() ?? string.Empty;
         string preisText = StueckpreisEingabe.Text?.Trim() ?? string.Empty;
 

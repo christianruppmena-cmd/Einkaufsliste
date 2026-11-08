@@ -1,7 +1,4 @@
-﻿
-using SQLite;
-
-namespace Einkaufsliste.Models;
+﻿namespace Einkaufsliste.Models;
 
 public class Produktpreis
 {
@@ -27,7 +24,7 @@ public class Produktpreis
     [NotNull]
     public string GueltigVon { get; set; } = string.Empty;
 
-    public string? GueltigBis { get; set; }
+    public string GueltigBis { get; set; }
 
     public bool IstAktiv { get; set; } = true;
 

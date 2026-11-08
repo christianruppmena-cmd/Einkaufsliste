@@ -1,10 +1,10 @@
 ﻿using System.Globalization;
 
-namespace Einkaufsliste;
+namespace Einkaufsliste.Utilities;
 
 public static class TextHelfer
 {
-    public static string Normalisieren(string? text)
+    public static string Normalisieren(string text)
     {
         if (string.IsNullOrWhiteSpace(text))
             return string.Empty;

@@ -1,7 +1,8 @@
-using Einkaufsliste.Models;
 using Einkaufsliste.Services;
+using Einkaufsliste.Models;
+using Einkaufsliste.Utilities;
 
-namespace Einkaufsliste;
+namespace Einkaufsliste.Application.Pages.Kategorien;
 
 public partial class KategorienPage : ContentPage
 {
@@ -31,7 +32,7 @@ public partial class KategorienPage : ContentPage
 
     private async void OnNeueKategorieClicked(object sender, EventArgs e)
     {
-        string? name = await DisplayPromptAsync(
+        string name = await DisplayPromptAsync(
             "Neue Kategorie",
             "Wie soll die Kategorie heißen?");
 
@@ -58,7 +59,7 @@ public partial class KategorienPage : ContentPage
         if (sender is not Button button || button.CommandParameter is not Kategorie kategorie)
             return;
 
-        string? neuerName = await DisplayPromptAsync(
+        string neuerName = await DisplayPromptAsync(
             "Kategorie bearbeiten",
             "Neuer Name für die Kategorie: ",
             initialValue: kategorie.Name,

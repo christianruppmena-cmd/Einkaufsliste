@@ -1,9 +1,14 @@
-using Einkaufsliste.Models;
 using Einkaufsliste.Services;
+using Einkaufsliste.Models;
 using System.ComponentModel;
 using System.Globalization;
 
-namespace Einkaufsliste;
+using Einkaufsliste;
+using Einkaufsliste.Application;
+using Einkaufsliste.Application.Pages;
+using Einkaufsliste.Application.Pages.Produkt;
+
+namespace Einkaufsliste.Application.Pages.Produkt;
 
 public partial class ProduktpreisePage : ContentPage
 {
@@ -35,13 +40,13 @@ public partial class ProduktpreisePage : ContentPage
 
         foreach (Haendler h in haendler)
         {
-            Produktpreis? normalpreis =
+            Produktpreis normalpreis =
                 await datenbank.AktuellenProduktpreisLadenAsync(
                     produkt.Id,
                     h.Id,
                     "Normalpreis");
 
-            Produktpreis? angebot =
+            Produktpreis angebot =
                 await datenbank.AktuellenProduktpreisLadenAsync(
                     produkt.Id,
                     h.Id,
@@ -233,7 +238,7 @@ public partial class ProduktpreisePage : ContentPage
 
 public class HaendlerPreisEintrag : System.ComponentModel.INotifyPropertyChanged
 {
-    public event System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
+    public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
 
     private bool gueltigBisAktiviert;
 
@@ -241,9 +246,9 @@ public class HaendlerPreisEintrag : System.ComponentModel.INotifyPropertyChanged
 
     public string Haendler { get; set; } = "";
 
-    public int? NormalpreisId { get; set; }
+    public int NormalpreisId { get; set; }
 
-    public int? AngebotId { get; set; }
+    public int AngebotId { get; set; }
 
     public string NormalpreisText { get; set; } = "";
 

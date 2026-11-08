@@ -1,21 +1,29 @@
-using Einkaufsliste.Services;
-using Microsoft.Maui.Controls.Shapes;
+using Einkaufsliste.Interfaces;
 
-namespace Einkaufsliste;
+namespace Einkaufsliste.Application.Pages.Datenbank;
 
 public partial class DatenbanksicherungPage : ContentPage
 {
+    private readonly IDBBackupService _backupService;
+
+    public DatenbanksicherungPage(IDBBackupService dBBackupService)
+    {
+        InitializeComponent();
+
+        _backupService = dBBackupService;
+    }
+
     protected override async void OnAppearing()
     {
         base.OnAppearing();
         await SicherungenAnzeigenAsync();
     }
+
     private async Task SicherungenAnzeigenAsync()
     {
         SicherungenListe.Children.Clear();
 
-        var sicherungen = 
-            await datenbank.LokaleSicherungenLadenAsync();
+        var sicherungen = await _backupService.LokaleSicherungenLadenAsync();
 
         KeineSicherungenLabel.IsVisible = sicherungen.Count == 0;
 
@@ -65,6 +73,7 @@ public partial class DatenbanksicherungPage : ContentPage
             SicherungenListe.Children.Add(karte);
         }
     }
+
     private async Task LokaleSicherungenWiederherstellenAsync(FileInfo sicherung)
     {
         bool bestaetigt = await DisplayAlertAsync(
@@ -76,7 +85,7 @@ public partial class DatenbanksicherungPage : ContentPage
             return;
         try
         {
-            await datenbank.DatenbankImportierenAsync(sicherung.FullName);
+            await _backupService.DatenbankImportierenAsync(sicherung.FullName);
             StatusLabel.Text = "Lokale Sicherung erfolgreich wiederhergestellt.";
 
             await DisplayAlertAsync(
@@ -93,21 +102,12 @@ public partial class DatenbanksicherungPage : ContentPage
                 "OK");
         }
     }
-    private readonly EinkauflistenDatenbank datenbank;
-
-    public DatenbanksicherungPage(EinkauflistenDatenbank datenbank)
-    {
-        InitializeComponent();
-
-        this.datenbank = datenbank;
-    }
 
     private async void OnExportierenClicked(object sender, EventArgs e)
     {
         try
         {
-            string exportPfad =
-                await datenbank.ExportDateiErstellenAsync();
+            string exportPfad = await _backupService.ExportDateiErstellenAsync();
 
             await Share.Default.RequestAsync(
                 new ShareFileRequest
@@ -130,7 +130,7 @@ public partial class DatenbanksicherungPage : ContentPage
 
     private async void OnImportierenClicked(object sender, EventArgs e)
     {
-        string? importPfad = null;
+        string importPfad = null;
 
         try
         {
@@ -143,7 +143,7 @@ public partial class DatenbanksicherungPage : ContentPage
                         {
                             {
                                 DevicePlatform.Android,
-                                new[] { "application/zip" }
+                                new[] { "Application/zip" }
                             },
                             {
                                 DevicePlatform.WinUI,
@@ -176,7 +176,7 @@ public partial class DatenbanksicherungPage : ContentPage
             }
 
             // Datenbank und Produktbilder importieren
-            await datenbank.DatenbankImportierenAsync(importPfad);
+            await _backupService.DatenbankImportierenAsync(importPfad);
 
             StatusLabel.Text =
                 "Datenbanksicherung erfolgreich wiederhergestellt.";

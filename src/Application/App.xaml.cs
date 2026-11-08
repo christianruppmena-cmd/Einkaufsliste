@@ -1,29 +1,31 @@
 ﻿
 using Einkaufsliste.Services;
+using Einkaufsliste.Interfaces;
 
-namespace Einkaufsliste
+namespace Einkaufsliste.Application
 {
     public partial class App : Application
     {
-        private readonly EinkauflistenDatenbank datenbank;
-
-        public App(EinkauflistenDatenbank datenbank)
+        private readonly EinkauflistenDatenbank _datenbank;
+        private readonly IDBBackupService _backupService;
+        public App(EinkauflistenDatenbank datenbank, IDBBackupService backupService)
         {
             InitializeComponent();
-            this.datenbank = datenbank;
+            _datenbank = datenbank;
+            _backupService = backupService;
         }
 
         protected override Window CreateWindow(IActivationState? activationState)
         {
-            var shell = new AppShell(datenbank);
+            var shell = new AppShell(_datenbank, _backupService);
 
             MainThread.BeginInvokeOnMainThread(async () =>
             {
                 try
                 {
-                    await datenbank.InitialisierenAsync();
-                    await datenbank.StandardHaendlerAnlegenAsync();
-                    await datenbank.StandardkategorienAnlegenAsync();
+                    await _datenbank.InitialisierenAsync();
+                    await _datenbank.StandardHaendlerAnlegenAsync();
+                    await _datenbank.StandardkategorienAnlegenAsync();
 
                     shell.StartseiteAnzeigen();
                 }

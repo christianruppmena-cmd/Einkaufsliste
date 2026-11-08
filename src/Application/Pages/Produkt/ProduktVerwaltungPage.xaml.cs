@@ -1,16 +1,16 @@
 using Einkaufsliste.Services;
-using Einkaufsliste.Models;
 using System.Globalization;
+using Einkaufsliste.Models;
 
-namespace Einkaufsliste;
+namespace Einkaufsliste.Application.Pages.Produkt;
 
 public partial class ProduktverwaltungPage : ContentPage
 {
     private readonly EinkauflistenDatenbank datenbank;
     private List<Produkt> alleProdukte = new();
     private List<Haendler> alleHaendler = new();
-    private string? ausgewaehlterBildPfad;
-    private Produkt? produktZumBearbeiten;
+    private string ausgewaehlterBildPfad;
+    private Produkt produktZumBearbeiten;
     private bool bildEntfernen;
     private readonly bool nurNeuesProduktFormular;
 
@@ -112,10 +112,10 @@ public partial class ProduktverwaltungPage : ContentPage
         string marke = MarkeEntry.Text?.Trim() ?? "";
         string variante = VarianteEntry.Text?.Trim() ?? "";
 
-        string? kategorie = KategoriePicker.SelectedItem?.ToString();
-        string? einheit = BasiseinheitPicker.SelectedItem?.ToString();
-        string? ausgewaehlterHaendler = BevorzugterHaendlerPicker.SelectedItem?.ToString();
-        int? bevorzugterHaendlerId = alleHaendler.FirstOrDefault(h => h.Name == ausgewaehlterHaendler)?.Id;
+        string kategorie = KategoriePicker.SelectedItem?.ToString();
+        string einheit = BasiseinheitPicker.SelectedItem?.ToString();
+        string ausgewaehlterHaendler = BevorzugterHaendlerPicker.SelectedItem?.ToString();
+        int bevorzugterHaendlerId = alleHaendler.FirstOrDefault(h => h.Name == ausgewaehlterHaendler)?.Id;
 
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -131,7 +131,7 @@ public partial class ProduktverwaltungPage : ContentPage
             return;
         }
 
-        decimal? packungsgroesse = null;
+        decimal packungsgroesse = null;
 
         string packungText =
             PackungsgroesseEntry.Text?.Trim().Replace(',', '.') ?? "";
@@ -159,7 +159,7 @@ public partial class ProduktverwaltungPage : ContentPage
             packungsgroesse = packung;
         }
 
-        string? altesBild = produktZumBearbeiten?.BildPfad;
+        string altesBild = produktZumBearbeiten?.BildPfad;
 
         Produkt zuSpeicherndesProdukt =
             produktZumBearbeiten ?? new Produkt();
@@ -315,12 +315,12 @@ public partial class ProduktverwaltungPage : ContentPage
     {
         try
         {
-            FileResult? foto = await MediaPicker.Default.PickPhotoAsync();
+            FileResult foto = await MediaPicker.Default.PickPhotoAsync();
 
             if (foto == null)
                 return;
 
-            string? vorherigesBild = ausgewaehlterBildPfad;
+            string vorherigesBild = ausgewaehlterBildPfad;
 
             string dateiendung = Path.GetExtension(foto.FileName);
 
@@ -359,7 +359,7 @@ public partial class ProduktverwaltungPage : ContentPage
 
     private async void OnProduktbildVerwaltenClicked(object sender, EventArgs e)
     {
-        string? auswahl = await DisplayActionSheetAsync(
+        string auswahl = await DisplayActionSheetAsync(
             "Produktbild verwalten",
             "Abbrechen",
             null,
@@ -402,13 +402,13 @@ public partial class ProduktverwaltungPage : ContentPage
                 return;
             }
 
-            FileResult? foto =
+            FileResult foto =
                 await MediaPicker.Default.CapturePhotoAsync();
 
             if (foto == null)
                 return;
 
-            string? vorherigesBild = ausgewaehlterBildPfad;
+            string vorherigesBild = ausgewaehlterBildPfad;
 
             string dateiendung = Path.GetExtension(foto.FileName);
             string dateiname = $"{Guid.NewGuid()}{dateiendung}";
@@ -442,7 +442,7 @@ public partial class ProduktverwaltungPage : ContentPage
                 "OK");
         }
     }
-    private async Task AltesProduktbildLoeschenAsync(string? altesBild,string? neuesBild)
+    private async Task AltesProduktbildLoeschenAsync(string altesBild,string neuesBild)
     {
         if (string.IsNullOrWhiteSpace(altesBild))
             return;

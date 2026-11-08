@@ -1,74 +1,65 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using System.Text;
-using SQLite;
-
-namespace Einkaufsliste.Models
+﻿namespace Einkaufsliste.Models
 {
     public class Einkaufsartikel : INotifyPropertyChanged
     {
         [PrimaryKey, AutoIncrement]
         public int Id { get; set; }
+        public int ProduktId { get; set; }
+        public int AusgewaehlterHaendlerId { get; set; }
 
-        public int? ProduktId { get; set; }
-        public int? AusgewaehlterHaendlerId { get; set; }
+        public string Kategorie { get; set; } = "Sonstiges";
 
-        private string haendlerAnzeige = string.Empty;
-
+        private string _haendlerAnzeige = string.Empty;
         [Ignore]
         public string HaendlerAnzeige
         {
-            get => haendlerAnzeige;
+            get => _haendlerAnzeige;
             set
             {
-                if (haendlerAnzeige == value)
+                if (_haendlerAnzeige == value)
                     return;
 
-                haendlerAnzeige = value;
+                _haendlerAnzeige = value;
                 OnPropertyChanged(nameof(HaendlerAnzeige));
             }
         }
-        private string name = string.Empty;
-        private bool istErledigt;
 
+        private string _name = string.Empty;
         public string Name
         {
-            get => name;
+            get => _name;
             set
             {
-                if (name == value)
+                if (_name == value)
                     return;
 
-                name = value;
+                _name = value;
                 OnPropertyChanged();
-
             }
-            
         }
+
+        private bool _istErledigt;
         public bool IstErledigt
         {
-            get => istErledigt;
+            get => _istErledigt;
             set
             {
-                if (istErledigt == value)
+                if (_istErledigt == value)
                     return;
-                istErledigt = value;
+                _istErledigt = value;
                 OnPropertyChanged();
             }
         }
-        public event PropertyChangedEventHandler? PropertyChanged;
 
+        public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(
-            [CallerMemberName] string? propertyName = null)
+            [CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(
                 this,
                 new PropertyChangedEventArgs(propertyName));
         }
 
-        public string Kategorie { get; set; } = "Sonstiges";
 
         private decimal stueckpreis;
         public decimal Stueckpreis
@@ -84,6 +75,7 @@ namespace Einkaufsliste.Models
                 OnPropertyChanged(nameof(Gesamtpreis));
             }
         }
+
         public decimal Gesamtpreis
         {
             get
@@ -118,38 +110,37 @@ namespace Einkaufsliste.Models
             }
         }
 
-        private string einheit = "Stück";
+        private string _einheit = "Stück";
         public string Einheit
         {
-            get => einheit;
+            get => _einheit;
             set
             {
-                if (einheit == value)
+                if (_einheit == value)
                     return;
 
-                einheit = value;
+                _einheit = value;
                 OnPropertyChanged(nameof(Einheit));
                 OnPropertyChanged(nameof(DetailsAnzeige));
             }
         }
 
-        private string hinweis = string.Empty;
+        private string _hinweis = string.Empty;
         public string Hinweis
         {
-            get => hinweis;
+            get => _hinweis;
             set
             {
-                if (hinweis == value)
+                if (_hinweis == value)
                     return;
 
-                hinweis = value;
+                _hinweis = value;
                 OnPropertyChanged(nameof(Hinweis));
                 OnPropertyChanged(nameof(DetailsAnzeige));
             }
         }
 
         public string DetailsAnzeige
-
         {
             get
             {
@@ -162,6 +153,4 @@ namespace Einkaufsliste.Models
             }
         }
     }
-
-    
 }

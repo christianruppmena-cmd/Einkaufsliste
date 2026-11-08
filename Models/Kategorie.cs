@@ -1,6 +1,4 @@
-﻿using SQLite;
-
-namespace Einkaufsliste.Models;
+﻿namespace Einkaufsliste.Models;
 
 public class Kategorie
 {

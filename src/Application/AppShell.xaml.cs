@@ -1,17 +1,20 @@
 ﻿using Einkaufsliste.Services;
-
-namespace Einkaufsliste
+using Einkaufsliste.Application.Pages;
+using Einkaufsliste.Interfaces;
+namespace Einkaufsliste.Application
 {
     public partial class AppShell : Shell
     {
         private readonly ShellContent startInhalt;
-        private readonly EinkauflistenDatenbank datenbank;
+        private readonly EinkauflistenDatenbank _datenbank;
+        private readonly IDBBackupService _backupService;
 
-        public AppShell(EinkauflistenDatenbank datenbank)
+        public AppShell(EinkauflistenDatenbank datenbank, IDBBackupService backupService)
         {
             InitializeComponent();
 
-            this.datenbank = datenbank;
+            _datenbank = datenbank;
+            _backupService = backupService;
 
             // Einkaufsliste
             var einkaufsliste = new ShellContent
@@ -50,7 +53,7 @@ namespace Einkaufsliste
             {
                 Title = "💾 Datensicherung",
                 Route = "DatenbanksicherungPage",
-                Content = new DatenbanksicherungPage(datenbank)
+                Content = new DatenbanksicherungPage(backupService)
             };
 
             // Eigene Menüeinträge
@@ -78,22 +81,23 @@ namespace Einkaufsliste
                 }
             };
 
-            // Händlerverwaltung
-            var haendler = new ShellContent
-            {
-                Title = "Händlerverwaltung",
-                Route = "HaendlerPage",
-                Content = new HaendlerPage(datenbank)
-            };
-
+            // Händlerverwaltung (in Arbeit)
             var haendlerMenue = new FlyoutItem
             {
-                Title = "🏪 Händlerverwaltung",
+                Title = "🏪 Händlerverwaltung (in Arbeit)",
+                IsEnabled = false,
                 Items =
                 {
                     new ShellSection
                     {
-                        Items = { haendler }
+                        Items =
+                        {
+                            new ShellContent
+                            {
+                                Title = "Händlerverwaltung",
+                                Content = new ContentPage()
+                            }
+                        }
                     }
                 }
             };
@@ -134,7 +138,7 @@ namespace Einkaufsliste
 
         public void StartseiteAnzeigen()
         {
-            startInhalt.Content = new MainPage(datenbank);
+            startInhalt.Content = new MainPage(_datenbank);
         }
     }
 }

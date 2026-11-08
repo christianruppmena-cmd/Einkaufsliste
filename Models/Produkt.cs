@@ -1,7 +1,4 @@
-﻿
-using SQLite;
-
-namespace Einkaufsliste.Models;
+﻿namespace Einkaufsliste.Models;
 
 public class Produkt
 {
@@ -20,14 +17,14 @@ public class Produkt
 
     public string Kategorie { get; set; } = "Sonstiges";
 
-    public int? BevorzugterHaendlerId { get; set; }
+    public int BevorzugterHaendlerId { get; set; }
 
-    public decimal? Packungsgroesse { get; set; }
+    public decimal Packungsgroesse { get; set; }
 
     public string Basiseinheit { get; set; } = string.Empty;
 
     // Lokaler Dateipfad des Produktbildes
-    public string? BildPfad { get; set; }
+    public string BildPfad { get; set; }
 
     public bool IstAktiv { get; set; } = true;
 }
