@@ -21,6 +21,7 @@ namespace Einkaufsliste
             builder.Services.AddSingleton<EinkauflistenDatenbank>();
             builder.Services.AddSingleton<DatenbankService>();
             builder.Services.AddSingleton<ArtikelService>();
+            builder.Services.AddTransient<MainPage>();
 #if DEBUG
             builder.Logging.AddDebug();
 #endif
