@@ -20,6 +20,7 @@ namespace Einkaufsliste
 
             builder.Services.AddSingleton<EinkauflistenDatenbank>();
             builder.Services.AddSingleton<DatenbankService>();
+            builder.Services.AddSingleton<ArtikelService>();
 #if DEBUG
             builder.Logging.AddDebug();
 #endif
