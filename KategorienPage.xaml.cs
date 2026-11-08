@@ -5,11 +5,12 @@ namespace Einkaufsliste;
 
 public partial class KategorienPage : ContentPage
 {
-    private readonly EinkauflistenDatenbank datenbank = new();
+    private readonly EinkauflistenDatenbank _datenbank;
 
-    public KategorienPage()
+    public KategorienPage(EinkauflistenDatenbank datenbank)
     {
         InitializeComponent();
+        _datenbank = datenbank;
     }
 
     protected override async void OnAppearing()
@@ -21,10 +22,10 @@ public partial class KategorienPage : ContentPage
 
     private async Task KategorienLadenAsync()
     {
-        await datenbank.InitialisierenAsync();
+        await _datenbank.InitialisierenAsync();
 
         List<Kategorie> kategorien =
-            await datenbank.AlleKategorieEintraegeLadenAsync();
+            await _datenbank.AlleKategorieEintraegeLadenAsync();
 
         KategorienListe.ItemsSource = kategorien;
     }
@@ -40,7 +41,7 @@ public partial class KategorienPage : ContentPage
 
         name = TextHelfer.Normalisieren(name);
 
-        List<Kategorie> kategorien = await datenbank.AlleKategorieEintraegeLadenAsync();
+        List<Kategorie> kategorien = await _datenbank.AlleKategorieEintraegeLadenAsync();
 
         bool existiert = kategorien.Any(k => string.Equals(k.Name, name, StringComparison.OrdinalIgnoreCase));
 
@@ -49,7 +50,7 @@ public partial class KategorienPage : ContentPage
             await DisplayAlertAsync("Hinweis", "Diese Kategorie existiert bereits.", "OK");
             return;
         }
-        await datenbank.KategorieSpeichernAsync(new Kategorie { Name = name });
+        await _datenbank.KategorieSpeichernAsync(new Kategorie { Name = name });
         await KategorienLadenAsync();
     }
 
@@ -76,7 +77,7 @@ public partial class KategorienPage : ContentPage
             StringComparison.Ordinal))
             return;
 
-        bool gespeichert = await datenbank.KategorieUmbenennenAsync(
+        bool gespeichert = await _datenbank.KategorieUmbenennenAsync(
             kategorie, neuerName);
 
         if(!gespeichert)

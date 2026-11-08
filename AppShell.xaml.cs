@@ -42,7 +42,7 @@ namespace Einkaufsliste
             {
                 Title = "🏷️ Kategorien",
                 Route = "KategorienPage",
-                Content = new KategorienPage()
+                Content = new KategorienPage(datenbank)
             };
 
             // Datensicherung

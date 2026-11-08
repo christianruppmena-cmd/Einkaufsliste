@@ -314,7 +314,7 @@ namespace Einkaufsliste
         }
         private async void OnKategorienOeffnenClicked(object sender, EventArgs e)
         {
-            await Navigation.PushAsync(new KategorienPage());
+            await Navigation.PushAsync(new KategorienPage(datenbank));
         }
         private void AktualisiereFortschritt()
         {
