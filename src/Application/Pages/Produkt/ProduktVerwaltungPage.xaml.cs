@@ -2,9 +2,9 @@ using Einkaufsliste.Services;
 using System.Globalization;
 using Einkaufsliste.Models;
 
-namespace Einkaufsliste.Application.Pages.Produkt;
+namespace Einkaufsliste.Application.Pages.Produkte;
 
-public partial class ProduktverwaltungPage : ContentPage
+public partial class ProduktVerwaltungPage : ContentPage
 {
     private readonly EinkauflistenDatenbank datenbank;
     private List<Produkt> alleProdukte = new();
@@ -15,7 +15,7 @@ public partial class ProduktverwaltungPage : ContentPage
     private readonly bool nurNeuesProduktFormular;
 
 
-    public ProduktverwaltungPage(EinkauflistenDatenbank datenbank, bool nurNeuesProduktFormular = false)
+    public ProduktVerwaltungPage(EinkauflistenDatenbank datenbank, bool nurNeuesProduktFormular = false)
     {
         InitializeComponent();
 
@@ -115,7 +115,7 @@ public partial class ProduktverwaltungPage : ContentPage
         string kategorie = KategoriePicker.SelectedItem?.ToString();
         string einheit = BasiseinheitPicker.SelectedItem?.ToString();
         string ausgewaehlterHaendler = BevorzugterHaendlerPicker.SelectedItem?.ToString();
-        int bevorzugterHaendlerId = alleHaendler.FirstOrDefault(h => h.Name == ausgewaehlterHaendler)?.Id;
+        int bevorzugterHaendlerId = alleHaendler.FirstOrDefault(h => h.Name == ausgewaehlterHaendler)?.Id ?? 0;
 
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -131,7 +131,7 @@ public partial class ProduktverwaltungPage : ContentPage
             return;
         }
 
-        decimal packungsgroesse = null;
+        decimal packungsgroesse = 0;
 
         string packungText =
             PackungsgroesseEntry.Text?.Trim().Replace(',', '.') ?? "";
@@ -253,10 +253,10 @@ public partial class ProduktverwaltungPage : ContentPage
 
         KategoriePicker.SelectedItem = produkt.Kategorie;
 
-        if (produkt.BevorzugterHaendlerId.HasValue)
+        if (produkt.BevorzugterHaendlerId > 0)
         {
             var bevorzugterHaendler = alleHaendler.FirstOrDefault(
-                h => h.Id == produkt.BevorzugterHaendlerId.Value);
+                h => h.Id == produkt.BevorzugterHaendlerId);
 
             BevorzugterHaendlerPicker.SelectedItem =
                 bevorzugterHaendler?.Name ?? "Kein bevorzugter Markt";
@@ -267,7 +267,7 @@ public partial class ProduktverwaltungPage : ContentPage
         }
 
         PackungsgroesseEntry.Text =
-            produkt.Packungsgroesse?.ToString(
+            produkt.Packungsgroesse.ToString(
                 CultureInfo.CurrentCulture) ?? "";
 
         BasiseinheitPicker.SelectedItem = produkt.Basiseinheit;

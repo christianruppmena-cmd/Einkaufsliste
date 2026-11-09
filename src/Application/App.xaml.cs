@@ -4,7 +4,7 @@ using Einkaufsliste.Interfaces;
 
 namespace Einkaufsliste.Application
 {
-    public partial class App : Application
+    public partial class App : Microsoft.Maui.Controls.Application
     {
         private readonly EinkauflistenDatenbank _datenbank;
         private readonly IDBBackupService _backupService;

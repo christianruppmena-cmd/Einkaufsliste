@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Einkaufsliste.Services;
 using Einkaufsliste.Interfaces;
+using Einkaufsliste.Application;
 
 namespace Einkaufsliste
 {
@@ -20,7 +21,7 @@ namespace Einkaufsliste
                 });
 
             builder.Services.AddSingleton<EinkauflistenDatenbank>();
-            builder.Services.AddScoped<IDBBackupService, DBBackupService>();
+            builder.Services.AddSingleton<IDBBackupService, DBBackupService>();
 
 #if DEBUG
             builder.Logging.AddDebug();

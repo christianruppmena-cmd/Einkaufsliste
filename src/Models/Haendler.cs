@@ -11,4 +11,6 @@ public class Haendler
     public bool IstAktiv { get; set; } = true;
 
     public int Sortierung { get; set; }
+
+    public string? LogoPfad { get; set; }
 }

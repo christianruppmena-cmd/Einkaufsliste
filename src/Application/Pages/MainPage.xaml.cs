@@ -1,6 +1,10 @@
 ﻿using Einkaufsliste.Services;
 using Einkaufsliste.Models;
 using Einkaufsliste.Utilities;
+using Einkaufsliste.Application.Pages.Artikel;
+using Einkaufsliste.Application.Pages.Kategorien;
+using Einkaufsliste.Application.Pages.Produkte;
+
 
 namespace Einkaufsliste.Application.Pages
 {
@@ -214,7 +218,7 @@ namespace Einkaufsliste.Application.Pages
         private async void OnProduktNeuAnlegenClicked(object sender, EventArgs e)
         {
             await Navigation.PushAsync(
-                new ProduktverwaltungPage(_datenbank, true));
+                new ProduktVerwaltungPage(_datenbank, true));
         }
         private async void OnArtikelLoeschenClicked(object sender, EventArgs e)
         {
@@ -309,7 +313,7 @@ namespace Einkaufsliste.Application.Pages
         }
         private async void OnKategorienOeffnenClicked(object sender, EventArgs e)
         {
-            await Navigation.PushAsync(new KategorienPage());
+            await Navigation.PushAsync(new KategorienPage(_datenbank));
         }
         private void AktualisiereFortschritt()
         {
@@ -698,19 +702,22 @@ namespace Einkaufsliste.Application.Pages
             if (e.CurrentSelection.FirstOrDefault() is not Produkt produkt)
                 return;
 
+            if(produkt == null)
+                return;
+
             ProduktVorschlaegeListe.SelectedItem = null;
             ProduktVorschlaegeContainer.IsVisible = false;
             ProduktsucheEntry.Text = string.Empty;
             
     
             // Aktuellen Preis beim bevorzugten Händler laden
-            Produktpreis aktuellerPreis = null;
+            Produktpreis? aktuellerPreis = null;
 
-            if (produkt.BevorzugterHaendlerId.HasValue)
+            if (produkt.BevorzugterHaendlerId > 0)
             {
-                aktuellerPreis = await _datenbank.GuenstigstenAktuellenPreisLadenAsync(
+                aktuellerPreis = await _datenbank!.GuenstigstenAktuellenPreisLadenAsync(
                     produkt.Id,
-                    produkt.BevorzugterHaendlerId.Value);
+                    produkt.BevorzugterHaendlerId);
             }
 
             // Einkaufsartikel mit Produktdaten erstellen

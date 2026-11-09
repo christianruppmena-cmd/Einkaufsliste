@@ -6,9 +6,9 @@ using System.Globalization;
 using Einkaufsliste;
 using Einkaufsliste.Application;
 using Einkaufsliste.Application.Pages;
-using Einkaufsliste.Application.Pages.Produkt;
+using Einkaufsliste.Application.Pages.Produkte;
 
-namespace Einkaufsliste.Application.Pages.Produkt;
+namespace Einkaufsliste.Application.Pages.Produkte;
 
 public partial class ProduktpreisePage : ContentPage
 {
@@ -56,8 +56,8 @@ public partial class ProduktpreisePage : ContentPage
             {
                 HaendlerId = h.Id,
                 Haendler = h.Name,
-                NormalpreisId = normalpreis?.Id,
-                AngebotId = angebot?.Id,
+                NormalpreisId = normalpreis?.Id ?? 0,
+                AngebotId = angebot?.Id ?? 0,
 
                 NormalpreisText = normalpreis?.PreisEuro.ToString(
                     "0.00",
@@ -160,7 +160,7 @@ public partial class ProduktpreisePage : ContentPage
 
                 var neuerPreis = new Produktpreis
                 {
-                    Id = eintrag.NormalpreisId ?? 0,
+                    Id = eintrag.NormalpreisId,
                     ProduktId = produkt.Id,
                     HaendlerId = eintrag.HaendlerId,
                     PreisInCent = (int)Math.Round(
@@ -177,10 +177,10 @@ public partial class ProduktpreisePage : ContentPage
 
             if (angebotDeaktivieren)
             {
-                if (eintrag.AngebotId.HasValue)
+                if (eintrag.AngebotId > 0)
                 {
                     await datenbank.ProduktpreisDeaktivierenAsync(
-                        eintrag.AngebotId.Value);
+                        eintrag.AngebotId);
                 }
             }
             else if (angebotVorhanden)
@@ -193,7 +193,7 @@ public partial class ProduktpreisePage : ContentPage
 
                 var neuerPreis = new Produktpreis
                 {
-                    Id = eintrag.AngebotId ?? 0,
+                    Id = eintrag.AngebotId,
                     ProduktId = produkt.Id,
                     HaendlerId = eintrag.HaendlerId,
                     PreisInCent = (int)Math.Round(

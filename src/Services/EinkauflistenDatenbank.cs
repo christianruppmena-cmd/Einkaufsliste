@@ -1,87 +1,101 @@
 ﻿using Einkaufsliste.Models;
+using Einkaufsliste.Interfaces;
 
 namespace Einkaufsliste.Services;
 
 public class EinkauflistenDatenbank
 {
-    private SQLiteAsyncConnection datenbank;
+    private SQLiteAsyncConnection _datenbank;
     private readonly string datenbankPfad =
         Path.Combine(FileSystem.AppDataDirectory, "einkaufliste.db3");
+    private readonly IDBBackupService _backupService;
 
-    private readonly string sicherungsOrdner =
-        Path.Combine(FileSystem.AppDataDirectory, "Sicherungen");
-    public EinkauflistenDatenbank()
+    
+    public EinkauflistenDatenbank(IDBBackupService backupService)
     {
-        datenbank = new SQLiteAsyncConnection(datenbankPfad);
-
+        _datenbank = new SQLiteAsyncConnection(datenbankPfad);
+        _backupService = backupService;
     }
    
-    private async Task<bool> DatenbankEnthaeltDatenAsync()
-    {
-        var produkte = await datenbank
-            .Table<Produkt>()
-            .CountAsync();
-
-        var artikel = await datenbank
-            .Table<Einkaufsartikel>()
-            .CountAsync();
-
-        return produkte > 0 || artikel > 0;
-    }
-
-    public async Task InitialisierenAsync()
+     public async Task InitialisierenAsync()
     {
         // Einkaufslisten
-        await datenbank.CreateTableAsync<Einkaufsartikel>();
-        await datenbank.CreateTableAsync<Kategorie>();
+        await _datenbank.CreateTableAsync<Einkaufsartikel>();
+        await _datenbank.CreateTableAsync<Kategorie>();
 
         // Produktverwaltung
-        await datenbank.CreateTableAsync<Produkt>();
+        await _datenbank.CreateTableAsync<Produkt>();
         // Migration: Bevorzugten Händler beim Produkt ergänzen
         var produktSpalten =
-            await datenbank.GetTableInfoAsync("Produkt");
+            await _datenbank.GetTableInfoAsync("Produkt");
 
         if (!produktSpalten.Any(s => s.Name == "BevorzugterHaendlerId"))
         {
-            await datenbank.ExecuteAsync(
+            await _datenbank.ExecuteAsync(
                 "ALTER TABLE Produkt ADD COLUMN BevorzugterHaendlerId INTEGER NULL");
         }
 
         // Migration: Ausgewählten Händler beim Einkaufsartikel ergänzen
         var artikelSpalten =
-            await datenbank.GetTableInfoAsync("Einkaufsartikel");
+            await _datenbank.GetTableInfoAsync("Einkaufsartikel");
 
         if (!artikelSpalten.Any(s => s.Name == "AusgewaehlterHaendlerId"))
         {
-            await datenbank.ExecuteAsync(
+            await _datenbank.ExecuteAsync(
                 "ALTER TABLE Einkaufsartikel ADD COLUMN AusgewaehlterHaendlerId INTEGER NULL");
         }
 
         // Preisvergleich
-        await datenbank.CreateTableAsync<Haendler>();
-        await datenbank.CreateTableAsync<Produktpreis>();
-        await datenbank.CreateTableAsync<PreisHistorie>();
+        await _datenbank.CreateTableAsync<Haendler>();
+        await _datenbank.CreateTableAsync<Produktpreis>();
+        await _datenbank.CreateTableAsync<PreisHistorie>();
 
         // Verknüpfung zwischen Einkaufsartikel und Produkt
-        var spalten = await datenbank.GetTableInfoAsync("Einkaufsartikel");
+        var spalten = await _datenbank.GetTableInfoAsync("Einkaufsartikel");
 
         if (!spalten.Any(s => s.Name == "ProduktId"))
         {
-            await datenbank.ExecuteAsync(
+            await _datenbank.ExecuteAsync(
                 "ALTER TABLE Einkaufsartikel ADD COLUMN ProduktId INTEGER NULL");
         }
         // Migration PreisHistorie: Versionsnummer ergänzen
         var historieSpalten =
-            await datenbank.GetTableInfoAsync("PreisHistorie");
+            await _datenbank.GetTableInfoAsync("PreisHistorie");
 
         if (!historieSpalten.Any(s => s.Name == "Versionsnummer"))
         {
-            await datenbank.ExecuteAsync(
+            await _datenbank.ExecuteAsync(
                 "ALTER TABLE PreisHistorie ADD COLUMN Versionsnummer INTEGER NOT NULL DEFAULT 0");
         }
     }
 
-    
+    public async Task HaendlerSpeichernAsync(Haendler haendler)
+    {
+        await InitialisierenAsync();
+
+        if (haendler == null)
+            return;
+
+        haendler.Name = haendler.Name.Trim();
+
+        if (string.IsNullOrWhiteSpace(haendler.Name))
+            return;
+
+        if (haendler.Id == 0)
+            await _datenbank.InsertAsync(haendler);
+        else
+            await _datenbank.UpdateAsync(haendler);
+
+        await _backupService.LokaleSicherungErstellenAsync();
+    }
+
+    public async Task<List<Haendler>> AlleHaendlerVerwaltenLadenAsync()
+    {
+        await InitialisierenAsync();
+
+        return await _datenbank.QueryAsync<Haendler>(
+            "SELECT * FROM Haendler ORDER BY name COLLATE NOCASE ASC");
+    }
     public async Task StandardHaendlerAnlegenAsync()
     {
         string[] haendlerNamen =
@@ -101,14 +115,14 @@ public class EinkauflistenDatenbank
         {
             string name = haendlerNamen[i];
 
-            var vorhanden = await datenbank
+            var vorhanden = await _datenbank
                 .Table<Haendler>()
                 .Where(h => h.Name == name)
                 .FirstOrDefaultAsync();
 
             if (vorhanden == null)
             {
-                await datenbank.InsertAsync(new Haendler
+                await _datenbank.InsertAsync(new Haendler
                 {
                     Name = name,
                     IstAktiv = true,
@@ -121,7 +135,7 @@ public class EinkauflistenDatenbank
     {
         await InitialisierenAsync();
 
-        return await datenbank
+        return await _datenbank
             .Table<Haendler>()
             .Where(h => h.IstAktiv)
             .OrderBy(h => h.Sortierung)
@@ -131,7 +145,7 @@ public class EinkauflistenDatenbank
     {
         await InitialisierenAsync();
 
-        return await datenbank
+        return await _datenbank
             .Table<Produktpreis>()
             .Where(p => p.ProduktId == produktId && p.IstAktiv)
             .ToListAsync();
@@ -142,7 +156,7 @@ public class EinkauflistenDatenbank
 
         string heute = DateTime.Now.ToString("yyyy-MM-dd");
 
-        List<Produktpreis> preise = await datenbank
+        List<Produktpreis> preise = await _datenbank
             .Table<Produktpreis>()
             .Where(p =>
                 p.ProduktId == produktId &&
@@ -244,7 +258,7 @@ public class EinkauflistenDatenbank
         produktpreis.ErfasstAm =
             DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
-        await datenbank.RunInTransactionAsync(conn =>
+        await _datenbank.RunInTransactionAsync(conn =>
         {
             // Alten Stand beim Bearbeiten sichern
             if (produktpreis.Id > 0)
@@ -302,7 +316,7 @@ public class EinkauflistenDatenbank
             // Neuen Preisstand historisch sichern
             PreisInHistorieUebernehmen(conn, produktpreis);
         });
-        await LokaleSicherungErstellenAsync();
+        await _backupService.LokaleSicherungErstellenAsync();
     }
     public async Task ProduktpreisDeaktivierenAsync(int produktpreisId)
     {
@@ -311,7 +325,7 @@ public class EinkauflistenDatenbank
         if (produktpreisId <= 0)
             return;
 
-        await datenbank.RunInTransactionAsync(conn =>
+        await _datenbank.RunInTransactionAsync(conn =>
         {
             Produktpreis? preis = conn.Find<Produktpreis>(produktpreisId);
 
@@ -328,13 +342,13 @@ public class EinkauflistenDatenbank
             conn.Update(preis);
         });
 
-        await LokaleSicherungErstellenAsync();
+        await _backupService.LokaleSicherungErstellenAsync();
     }
     public async Task<List<PreisHistorie>> PreisHistorieLadenAsync(int produktId, int haendlerId)
     {
         await InitialisierenAsync();
 
-        return await datenbank
+        return await _datenbank
             .Table<PreisHistorie>()
             .Where(h =>
                 h.ProduktId == produktId &&
@@ -361,14 +375,14 @@ public class EinkauflistenDatenbank
 
         foreach (string name in standardkategorien)
         {
-            Kategorie? vorhanden = await datenbank
+            Kategorie? vorhanden = await _datenbank
                 .Table<Kategorie>()
                 .Where(k => k.Name == name)
                 .FirstOrDefaultAsync();
 
             if (vorhanden == null)
             {
-                await datenbank.InsertAsync(new Kategorie
+                await _datenbank.InsertAsync(new Kategorie
                 {
                     Name = name
                 });
@@ -380,7 +394,7 @@ public class EinkauflistenDatenbank
     {
         await InitialisierenAsync();
 
-        return await datenbank
+        return await _datenbank
             .Table<Kategorie>()
             .OrderBy(k => k.Name)
             .ToListAsync();
@@ -392,14 +406,14 @@ public class EinkauflistenDatenbank
 
         if (kategorie.Id == 0)
         {
-            await datenbank.InsertAsync(kategorie);
+            await _datenbank.InsertAsync(kategorie);
 
         }
         else
         {
-            await datenbank.UpdateAsync(kategorie);
+            await _datenbank.UpdateAsync(kategorie);
         }
-        await LokaleSicherungErstellenAsync();
+        await _backupService.LokaleSicherungErstellenAsync();
     }
 
     public async Task<bool> KategorieUmbenennenAsync(Kategorie kategorie, string neuerName)
@@ -415,7 +429,7 @@ public class EinkauflistenDatenbank
         // Prüfen ob der neue Name bereits vergene ist
 
         List<Kategorie> kategorien =
-            await datenbank.Table<Kategorie>().ToListAsync();
+            await _datenbank.Table<Kategorie>().ToListAsync();
 
         bool existiertBereits = kategorien.Any(k =>
         k.Id != kategorie.Id &&
@@ -430,12 +444,12 @@ public class EinkauflistenDatenbank
         // Alle betroffenen Artikel aktualisieren
 
         List<Einkaufsartikel> artikel =
-            await datenbank.Table<Einkaufsartikel>().ToListAsync();
+            await _datenbank.Table<Einkaufsartikel>().ToListAsync();
 
         List<Produkt> produkte =
-            await datenbank.Table<Produkt>().ToListAsync();
+            await _datenbank.Table<Produkt>().ToListAsync();
 
-        await datenbank.RunInTransactionAsync(conn =>
+        await _datenbank.RunInTransactionAsync(conn =>
         {
             foreach (Einkaufsartikel eintrag in artikel.Where(a =>
             string.Equals(
@@ -460,13 +474,13 @@ public class EinkauflistenDatenbank
             conn.Update(kategorie);
         });
 
-        await LokaleSicherungErstellenAsync();
+        await _backupService.LokaleSicherungErstellenAsync();
         return true;
     }
 
     public async Task<List<Einkaufsartikel>> AlleArtikelLadenAsync()
     {
-        return await datenbank.Table<Einkaufsartikel>().ToListAsync();
+        return await _datenbank.Table<Einkaufsartikel>().ToListAsync();
     }
 
     public async Task ArtikelSpeichernAsync(Einkaufsartikel artikel)
@@ -475,11 +489,11 @@ public class EinkauflistenDatenbank
 
         if (artikel.Id == 0)
         {
-            ergebnis = await datenbank.InsertAsync(artikel);
+            ergebnis = await _datenbank.InsertAsync(artikel);
         }
         else
         {
-            ergebnis = await datenbank.UpdateAsync(artikel);
+            ergebnis = await _datenbank.UpdateAsync(artikel);
         }
 
         System.Diagnostics.Debug.WriteLine(
@@ -487,12 +501,12 @@ public class EinkauflistenDatenbank
             $"Menge={artikel.Menge}, Einheit={artikel.Einheit}, " +
             $"Ergebnis={ergebnis}");
 
-        await LokaleSicherungErstellenAsync();
+        await _backupService.LokaleSicherungErstellenAsync();
     }
 
     public async Task EinkaufsartikelHaendlerAktualisierenAsync(int produktId,int? haendlerId)
     {
-        List<Einkaufsartikel> artikel = await datenbank
+        List<Einkaufsartikel> artikel = await _datenbank
             .Table<Einkaufsartikel>()
             .Where(a => a.ProduktId == produktId && !a.IstErledigt)
             .ToListAsync();
@@ -508,30 +522,30 @@ public class EinkauflistenDatenbank
 
         foreach (Einkaufsartikel eintrag in artikel)
         {
-            eintrag.AusgewaehlterHaendlerId = haendlerId;
+            eintrag.AusgewaehlterHaendlerId = haendlerId ?? 0;
             eintrag.HaendlerAnzeige = haendlerId.HasValue
-                ? (await datenbank.Table<Haendler>()
+                ? (await _datenbank.Table<Haendler>()
                     .Where(h => h.Id == haendlerId.Value)
                     .FirstOrDefaultAsync())?.Name ?? string.Empty
                 : string.Empty;
 
             eintrag.Stueckpreis = aktuellerPreis?.PreisEuro ?? 0m;
 
-            await datenbank.UpdateAsync(eintrag);
+            await _datenbank.UpdateAsync(eintrag);
         }
 
-        await LokaleSicherungErstellenAsync();
+        await _backupService.LokaleSicherungErstellenAsync();
     }
 
     public async Task ArtikelLoeschenAsync(Einkaufsartikel artikel)
     {
-        await datenbank.DeleteAsync(artikel);
-        await LokaleSicherungErstellenAsync();
+        await _datenbank.DeleteAsync(artikel);
+        await _backupService.LokaleSicherungErstellenAsync();
     }
 
     public async Task<List<Produkt>> AlleProdukteLadenAsync()
     {
-        return await datenbank.Table<Produkt>().ToListAsync();
+        return await _datenbank.Table<Produkt>().ToListAsync();
 
     }
 
@@ -539,7 +553,7 @@ public class EinkauflistenDatenbank
     {
         await InitialisierenAsync();
 
-        List<Produkt> produkte = await datenbank.Table<Produkt>().ToListAsync();
+        List<Produkt> produkte = await _datenbank.Table<Produkt>().ToListAsync();
 
         return produkte
             .Select(p => p.Kategorie)
@@ -562,7 +576,7 @@ public class EinkauflistenDatenbank
         string suchname = Normalisieren(name);
 
         List<Produkt> produkte =
-            await datenbank.Table<Produkt>().ToListAsync();
+            await _datenbank.Table<Produkt>().ToListAsync();
 
         // Den vollständigen Namen vergleichen
 
@@ -604,7 +618,7 @@ public class EinkauflistenDatenbank
         string name = Normalisieren(produkt.Name);
         string marke = Normalisieren(produkt.Marke);
         string variante = Normalisieren(produkt.Variante);
-        string packung = produkt.Packungsgroesse?.ToString(
+        string packung = produkt.Packungsgroesse.ToString(
             "0.################",
             System.Globalization.CultureInfo.InvariantCulture) ?? "";
         string einheit = Normalisieren(produkt.Basiseinheit);
@@ -612,7 +626,7 @@ public class EinkauflistenDatenbank
         produkt.ProduktSchluessel =
             string.Join("|", name, marke, variante, packung, einheit);
 
-        var vorhandenesProdukt = await datenbank
+        var vorhandenesProdukt = await _datenbank
             .Table<Produkt>()
             .Where(p => p.ProduktSchluessel == produkt.ProduktSchluessel)
             .FirstOrDefaultAsync();
@@ -626,18 +640,18 @@ public class EinkauflistenDatenbank
 
         if (produkt.Id == 0)
         {
-            await datenbank.InsertAsync(produkt);
+            await _datenbank.InsertAsync(produkt);
         }
         else
         {
-            await datenbank.UpdateAsync(produkt);
+            await _datenbank.UpdateAsync(produkt);
         }
-        await LokaleSicherungErstellenAsync();
+        await _backupService.LokaleSicherungErstellenAsync();
     }
 
     public async Task<Einkaufsartikel?> ArtikelLadenNachIdAsync(int id)
     {
-        return await datenbank
+        return await _datenbank
             .Table<Einkaufsartikel>()
             .Where(a => a.Id == id)
             .FirstOrDefaultAsync();

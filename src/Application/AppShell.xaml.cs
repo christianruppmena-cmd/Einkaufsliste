@@ -1,6 +1,11 @@
 ﻿using Einkaufsliste.Services;
 using Einkaufsliste.Application.Pages;
 using Einkaufsliste.Interfaces;
+using Einkaufsliste.Application.Pages.Produkte;
+using Einkaufsliste.Application.Pages.Datenbank;
+using Einkaufsliste.Application.Pages.Kategorien;
+
+
 namespace Einkaufsliste.Application
 {
     public partial class AppShell : Shell
@@ -36,8 +41,8 @@ namespace Einkaufsliste.Application
             var produktverwaltung = new ShellContent
             {
                 Title = "📦 Produktverwaltung",
-                Route = "ProduktverwaltungPage",
-                Content = new ProduktverwaltungPage(datenbank)
+                Route = "ProduktVerwaltungPage",
+                Content = new ProduktVerwaltungPage(datenbank)
             };
 
             // Kategorienverwaltung
@@ -45,7 +50,7 @@ namespace Einkaufsliste.Application
             {
                 Title = "🏷️ Kategorien",
                 Route = "KategorienPage",
-                Content = new KategorienPage()
+                Content = new KategorienPage(datenbank)
             };
 
             // Datensicherung

@@ -1,5 +1,6 @@
 ﻿using Einkaufsliste.Interfaces;
 using Einkaufsliste.Models;
+using System.IO.Compression;
 
 namespace Einkaufsliste.Services;
 
@@ -8,7 +9,8 @@ public class DBBackupService : IDBBackupService
     private SQLiteAsyncConnection datenbank;
     private readonly string datenbankPfad =
         Path.Combine(FileSystem.AppDataDirectory, "einkaufliste.db3");
-
+    private readonly string sicherungsOrdner =
+    Path.Combine(FileSystem.AppDataDirectory, "Sicherungen");
     public DBBackupService()
     {
         datenbank = new SQLiteAsyncConnection(datenbankPfad);
@@ -506,6 +508,12 @@ public class DBBackupService : IDBBackupService
             if (File.Exists(tempDatenbank))
                 File.Delete(tempDatenbank);
         }
+    }
+
+    private async Task<bool> DatenbankEnthaeltDatenAsync()
+    {
+        int anzahlProdukte = await datenbank.Table<Produkt>().CountAsync();
+        return anzahlProdukte > 0;
     }
 
     private async Task SicherungsOrdnerErstellenAsync()
