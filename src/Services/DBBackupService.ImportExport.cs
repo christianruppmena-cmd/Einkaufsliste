@@ -36,46 +36,7 @@ namespace Einkaufsliste.Services
             {
                 SicherungsdatenbankExtrahierenUndPruefen(importPfad, pruefPfad);
 
-                // Produktbilder zunächst temporär extrahieren
-                using (var archiv = ZipFile.OpenRead(importPfad))
-                {
-                    foreach (var eintrag in archiv.Entries)
-                    {
-                        if (!eintrag.FullName.StartsWith(
-                            "Produktbilder/",
-                            StringComparison.OrdinalIgnoreCase))
-                        {
-                            continue;
-                        }
-
-                        string dateiname =
-                            Path.GetFileName(eintrag.FullName);
-
-                        if (string.IsNullOrWhiteSpace(dateiname))
-                        {
-                            continue;
-                        }
-
-                        string endung =
-                            Path.GetExtension(dateiname).ToLowerInvariant();
-
-                        if (endung != ".jpg" &&
-                            endung != ".jpeg" &&
-                            endung != ".png" &&
-                            endung != ".webp")
-                        {
-                            continue;
-                        }
-
-                        string zielpfad = Path.Combine(
-                            importBildOrdner,
-                            dateiname);
-
-                        eintrag.ExtractToFile(
-                            zielpfad,
-                            overwrite: true);
-                    }
-                }
+                ProduktbilderTemporaerExtrahieren(importPfad, importBildOrdner);
 
                 // Aktuelle Datenbank als Rückfallsicherung erstellen
                 await datenbank.ExecuteAsync(
@@ -372,6 +333,49 @@ namespace Einkaufsliste.Services
                 {
                     throw new Exception(
                         "Die Sicherungsdatei enthält keine gültige Produkt-Tabelle.");
+                }
+            }
+        }
+        private static void ProduktbilderTemporaerExtrahieren(string importPfad,string importBildOrdner)
+        {
+            // Produktbilder zunächst temporär extrahieren
+            using (var archiv = ZipFile.OpenRead(importPfad))
+            {
+                foreach (var eintrag in archiv.Entries)
+                {
+                    if (!eintrag.FullName.StartsWith(
+                        "Produktbilder/",
+                        StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+
+                    string dateiname =
+                        Path.GetFileName(eintrag.FullName);
+
+                    if (string.IsNullOrWhiteSpace(dateiname))
+                    {
+                        continue;
+                    }
+
+                    string endung =
+                        Path.GetExtension(dateiname).ToLowerInvariant();
+
+                    if (endung != ".jpg" &&
+                        endung != ".jpeg" &&
+                        endung != ".png" &&
+                        endung != ".webp")
+                    {
+                        continue;
+                    }
+
+                    string zielpfad = Path.Combine(
+                        importBildOrdner,
+                        dateiname);
+
+                    eintrag.ExtractToFile(
+                        zielpfad,
+                        overwrite: true);
                 }
             }
         }
