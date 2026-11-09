@@ -324,6 +324,21 @@ public partial class ProduktVerwaltungPage : ContentPage
         GespeicherteProdukteBereich.IsVisible = false;
         ProduktFormularBereich.IsVisible = true;
     }
+
+    private static async Task<string> ProduktbildLokalSpeichernAsync(FileResult foto)
+    {
+        string dateiendung = Path.GetExtension(foto.FileName);
+        string dateiname = $"{Guid.NewGuid()}{dateiendung}";
+        string zielpfad = Path.Combine(
+            FileSystem.AppDataDirectory,
+            dateiname);
+
+        await using Stream quelle = await foto.OpenReadAsync();
+        await using FileStream ziel = File.Create(zielpfad);
+
+        await quelle.CopyToAsync(ziel);
+        return zielpfad;
+    }
     private async void OnProduktLoeschenClicked(object sender, EventArgs e)
     {
         if (produktZumBearbeiten == null)
@@ -364,25 +379,24 @@ public partial class ProduktVerwaltungPage : ContentPage
     {
         try
         {
-            FileResult foto = await MediaPicker.Default.PickPhotoAsync();
+            List<FileResult> fotos =
+                await MediaPicker.Default.PickPhotosAsync(
+                    new MediaPickerOptions
+                {
+                    SelectionLimit = 1
+                });
 
-            if (foto == null)
-                return;
+                FileResult? foto = fotos.FirstOrDefault();
+
+                if (foto == null)
+                    return;
+
+                if (foto == null)
+                    return;
 
             string vorherigesBild = ausgewaehlterBildPfad;
+            string zielpfad = await ProduktbildLokalSpeichernAsync(foto);
 
-            string dateiendung = Path.GetExtension(foto.FileName);
-
-            string dateiname = $"{Guid.NewGuid()}{dateiendung}";
-
-            string zielpfad = Path.Combine(
-                FileSystem.AppDataDirectory,
-                dateiname);
-
-            await using Stream quelle = await foto.OpenReadAsync();
-            await using FileStream ziel = File.Create(zielpfad);
-
-            await quelle.CopyToAsync(ziel);
 
             ausgewaehlterBildPfad = zielpfad;
             bildEntfernen = false;
