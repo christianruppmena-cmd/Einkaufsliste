@@ -162,59 +162,8 @@ namespace Einkaufsliste.Application.Pages
             // Erst jetzt nach einem doppelten Artikel suchen
             Einkaufsartikel? vorhandenerArtikel = FindeGleichenOffenenArtikel(neuerEintrag);
 
-            if (vorhandenerArtikel != null)
-            {
-                bool zusammenfassen = await DisplayAlertAsync(
-                    "Artikel bereits vorhanden",
-                    $"{vorhandenerArtikel.Name} ist bereits in deiner Einkaufsliste.\n\n" +
-                    $"Vorhanden: {vorhandenerArtikel.Menge} {vorhandenerArtikel.Einheit}\n" +
-                    $"Neu: {neuerEintrag.Menge} {neuerEintrag.Einheit}\n\n" +
-                    "Möchtest du die Mengen zusammenfassen?",
-                    "Zusammenfassen",
-                    "Separat hinzufügen");
-
-                if (zusammenfassen)
-                {
-                    if (decimal.TryParse(
-                            vorhandenerArtikel.Menge,
-                            System.Globalization.NumberStyles.Number,
-                            System.Globalization.CultureInfo.CurrentCulture,
-                            out decimal alteMenge)
-                        && decimal.TryParse(
-                            neuerEintrag.Menge,
-                            System.Globalization.NumberStyles.Number,
-                            System.Globalization.CultureInfo.CurrentCulture,
-                            out decimal neueMenge))
-                    {
-                        vorhandenerArtikel.Menge =
-                            (alteMenge + neueMenge).ToString(
-                                System.Globalization.CultureInfo.CurrentCulture);
-
-                        if (string.IsNullOrWhiteSpace(vorhandenerArtikel.Hinweis))
-                        {
-                            vorhandenerArtikel.Hinweis = neuerEintrag.Hinweis;
-                        }
-                        else if (!string.IsNullOrWhiteSpace(neuerEintrag.Hinweis)
-                            && !string.Equals(
-                                vorhandenerArtikel.Hinweis,
-                                neuerEintrag.Hinweis,
-                                StringComparison.OrdinalIgnoreCase))
-                        {
-                            vorhandenerArtikel.Hinweis += " / " + neuerEintrag.Hinweis;
-                        }
-
-                        await _datenbank.ArtikelSpeichernAsync(vorhandenerArtikel);
-                        AktualisiereFortschritt();
-                        return;
-                    }
-
-                    await DisplayAlertAsync(
-                        "Menge ungültig",
-                        "Die Mengen konnten nicht addiert werden. Bitte prüfe die Angaben.",
-                        "OK");
-                    return;
-                }
-            }
+            if (await VorhandenenArtikelBehandelnAsync(neuerEintrag))
+                return;
 
             await _datenbank.ArtikelSpeichernAsync(neuerEintrag);
 
@@ -753,6 +702,8 @@ namespace Einkaufsliste.Application.Pages
                 IstErledigt = false
             };
 
+            if (await VorhandenenArtikelBehandelnAsync(neuerArtikel))
+                return;
             await _datenbank.ArtikelSpeichernAsync(neuerArtikel);
 
             // Passende Gruppe ermitteln
@@ -837,6 +788,78 @@ namespace Einkaufsliste.Application.Pages
                 new Kategorie { Name = neueKategorie });
 
             return neueKategorie;
+        }
+        private static bool MengenUndHinweiseZusammenfassen(Einkaufsartikel vorhandenerArtikel, Einkaufsartikel neuerEintrag)
+        {
+            if (!decimal.TryParse(
+                    vorhandenerArtikel.Menge,
+                    System.Globalization.NumberStyles.Number,
+                    System.Globalization.CultureInfo.CurrentCulture,
+                    out decimal alteMenge)
+                || !decimal.TryParse(
+                    neuerEintrag.Menge,
+                    System.Globalization.NumberStyles.Number,
+                    System.Globalization.CultureInfo.CurrentCulture,
+                    out decimal neueMenge))
+            {
+                return false;
+            }
+
+            vorhandenerArtikel.Menge =
+                (alteMenge + neueMenge).ToString(
+                    System.Globalization.CultureInfo.CurrentCulture);
+
+            if (string.IsNullOrWhiteSpace(vorhandenerArtikel.Hinweis))
+            {
+                vorhandenerArtikel.Hinweis = neuerEintrag.Hinweis;
+            }
+            else if (!string.IsNullOrWhiteSpace(neuerEintrag.Hinweis)
+                     && !string.Equals(
+                         vorhandenerArtikel.Hinweis,
+                         neuerEintrag.Hinweis,
+                         StringComparison.OrdinalIgnoreCase))
+            {
+                vorhandenerArtikel.Hinweis += " / " + neuerEintrag.Hinweis;
+            }
+
+            return true;
+        }
+        private async Task<bool> VorhandenenArtikelBehandelnAsync(Einkaufsartikel neuerEintrag)
+        {
+            Einkaufsartikel? vorhandenerArtikel =
+                FindeGleichenOffenenArtikel(neuerEintrag);
+
+            if (vorhandenerArtikel == null)
+                return false;
+
+            bool zusammenfassen = await DisplayAlertAsync(
+                "Artikel bereits vorhanden",
+                $"{vorhandenerArtikel.Name} ist bereits in deiner Einkaufsliste.\n\n" +
+                $"Vorhanden: {vorhandenerArtikel.Menge} {vorhandenerArtikel.Einheit}\n" +
+                $"Neu: {neuerEintrag.Menge} {neuerEintrag.Einheit}\n\n" +
+                "Möchtest du die Mengen zusammenfassen?",
+                "Zusammenfassen",
+                "Separat hinzufügen");
+
+            if (!zusammenfassen)
+                return false;
+
+            if (!MengenUndHinweiseZusammenfassen(
+                    vorhandenerArtikel,
+                    neuerEintrag))
+            {
+                await DisplayAlertAsync(
+                    "Menge ungültig",
+                    "Die Mengen konnten nicht addiert werden. Bitte prüfe die Angaben.",
+                    "OK");
+                return true;
+            }
+
+            await _datenbank.ArtikelSpeichernAsync(vorhandenerArtikel);
+            AktualisiereFortschritt();
+            await GesamtsummeAktualisierenAsync();
+
+            return true;
         }
     }
 }
