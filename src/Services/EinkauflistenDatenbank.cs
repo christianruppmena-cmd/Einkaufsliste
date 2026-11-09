@@ -639,7 +639,68 @@ public class EinkauflistenDatenbank
         }
         await _backupService.LokaleSicherungErstellenAsync();
     }
+    public async Task ProduktZusammenfuehrenAsync(int quellProduktId,int zielProduktId)
+    {
+        if (quellProduktId == zielProduktId)
+        {
+            throw new ArgumentException(
+                "Quell- und Zielprodukt müssen verschieden sein.");
+        }
 
+        await InitialisierenAsync();
+
+        await _datenbank.RunInTransactionAsync(verbindung =>
+        {
+            Produkt quellProdukt =
+                verbindung.Find<Produkt>(quellProduktId);
+
+            Produkt zielProdukt =
+                verbindung.Find<Produkt>(zielProduktId);
+
+            if (quellProdukt == null || zielProdukt == null)
+            {
+                throw new InvalidOperationException(
+                    "Quell- oder Zielprodukt wurde nicht gefunden.");
+            }
+
+            foreach (Einkaufsartikel artikel in verbindung
+                .Table<Einkaufsartikel>()
+                .Where(a => a.ProduktId == quellProduktId)
+                .ToList())
+            {
+                artikel.ProduktId = zielProduktId;
+                artikel.Name = zielProdukt.Name;
+                artikel.Kategorie = zielProdukt.Kategorie;
+                verbindung.Update(artikel);
+            }
+
+            foreach (Produktpreis preis in verbindung
+                .Table<Produktpreis>()
+                .Where(p => p.ProduktId == quellProduktId)
+                .ToList())
+            {
+                preis.ProduktId = zielProduktId;
+                verbindung.Update(preis);
+            }
+
+            foreach (PreisHistorie historie in verbindung
+                .Table<PreisHistorie>()
+                .Where(h => h.ProduktId == quellProduktId)
+                .ToList())
+            {
+                historie.ProduktId = zielProduktId;
+                verbindung.Update(historie);
+            }
+
+            zielProdukt.IstAktiv = true;
+            verbindung.Update(zielProdukt);
+
+            quellProdukt.IstAktiv = false;
+            verbindung.Update(quellProdukt);
+        });
+
+        await _backupService.LokaleSicherungErstellenAsync();
+    }
     public async Task<Einkaufsartikel?> ArtikelLadenNachIdAsync(int id)
     {
         return await _datenbank
@@ -647,8 +708,7 @@ public class EinkauflistenDatenbank
             .Where(a => a.Id == id)
             .FirstOrDefaultAsync();
     }
-    public async Task<Produkt?> ProduktMitGleichemSchluesselLadenAsync(
-    Produkt produkt)
+    public async Task<Produkt?> ProduktMitGleichemSchluesselLadenAsync(Produkt produkt)
     {
         string schluessel = ProduktSchluesselErstellen(produkt);
 
