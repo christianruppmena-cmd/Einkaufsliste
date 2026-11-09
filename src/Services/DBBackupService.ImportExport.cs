@@ -53,22 +53,8 @@ namespace Einkaufsliste.Services
 
                 try
                 {
-                    // Alte SQLite-Begleitdateien entfernen
-                    if (File.Exists(datenbankPfad + "-wal"))
-                        File.Delete(datenbankPfad + "-wal");
-
-                    if (File.Exists(datenbankPfad + "-shm"))
-                        File.Delete(datenbankPfad + "-shm");
-
-                    // Neue Datenbank übernehmen
-                    File.Copy(
-                        pruefPfad,
-                        datenbankPfad,
-                        overwrite: true);
-
-                    // Neue Verbindung herstellen
-                    datenbank = new SQLiteAsyncConnection(datenbankPfad);
-
+                    ImportierteDatenbankUebernehmen(pruefPfad);
+                    
                     ProduktbilderErsetzen(importBildOrdner);
 
                     // Rückfallsicherungen nach erfolgreichem Import löschen
@@ -386,6 +372,24 @@ namespace Einkaufsliste.Services
                     zielpfad,
                     overwrite: true);
             }
+        }
+        private void ImportierteDatenbankUebernehmen(string pruefPfad)
+        {
+            // Alte SQLite-Begleitdateien entfernen
+            if (File.Exists(datenbankPfad + "-wal"))
+                File.Delete(datenbankPfad + "-wal");
+
+            if (File.Exists(datenbankPfad + "-shm"))
+                File.Delete(datenbankPfad + "-shm");
+
+            // Neue Datenbank übernehmen
+            File.Copy(
+                pruefPfad,
+                datenbankPfad,
+                overwrite: true);
+
+            // Neue Verbindung herstellen
+            datenbank = new SQLiteAsyncConnection(datenbankPfad);
         }
     }
 }
