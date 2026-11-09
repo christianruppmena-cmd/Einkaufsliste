@@ -89,8 +89,7 @@ namespace Einkaufsliste.Application
             // Händlerverwaltung (in Arbeit)
             var haendlerMenue = new FlyoutItem
             {
-                Title = "🏪 Händlerverwaltung (in Arbeit)",
-                IsEnabled = false,
+                Title = "🏪 Händlerverwaltung",
                 Items =
                 {
                     new ShellSection
@@ -100,7 +99,8 @@ namespace Einkaufsliste.Application
                             new ShellContent
                             {
                                 Title = "Händlerverwaltung",
-                                Content = new ContentPage()
+                                Route = "HaendlerPage",
+                                Content = new HaendlerPage(datenbank)
                             }
                         }
                     }
