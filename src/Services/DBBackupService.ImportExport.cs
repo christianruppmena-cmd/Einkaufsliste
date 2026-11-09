@@ -147,10 +147,7 @@ namespace Einkaufsliste.Services
                     string endung =
                         Path.GetExtension(dateiname).ToLowerInvariant();
 
-                    if (endung != ".jpg" &&
-                        endung != ".jpeg" &&
-                        endung != ".png" &&
-                        endung != ".webp")
+                    if (!IstUnterstuetztesBildformat(dateiname))
                     {
                         continue;
                     }
@@ -176,10 +173,7 @@ namespace Einkaufsliste.Services
                 string endung =
                     Path.GetExtension(datei).ToLowerInvariant();
 
-                if (endung == ".jpg" ||
-                    endung == ".jpeg" ||
-                    endung == ".png" ||
-                    endung == ".webp")
+                if (IstUnterstuetztesBildformat(datei))
                 {
                     File.Copy(
                         datei,
@@ -202,10 +196,7 @@ namespace Einkaufsliste.Services
                 string endung =
                     Path.GetExtension(datei).ToLowerInvariant();
 
-                if (endung != ".jpg" &&
-                    endung != ".jpeg" &&
-                    endung != ".png" &&
-                    endung != ".webp")
+                if(!IstUnterstuetztesBildformat(datei))
                 {
                     continue;
                 }
@@ -280,10 +271,7 @@ namespace Einkaufsliste.Services
                 string endung =
                     Path.GetExtension(datei).ToLowerInvariant();
 
-                if (endung == ".jpg" ||
-                    endung == ".jpeg" ||
-                    endung == ".png" ||
-                    endung == ".webp")
+                if (IstUnterstuetztesBildformat(datei))
                 {
                     File.Delete(datei);
                 }
@@ -328,6 +316,15 @@ namespace Einkaufsliste.Services
                     rueckfallBildOrdner,
                     recursive: true);
             }
+        }
+        private static bool IstUnterstuetztesBildformat(string dateipfad)
+        {
+            string erweiterung = Path.GetExtension(dateipfad);
+
+            return erweiterung.Equals(".jpg", StringComparison.OrdinalIgnoreCase)
+                || erweiterung.Equals(".jpeg", StringComparison.OrdinalIgnoreCase)
+                || erweiterung.Equals(".png", StringComparison.OrdinalIgnoreCase)
+                || erweiterung.Equals(".webp", StringComparison.OrdinalIgnoreCase);
         }
     }
 }
