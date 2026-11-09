@@ -34,46 +34,7 @@ namespace Einkaufsliste.Services
 
             try
             {
-                // ZIP-Sicherung öffnen und Datenbank extrahieren
-                using (var archiv = ZipFile.OpenRead(importPfad))
-                {
-                    var datenbankEintrag =
-                        archiv.GetEntry("einkaufliste.db3");
-
-                    if (datenbankEintrag == null)
-                    {
-                        throw new Exception(
-                            "Die ZIP-Sicherung enthält keine Datenbank.");
-                    }
-
-                    datenbankEintrag.ExtractToFile(
-                        pruefPfad,
-                        overwrite: true);
-                }
-
-                // Datenbank auf Integrität prüfen
-                using (var pruefDatenbank =
-                    new SQLite.SQLiteConnection(pruefPfad))
-                {
-                    string ergebnis =
-                        pruefDatenbank.ExecuteScalar<string>(
-                            "PRAGMA integrity_check;");
-
-                    if (ergebnis != "ok")
-                    {
-                        throw new Exception(
-                            "Die Sicherungsdatei ist beschädigt.");
-                    }
-
-                    var tabellen =
-                        pruefDatenbank.GetTableInfo("Produkt");
-
-                    if (tabellen.Count == 0)
-                    {
-                        throw new Exception(
-                            "Die Sicherungsdatei enthält keine gültige Produkt-Tabelle.");
-                    }
-                }
+                SicherungsdatenbankExtrahierenUndPruefen(importPfad, pruefPfad);
 
                 // Produktbilder zunächst temporär extrahieren
                 using (var archiv = ZipFile.OpenRead(importPfad))
@@ -369,6 +330,49 @@ namespace Einkaufsliste.Services
             {
                 if (File.Exists(tempDatenbank))
                     File.Delete(tempDatenbank);
+            }
+        }
+        private static void SicherungsdatenbankExtrahierenUndPruefen(string importPfad,string pruefPfad)
+        {
+            // ZIP-Sicherung öffnen und Datenbank extrahieren
+            using (var archiv = ZipFile.OpenRead(importPfad))
+            {
+                var datenbankEintrag =
+                    archiv.GetEntry("einkaufliste.db3");
+
+                if (datenbankEintrag == null)
+                {
+                    throw new Exception(
+                        "Die ZIP-Sicherung enthält keine Datenbank.");
+                }
+
+                datenbankEintrag.ExtractToFile(
+                    pruefPfad,
+                    overwrite: true);
+            }
+
+            // Datenbank auf Integrität prüfen
+            using (var pruefDatenbank =
+                new SQLite.SQLiteConnection(pruefPfad))
+            {
+                string ergebnis =
+                    pruefDatenbank.ExecuteScalar<string>(
+                        "PRAGMA integrity_check;");
+
+                if (ergebnis != "ok")
+                {
+                    throw new Exception(
+                        "Die Sicherungsdatei ist beschädigt.");
+                }
+
+                var tabellen =
+                    pruefDatenbank.GetTableInfo("Produkt");
+
+                if (tabellen.Count == 0)
+                {
+                    throw new Exception(
+                        "Die Sicherungsdatei enthält keine gültige Produkt-Tabelle.");
+                }
             }
         }
     }
