@@ -10,7 +10,7 @@ namespace Einkaufsliste.Application.Pages
 {
     public partial class MainPage : ContentPage
     {
-        private ObservableCollection<Artikelgruppe> artikelGruppen = new();
+        private readonly ObservableCollection<Artikelgruppe> artikelGruppen = new();
         private readonly EinkauflistenDatenbank _datenbank ;
         private const string GruppierungsEinstellung = "Gruppierungsart";
         private string aktuelleGruppierung = "Produktkategorie";
@@ -32,15 +32,15 @@ namespace Einkaufsliste.Application.Pages
             GruppierungsPicker.SelectedItem = aktuelleGruppierung;
         }
 
-        protected override void OnAppearing()
+        protected override async void OnAppearing()
         {
             base.OnAppearing();
-            LadeDatenAsync();
-            LadeProdukteFuerSucheAsync();
+            await LadeDatenAsync();
+            await LadeProdukteFuerSucheAsync();
 
         }
 
-        private async void LadeProdukteFuerSucheAsync()
+        private async Task LadeProdukteFuerSucheAsync()
         {
             alleProdukte = await _datenbank.AlleProdukteLadenAsync();
         }
@@ -298,7 +298,7 @@ namespace Einkaufsliste.Application.Pages
             AktualisiereFortschritt();
             await GesamtsummeAktualisierenAsync();
         }
-        private async void LadeDatenAsync()
+        private async Task LadeDatenAsync()
         {
             alleHaendler = await _datenbank.AlleHaendlerLadenAsync();
 
