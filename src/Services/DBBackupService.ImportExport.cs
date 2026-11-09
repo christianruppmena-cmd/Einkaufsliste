@@ -46,28 +46,7 @@ namespace Einkaufsliste.Services
                 // Zusätzliche lokale Sicherung erstellen
                 await LokaleSicherungErstellenAsync();
 
-                // Bisherige Produktbilder für einen möglichen Rollback sichern
-                Directory.CreateDirectory(rueckfallBildOrdner);
-
-                foreach (string datei in Directory.GetFiles(
-                    FileSystem.AppDataDirectory))
-                {
-                    string endung =
-                        Path.GetExtension(datei).ToLowerInvariant();
-
-                    if (endung == ".jpg" ||
-                        endung == ".jpeg" ||
-                        endung == ".png" ||
-                        endung == ".webp")
-                    {
-                        File.Copy(
-                            datei,
-                            Path.Combine(
-                                rueckfallBildOrdner,
-                                Path.GetFileName(datei)),
-                            overwrite: true);
-                    }
-                }
+                ProduktbilderAlsRueckfallSichern(rueckfallBildOrdner);
 
                 // Verbindung erst nach erfolgreicher Sicherung schließen
                 await datenbank.CloseAsync();
@@ -293,7 +272,7 @@ namespace Einkaufsliste.Services
                     File.Delete(tempDatenbank);
             }
         }
-        private static void SicherungsdatenbankExtrahierenUndPruefen(string importPfad,string pruefPfad)
+        private static void SicherungsdatenbankExtrahierenUndPruefen(string importPfad, string pruefPfad)
         {
             // ZIP-Sicherung öffnen und Datenbank extrahieren
             using (var archiv = ZipFile.OpenRead(importPfad))
@@ -336,7 +315,7 @@ namespace Einkaufsliste.Services
                 }
             }
         }
-        private static void ProduktbilderTemporaerExtrahieren(string importPfad,string importBildOrdner)
+        private static void ProduktbilderTemporaerExtrahieren(string importPfad, string importBildOrdner)
         {
             // Produktbilder zunächst temporär extrahieren
             using (var archiv = ZipFile.OpenRead(importPfad))
@@ -375,6 +354,31 @@ namespace Einkaufsliste.Services
 
                     eintrag.ExtractToFile(
                         zielpfad,
+                        overwrite: true);
+                }
+            }
+        }
+        private static void ProduktbilderAlsRueckfallSichern(string rueckfallBildOrdner)
+        {
+            // Bisherige Produktbilder für einen möglichen Rollback sichern
+            Directory.CreateDirectory(rueckfallBildOrdner);
+
+            foreach (string datei in Directory.GetFiles(
+                FileSystem.AppDataDirectory))
+            {
+                string endung =
+                    Path.GetExtension(datei).ToLowerInvariant();
+
+                if (endung == ".jpg" ||
+                    endung == ".jpeg" ||
+                    endung == ".png" ||
+                    endung == ".webp")
+                {
+                    File.Copy(
+                        datei,
+                        Path.Combine(
+                            rueckfallBildOrdner,
+                            Path.GetFileName(datei)),
                         overwrite: true);
                 }
             }
