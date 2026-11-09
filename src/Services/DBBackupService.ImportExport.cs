@@ -76,26 +76,7 @@ namespace Einkaufsliste.Services
             }
             finally
             {
-                // Temporäre Dateien und Ordner aufräumen
-                if (File.Exists(pruefPfad))
-                    File.Delete(pruefPfad);
-
-                if (Directory.Exists(importBildOrdner))
-                {
-                    Directory.Delete(
-                        importBildOrdner,
-                        recursive: true);
-                }
-
-                if (File.Exists(rueckfallPfad))
-                    File.Delete(rueckfallPfad);
-
-                if (Directory.Exists(rueckfallBildOrdner))
-                {
-                    Directory.Delete(
-                        rueckfallBildOrdner,
-                        recursive: true);
-                }
+                ImportdateienAufraeumen(pruefPfad, importBildOrdner, rueckfallPfad, rueckfallBildOrdner);
             }
         }
         public async Task<string> ExportDateiErstellenAsync()
@@ -392,6 +373,29 @@ namespace Einkaufsliste.Services
                         zielpfad,
                         overwrite: true);
                 }
+            }
+        }
+        private static void ImportdateienAufraeumen(string pruefPfad, string importBildOrdner,string rueckfallPfad,string rueckfallBildOrdner)
+        {
+            // Temporäre Dateien und Ordner aufräumen
+            if (File.Exists(pruefPfad))
+                File.Delete(pruefPfad);
+
+            if (Directory.Exists(importBildOrdner))
+            {
+                Directory.Delete(
+                    importBildOrdner,
+                    recursive: true);
+            }
+
+            if (File.Exists(rueckfallPfad))
+                File.Delete(rueckfallPfad);
+
+            if (Directory.Exists(rueckfallBildOrdner))
+            {
+                Directory.Delete(
+                    rueckfallBildOrdner,
+                    recursive: true);
             }
         }
     }
