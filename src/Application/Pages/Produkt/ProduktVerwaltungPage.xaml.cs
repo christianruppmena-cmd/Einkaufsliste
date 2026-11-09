@@ -36,9 +36,7 @@ public partial class ProduktVerwaltungPage : ContentPage
     }
     private void OnNeuesProduktClicked(object sender, EventArgs e)
     {
-        produktZumBearbeiten = null;
-        ausgewaehlterBildPfad = null;
-        bildEntfernen = false;
+        FormularZustandZuruecksetzen();
 
         NameEntry.Text = "";
         MarkeEntry.Text = "";
@@ -56,18 +54,14 @@ public partial class ProduktVerwaltungPage : ContentPage
     }
     private void OnFormularAbbrechenClicked(object sender, EventArgs e)
     {
-        produktZumBearbeiten = null;
-        ausgewaehlterBildPfad = null;
-        bildEntfernen = false;
+        FormularZustandZuruecksetzen();
 
         ProduktFormularBereich.IsVisible = false;
         GespeicherteProdukteBereich.IsVisible = true;
     }
     private void ZurProduktlisteZurueckkehren()
     {
-        produktZumBearbeiten = null;
-        ausgewaehlterBildPfad = null;
-        bildEntfernen = false;
+        FormularZustandZuruecksetzen();
 
         ProduktFormularBereich.IsVisible = false;
         GespeicherteProdukteBereich.IsVisible = true;
@@ -236,9 +230,7 @@ public partial class ProduktVerwaltungPage : ContentPage
                     zuSpeicherndesProdukt.BevorzugterHaendlerId);
             }
 
-            produktZumBearbeiten = null;
-            ausgewaehlterBildPfad = null;
-            bildEntfernen = false;
+            FormularZustandZuruecksetzen();
 
             await LadeProdukteAsync();
 
@@ -375,7 +367,7 @@ public partial class ProduktVerwaltungPage : ContentPage
                 "OK");
         }
     }
-    private async void OnProduktbildAuswaehlenClicked(object sender, EventArgs e)
+    private async Task ProduktbildAuswaehlenAsync()
     {
         try
         {
@@ -419,7 +411,12 @@ public partial class ProduktVerwaltungPage : ContentPage
                 "OK");
         }
     }
-
+    private void FormularZustandZuruecksetzen()
+    {
+        produktZumBearbeiten = null;
+        ausgewaehlterBildPfad = null;
+        bildEntfernen = false;
+    }
     private async void OnProduktbildVerwaltenClicked(object sender, EventArgs e)
     {
         string auswahl = await DisplayActionSheetAsync(
@@ -433,7 +430,7 @@ public partial class ProduktVerwaltungPage : ContentPage
         switch (auswahl)
         {
             case "Bild aus Galerie auswählen":
-                OnProduktbildAuswaehlenClicked(sender, e);
+                await ProduktbildAuswaehlenAsync();
                 break;
 
             case "Foto mit Kamera aufnehmen":
