@@ -70,60 +70,7 @@ namespace Einkaufsliste.Services
                 }
                 catch
                 {
-                    // Fehler beim Import: ursprüngliche Datenbank wiederherstellen
-                    try
-                    {
-                        await datenbank.CloseAsync();
-                    }
-                    catch
-                    {
-                        // Verbindung ist möglicherweise bereits geschlossen
-                    }
-
-                    if (File.Exists(rueckfallPfad))
-                    {
-                        File.Copy(
-                            rueckfallPfad,
-                            datenbankPfad,
-                            overwrite: true);
-                    }
-
-                    // Ursprüngliche Datenbankverbindung wiederherstellen
-                    datenbank = new SQLiteAsyncConnection(datenbankPfad);
-
-                    // Importierte Produktbilder entfernen
-                    foreach (string datei in Directory.GetFiles(
-                        FileSystem.AppDataDirectory))
-                    {
-                        string endung =
-                            Path.GetExtension(datei).ToLowerInvariant();
-
-                        if (endung == ".jpg" ||
-                            endung == ".jpeg" ||
-                            endung == ".png" ||
-                            endung == ".webp")
-                        {
-                            File.Delete(datei);
-                        }
-                    }
-
-                    // Ursprüngliche Produktbilder zurückkopieren
-                    if (Directory.Exists(rueckfallBildOrdner))
-                    {
-                        foreach (string bild in Directory.GetFiles(
-                            rueckfallBildOrdner))
-                        {
-                            string zielpfad = Path.Combine(
-                                FileSystem.AppDataDirectory,
-                                Path.GetFileName(bild));
-
-                            File.Copy(
-                                bild,
-                                zielpfad,
-                                overwrite: true);
-                        }
-                    }
-
+                    await UrsprungsdatenbankWiederherstellenAsync(rueckfallPfad, rueckfallBildOrdner);
                     throw;
                 }
             }
@@ -390,6 +337,62 @@ namespace Einkaufsliste.Services
 
             // Neue Verbindung herstellen
             datenbank = new SQLiteAsyncConnection(datenbankPfad);
+        }
+        private async Task UrsprungsdatenbankWiederherstellenAsync(string rueckfallPfad,string rueckfallBildOrdner)
+        {
+            // Fehler beim Import: ursprüngliche Datenbank wiederherstellen
+            try
+            {
+                await datenbank.CloseAsync();
+            }
+            catch
+            {
+                // Verbindung ist möglicherweise bereits geschlossen
+            }
+
+            if (File.Exists(rueckfallPfad))
+            {
+                File.Copy(
+                    rueckfallPfad,
+                    datenbankPfad,
+                    overwrite: true);
+            }
+
+            // Ursprüngliche Datenbankverbindung wiederherstellen
+            datenbank = new SQLiteAsyncConnection(datenbankPfad);
+
+            // Importierte Produktbilder entfernen
+            foreach (string datei in Directory.GetFiles(
+                FileSystem.AppDataDirectory))
+            {
+                string endung =
+                    Path.GetExtension(datei).ToLowerInvariant();
+
+                if (endung == ".jpg" ||
+                    endung == ".jpeg" ||
+                    endung == ".png" ||
+                    endung == ".webp")
+                {
+                    File.Delete(datei);
+                }
+            }
+
+            // Ursprüngliche Produktbilder zurückkopieren
+            if (Directory.Exists(rueckfallBildOrdner))
+            {
+                foreach (string bild in Directory.GetFiles(
+                    rueckfallBildOrdner))
+                {
+                    string zielpfad = Path.Combine(
+                        FileSystem.AppDataDirectory,
+                        Path.GetFileName(bild));
+
+                    File.Copy(
+                        bild,
+                        zielpfad,
+                        overwrite: true);
+                }
+            }
         }
     }
 }
