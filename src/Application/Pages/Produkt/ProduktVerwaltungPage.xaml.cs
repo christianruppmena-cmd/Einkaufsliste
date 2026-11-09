@@ -6,7 +6,7 @@ namespace Einkaufsliste.Application.Pages.Produkte;
 
 public partial class ProduktVerwaltungPage : ContentPage
 {
-    private readonly EinkauflistenDatenbank datenbank;
+    private readonly EinkauflistenDatenbank _datenbank;
     private List<Produkt> alleProdukte = new();
     private List<Haendler> alleHaendler = new();
     private string ausgewaehlterBildPfad;
@@ -19,7 +19,7 @@ public partial class ProduktVerwaltungPage : ContentPage
     {
         InitializeComponent();
 
-        this.datenbank = datenbank;
+        _datenbank = datenbank;
         this.nurNeuesProduktFormular = nurNeuesProduktFormular;
 
         if(nurNeuesProduktFormular)
@@ -78,7 +78,7 @@ public partial class ProduktVerwaltungPage : ContentPage
     private async Task LadeKategorienAsync()
     {
         List<Kategorie> kategorien =
-            await datenbank.AlleKategorieEintraegeLadenAsync();
+            await _datenbank.AlleKategorieEintraegeLadenAsync();
 
         KategoriePicker.ItemsSource = kategorien
             .Select(k => k.Name)
@@ -87,7 +87,7 @@ public partial class ProduktVerwaltungPage : ContentPage
 
     private async Task LadeHaendlerAsync()
     {
-        alleHaendler = await datenbank.AlleHaendlerLadenAsync();
+        alleHaendler = await _datenbank.AlleHaendlerLadenAsync();
 
         var haendlerNamen = new List<string>
     {
@@ -181,7 +181,7 @@ public partial class ProduktVerwaltungPage : ContentPage
         try
         {
             Produkt? vorhandenesProdukt =
-                        await datenbank.ProduktMitGleichemSchluesselLadenAsync(zuSpeicherndesProdukt);
+                        await _datenbank.ProduktMitGleichemSchluesselLadenAsync(zuSpeicherndesProdukt);
 
             bool wurdeZusammengefuehrt = false;
 
@@ -208,7 +208,7 @@ public partial class ProduktVerwaltungPage : ContentPage
                 if (!bestaetigen)
                     return;
 
-                await datenbank.ProduktZusammenfuehrenAsync(
+                await _datenbank.ProduktZusammenfuehrenAsync(
                     zuSpeicherndesProdukt.Id,
                     vorhandenesProdukt.Id);
 
@@ -223,9 +223,9 @@ public partial class ProduktVerwaltungPage : ContentPage
             }
             else
             {
-                await datenbank.ProduktSpeichernAsync(zuSpeicherndesProdukt);
+                await _datenbank.ProduktSpeichernAsync(zuSpeicherndesProdukt);
 
-                await datenbank.EinkaufsartikelHaendlerAktualisierenAsync(
+                await _datenbank.EinkaufsartikelHaendlerAktualisierenAsync(
                     zuSpeicherndesProdukt.Id,
                     zuSpeicherndesProdukt.BevorzugterHaendlerId);
             }
@@ -268,7 +268,7 @@ public partial class ProduktVerwaltungPage : ContentPage
 
     private async Task LadeProdukteAsync()
     {
-        alleProdukte = await datenbank.AlleProdukteLadenAsync();
+        alleProdukte = await _datenbank.AlleProdukteLadenAsync();
 
         ProduktListe.ItemsSource = alleProdukte.Where(p => p.IstAktiv).OrderBy(p => p.Name).ToList();
     }
@@ -349,7 +349,7 @@ public partial class ProduktVerwaltungPage : ContentPage
         {
             produktZumBearbeiten.IstAktiv = false;
 
-            await datenbank.ProduktSpeichernAsync(produktZumBearbeiten);
+            await _datenbank.ProduktSpeichernAsync(produktZumBearbeiten);
             await LadeProdukteAsync();
 
             ZurProduktlisteZurueckkehren();
@@ -514,7 +514,7 @@ public partial class ProduktVerwaltungPage : ContentPage
             return;
 
         List<Produkt> produkte =
-            await datenbank.AlleProdukteLadenAsync();
+            await _datenbank.AlleProdukteLadenAsync();
 
         bool wirdNochVerwendet = produkte.Any(p =>
             string.Equals(
@@ -549,7 +549,7 @@ public partial class ProduktVerwaltungPage : ContentPage
         }
 
         await Navigation.PushAsync(
-            new ProduktpreisePage(datenbank, produkt));
+            new ProduktpreisePage(_datenbank, produkt));
     }
 
 
