@@ -69,45 +69,7 @@ namespace Einkaufsliste.Services
                     // Neue Verbindung herstellen
                     datenbank = new SQLiteAsyncConnection(datenbankPfad);
 
-                    // Vorhandene Produktbilder entfernen
-                    string bildOrdner = FileSystem.AppDataDirectory;
-
-                    foreach (string datei in Directory.GetFiles(bildOrdner))
-                    {
-                        string dateiname = Path.GetFileName(datei);
-
-                        string endung =
-                            Path.GetExtension(datei).ToLowerInvariant();
-
-                        if (endung != ".jpg" &&
-                            endung != ".jpeg" &&
-                            endung != ".png" &&
-                            endung != ".webp")
-                        {
-                            continue;
-                        }
-
-                        if (File.Exists(
-                            Path.Combine(importBildOrdner, dateiname)))
-                        {
-                            continue;
-                        }
-
-                        File.Delete(datei);
-                    }
-
-                    // Neue Produktbilder übernehmen
-                    foreach (string bild in Directory.GetFiles(importBildOrdner))
-                    {
-                        string zielpfad = Path.Combine(
-                            bildOrdner,
-                            Path.GetFileName(bild));
-
-                        File.Copy(
-                            bild,
-                            zielpfad,
-                            overwrite: true);
-                    }
+                    ProduktbilderErsetzen(importBildOrdner);
 
                     // Rückfallsicherungen nach erfolgreichem Import löschen
                     if (File.Exists(rueckfallPfad))
@@ -381,6 +343,48 @@ namespace Einkaufsliste.Services
                             Path.GetFileName(datei)),
                         overwrite: true);
                 }
+            }
+        }
+        private static void ProduktbilderErsetzen(string importBildOrdner)
+        {
+            // Vorhandene Produktbilder entfernen
+            string bildOrdner = FileSystem.AppDataDirectory;
+
+            foreach (string datei in Directory.GetFiles(bildOrdner))
+            {
+                string dateiname = Path.GetFileName(datei);
+
+                string endung =
+                    Path.GetExtension(datei).ToLowerInvariant();
+
+                if (endung != ".jpg" &&
+                    endung != ".jpeg" &&
+                    endung != ".png" &&
+                    endung != ".webp")
+                {
+                    continue;
+                }
+
+                if (File.Exists(
+                    Path.Combine(importBildOrdner, dateiname)))
+                {
+                    continue;
+                }
+
+                File.Delete(datei);
+            }
+
+            // Neue Produktbilder übernehmen
+            foreach (string bild in Directory.GetFiles(importBildOrdner))
+            {
+                string zielpfad = Path.Combine(
+                    bildOrdner,
+                    Path.GetFileName(bild));
+
+                File.Copy(
+                    bild,
+                    zielpfad,
+                    overwrite: true);
             }
         }
     }
