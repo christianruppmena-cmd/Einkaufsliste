@@ -161,6 +161,8 @@ public partial class ProduktVerwaltungPage : ContentPage
 
         string altesBild = produktZumBearbeiten?.BildPfad;
 
+        string urspruenglicherName = produktZumBearbeiten?.Name ?? name;
+
         Produkt zuSpeicherndesProdukt =
             produktZumBearbeiten ?? new Produkt();
 
@@ -184,12 +186,55 @@ public partial class ProduktVerwaltungPage : ContentPage
 
         try
         {
-            await datenbank.ProduktSpeichernAsync(zuSpeicherndesProdukt);
+            Produkt? vorhandenesProdukt =
+                        await datenbank.ProduktMitGleichemSchluesselLadenAsync(zuSpeicherndesProdukt);
 
-            // Bevorzugten Händler bei vorhandenen Einkaufsartikeln übernehmen
-            await datenbank.EinkaufsartikelHaendlerAktualisierenAsync(
-                zuSpeicherndesProdukt.Id,
-                zuSpeicherndesProdukt.BevorzugterHaendlerId);
+            bool wurdeZusammengefuehrt = false;
+
+            if (vorhandenesProdukt != null)
+            {
+                if (zuSpeicherndesProdukt.Id == 0)
+                {
+                    await DisplayAlertAsync(
+                        "Produkt bereits vorhanden",
+                        $"„{vorhandenesProdukt.Name}“ existiert bereits.",
+                        "OK");
+                    return;
+                }
+
+                bool bestaetigen = await DisplayAlertAsync(
+                    "Produkt bereits vorhanden",
+                    $"„{vorhandenesProdukt.Name}“ existiert bereits. " +
+                    $"Sollen Einkaufsartikel, Preise und Preisverläufe von " +
+                    $"„{urspruenglicherName}“ übernommen werden? " +
+                    "Das vorhandene Produkt behält seine Stammdaten.",
+                    "Ja, übernehmen",
+                    "Nein");
+
+                if (!bestaetigen)
+                    return;
+
+                await datenbank.ProduktZusammenfuehrenAsync(
+                    zuSpeicherndesProdukt.Id,
+                    vorhandenesProdukt.Id);
+
+                wurdeZusammengefuehrt = true;
+
+                // Das vorhandene Produkt behält sein Bild.
+                if (!string.IsNullOrWhiteSpace(ausgewaehlterBildPfad) &&
+                    File.Exists(ausgewaehlterBildPfad))
+                {
+                    File.Delete(ausgewaehlterBildPfad);
+                }
+            }
+            else
+            {
+                await datenbank.ProduktSpeichernAsync(zuSpeicherndesProdukt);
+
+                await datenbank.EinkaufsartikelHaendlerAktualisierenAsync(
+                    zuSpeicherndesProdukt.Id,
+                    zuSpeicherndesProdukt.BevorzugterHaendlerId);
+            }
 
             produktZumBearbeiten = null;
             ausgewaehlterBildPfad = null;
@@ -202,8 +247,12 @@ public partial class ProduktVerwaltungPage : ContentPage
                 zuSpeicherndesProdukt.BildPfad);
 
             await DisplayAlertAsync(
-                "Gespeichert",
-                $"{name} wurde erfolgreich gespeichert.",
+                wurdeZusammengefuehrt
+                    ? "Produkte zusammengeführt"
+                    : "Gespeichert",
+                wurdeZusammengefuehrt
+                    ? $"Die Daten von „{urspruenglicherName}“ wurden in „{vorhandenesProdukt!.Name}“ übernommen."
+                    : $"{name} wurde erfolgreich gespeichert.",
                 "OK");
             // Bei direktem Aufruf über den Plus-Button zurückkehren
             if (nurNeuesProduktFormular)
