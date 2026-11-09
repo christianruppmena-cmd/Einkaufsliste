@@ -138,17 +138,25 @@ namespace Einkaufsliste.Application.Pages
                 }
                 else
                 {
-                    neuerEintrag.Kategorie = ausgewaehlteKategorie;
+                    string? kategorie =
+                        await KategorieFuerNeuesProduktAuswaehlenAsync(
+                            neuerEintrag.Name);
+
+                    if (kategorie == null)
+                        return;
+
+                    Produkt neuesProdukt = new()
+                    {
+                        Name = TextHelfer.Normalisieren(neuerEintrag.Name),
+                        Kategorie = TextHelfer.Normalisieren(kategorie)
+                    };
+
+                    await _datenbank.ProduktSpeichernAsync(neuesProdukt);
+
+                    neuerEintrag.ProduktId = neuesProdukt.Id;
+                    neuerEintrag.Name = neuesProdukt.Name;
+                    neuerEintrag.Kategorie = neuesProdukt.Kategorie;
                 }
-
-                Produkt neuesProdukt = new Produkt
-                {
-                    Name = TextHelfer.Normalisieren(neuerEintrag.Name),
-                    Kategorie = TextHelfer.Normalisieren(neuerEintrag.Kategorie)
-                };
-
-                await _datenbank.ProduktSpeichernAsync(neuesProdukt);
-                neuerEintrag.ProduktId = neuesProdukt.Id;
             }
 
             // Erst jetzt nach einem doppelten Artikel suchen
@@ -774,6 +782,61 @@ namespace Einkaufsliste.Application.Pages
 
             AktualisiereFortschritt();
             await GesamtsummeAktualisierenAsync();
+        }
+        private async Task<string?> KategorieFuerNeuesProduktAuswaehlenAsync(string produktName)
+        {
+            List<Kategorie> kategorien =
+                await _datenbank.AlleKategorieEintraegeLadenAsync();
+
+            string[] kategorienNamen =
+                kategorien.Select(k => k.Name).ToArray();
+
+            const string neueKategorieOption = "+ Neue Kategorie";
+
+            string? ausgewaehlteKategorie = await DisplayActionSheetAsync(
+                $"Welche Kategorie gehört zu {produktName}?",
+                "Abbrechen",
+                null,
+                kategorienNamen.Append(neueKategorieOption).ToArray());
+
+            if (string.IsNullOrWhiteSpace(ausgewaehlteKategorie) ||
+                ausgewaehlteKategorie == "Abbrechen")
+            {
+                return null;
+            }
+
+            if (ausgewaehlteKategorie != neueKategorieOption)
+                return ausgewaehlteKategorie;
+
+            string? neueKategorie = await DisplayPromptAsync(
+                "Neue Kategorie",
+                "Wie soll die Kategorie heißen?");
+
+            if (string.IsNullOrWhiteSpace(neueKategorie))
+                return null;
+
+            neueKategorie = neueKategorie.Trim();
+
+            bool existiertBereits = kategorien.Any(k =>
+                string.Equals(
+                    k.Name.Trim(),
+                    neueKategorie,
+                    StringComparison.OrdinalIgnoreCase));
+
+            if (existiertBereits)
+            {
+                await DisplayAlertAsync(
+                    "Hinweis",
+                    "Diese Kategorie existiert bereits.",
+                    "OK");
+
+                return null;
+            }
+
+            await _datenbank.KategorieSpeichernAsync(
+                new Kategorie { Name = neueKategorie });
+
+            return neueKategorie;
         }
     }
 }
