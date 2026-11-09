@@ -39,6 +39,25 @@ namespace Einkaufsliste.Application.Pages
             await LadeProdukteFuerSucheAsync();
 
         }
+        private Einkaufsartikel? FindeGleichenOffenenArtikel(Einkaufsartikel artikelZumPruefen)
+        {
+            return artikelGruppen
+                .SelectMany(gruppe => gruppe)
+                .FirstOrDefault(artikel =>
+                    string.Equals(
+                        artikel.Name.Trim(),
+                        artikelZumPruefen.Name.Trim(),
+                        StringComparison.OrdinalIgnoreCase)
+                    && string.Equals(
+                        artikel.Einheit,
+                        artikelZumPruefen.Einheit,
+                        StringComparison.OrdinalIgnoreCase)
+                    && string.Equals(
+                        artikel.Kategorie,
+                        artikelZumPruefen.Kategorie,
+                        StringComparison.OrdinalIgnoreCase)
+                    && !artikel.IstErledigt);
+        }
 
         private async Task LadeProdukteFuerSucheAsync()
         {
@@ -133,22 +152,7 @@ namespace Einkaufsliste.Application.Pages
             }
 
             // Erst jetzt nach einem doppelten Artikel suchen
-            Einkaufsartikel vorhandenerArtikel = artikelGruppen
-                .SelectMany(gruppe => gruppe)
-                .FirstOrDefault(artikel =>
-                    string.Equals(
-                        artikel.Name.Trim(),
-                        neuerEintrag.Name.Trim(),
-                        StringComparison.OrdinalIgnoreCase)
-                    && string.Equals(
-                        artikel.Einheit,
-                        neuerEintrag.Einheit,
-                        StringComparison.OrdinalIgnoreCase)
-                    && string.Equals(
-                        artikel.Kategorie,
-                        neuerEintrag.Kategorie,
-                        StringComparison.OrdinalIgnoreCase)
-                    && !artikel.IstErledigt);
+            Einkaufsartikel? vorhandenerArtikel = FindeGleichenOffenenArtikel(neuerEintrag);
 
             if (vorhandenerArtikel != null)
             {

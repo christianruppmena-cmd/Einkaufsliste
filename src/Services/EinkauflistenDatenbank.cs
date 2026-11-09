@@ -615,16 +615,7 @@ public class EinkauflistenDatenbank
                 : wert.Trim().ToLowerInvariant();
         }
 
-        string name = Normalisieren(produkt.Name);
-        string marke = Normalisieren(produkt.Marke);
-        string variante = Normalisieren(produkt.Variante);
-        string packung = produkt.Packungsgroesse.ToString(
-            "0.################",
-            System.Globalization.CultureInfo.InvariantCulture) ?? "";
-        string einheit = Normalisieren(produkt.Basiseinheit);
-
-        produkt.ProduktSchluessel =
-            string.Join("|", name, marke, variante, packung, einheit);
+       produkt.ProduktSchluessel = ProduktSchluesselErstellen(produkt);
 
         var vorhandenesProdukt = await _datenbank
             .Table<Produkt>()
@@ -655,5 +646,36 @@ public class EinkauflistenDatenbank
             .Table<Einkaufsartikel>()
             .Where(a => a.Id == id)
             .FirstOrDefaultAsync();
+    }
+    public async Task<Produkt?> ProduktMitGleichemSchluesselLadenAsync(
+    Produkt produkt)
+    {
+        string schluessel = ProduktSchluesselErstellen(produkt);
+
+        return await _datenbank
+            .Table<Produkt>()
+            .Where(p =>
+                p.Id != produkt.Id &&
+                p.ProduktSchluessel == schluessel)
+            .FirstOrDefaultAsync();
+    }
+    private static string ProduktSchluesselErstellen(Produkt produkt)
+    {
+        static string Normalisieren(string? wert)
+        {
+            return string.IsNullOrWhiteSpace(wert)
+                ? string.Empty
+                : wert.Trim().ToLowerInvariant();
+        }
+
+        string name = Normalisieren(produkt.Name);
+        string marke = Normalisieren(produkt.Marke);
+        string variante = Normalisieren(produkt.Variante);
+        string packung = produkt.Packungsgroesse.ToString(
+            "0.################",
+            System.Globalization.CultureInfo.InvariantCulture);
+        string einheit = Normalisieren(produkt.Basiseinheit);
+
+        return string.Join("|", name, marke, variante, packung, einheit);
     }
 }
