@@ -11,22 +11,49 @@ namespace Einkaufsliste.Application.Pages
     {
         private Einkaufsartikel? FindeGleichenOffenenArtikel(Einkaufsartikel artikelZumPruefen)
         {
-            return artikelGruppen
-                .SelectMany(gruppe => gruppe)
-                .FirstOrDefault(artikel =>
-                    string.Equals(
-                        artikel.Name.Trim(),
-                        artikelZumPruefen.Name.Trim(),
-                        StringComparison.OrdinalIgnoreCase)
-                    && string.Equals(
-                        artikel.Einheit,
-                        artikelZumPruefen.Einheit,
-                        StringComparison.OrdinalIgnoreCase)
-                    && string.Equals(
-                        artikel.Kategorie,
-                        artikelZumPruefen.Kategorie,
-                        StringComparison.OrdinalIgnoreCase)
-                    && !artikel.IstErledigt);
+            return artikelGruppen.SelectMany(gruppe => gruppe).FirstOrDefault(artikel =>
+            {
+                bool gleichesProdukt =
+                artikel.ProduktId > 0 && artikelZumPruefen.ProduktId > 0
+                ? artikel.ProduktId == artikelZumPruefen.ProduktId
+                : string.Equals(
+                    artikel.Name?.Trim(),
+                    artikelZumPruefen.Name?.Trim(),
+                    StringComparison.OrdinalIgnoreCase);
+
+                bool gleicheEinheit = string.Equals(
+                    artikel.Einheit?.Trim(),
+                    artikelZumPruefen.Einheit?.Trim(),
+                    StringComparison.OrdinalIgnoreCase);
+                return gleichesProdukt && gleicheEinheit && !artikel.IstErledigt;
+            });
+        }
+        private async Task ArtikelHinzufuegenOderZusammenfuehrenAsync(Einkaufsartikel neuerEintrag)
+        {
+            await _artikelHinzufuegenSperre.WaitAsync();
+
+            try
+            {
+                List<Einkaufsartikel> aktuelleArtikel =
+                    await _datenbank.AlleArtikelLadenAsync();
+
+                ArtikelGruppieren(aktuelleArtikel);
+
+                if (await VorhandenenArtikelBehandelnAsync(neuerEintrag))
+                    return;
+
+                await _datenbank.ArtikelSpeichernAsync(neuerEintrag);
+
+                aktuelleArtikel = await _datenbank.AlleArtikelLadenAsync();
+                ArtikelGruppieren(aktuelleArtikel);
+
+                AktualisiereFortschritt();
+                await GesamtsummeAktualisierenAsync();
+            }
+            finally
+            {
+                _artikelHinzufuegenSperre.Release();
+            }
         }
         private async void OnArtikelHinzufuegenClicked(object sender, EventArgs e)
         {
@@ -125,20 +152,7 @@ namespace Einkaufsliste.Application.Pages
             }
 
             // Erst jetzt nach einem doppelten Artikel suchen
-            Einkaufsartikel? vorhandenerArtikel = FindeGleichenOffenenArtikel(neuerEintrag);
-
-            if (await VorhandenenArtikelBehandelnAsync(neuerEintrag))
-                return;
-
-            await _datenbank.ArtikelSpeichernAsync(neuerEintrag);
-
-            // Einkaufsliste entsprechend der gewählten Gruppierung aktualisieren
-            List<Einkaufsartikel> alleArtikel = await _datenbank.AlleArtikelLadenAsync();
-
-            ArtikelGruppieren(alleArtikel);
-
-            AktualisiereFortschritt();
-            await GesamtsummeAktualisierenAsync();
+            await ArtikelHinzufuegenOderZusammenfuehrenAsync(neuerEintrag);
         }
         private async void OnArtikelLoeschenClicked(object sender, EventArgs e)
         {

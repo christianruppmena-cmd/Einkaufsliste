@@ -89,37 +89,8 @@ namespace Einkaufsliste.Application.Pages
                 IstErledigt = false
             };
 
-            if (await VorhandenenArtikelBehandelnAsync(neuerArtikel))
-                return;
-            await _datenbank.ArtikelSpeichernAsync(neuerArtikel);
+            await ArtikelHinzufuegenOderZusammenfuehrenAsync(neuerArtikel);
 
-            // Passende Gruppe ermitteln
-            string gruppenName;
-
-            if (aktuelleGruppierung == "Kaufort")
-            {
-                gruppenName = alleHaendler
-                    .FirstOrDefault(h => h.Id == neuerArtikel.AusgewaehlterHaendlerId)
-                    ?.Name ?? "Ohne festgelegten Kaufort";
-            }
-            else
-            {
-                gruppenName = neuerArtikel.Kategorie;
-            }
-
-            Artikelgruppe gruppe = artikelGruppen
-                .FirstOrDefault(g => g.Kategorie == gruppenName);
-
-            if (gruppe == null)
-            {
-                gruppe = new Artikelgruppe(gruppenName);
-                artikelGruppen.Add(gruppe);
-            }
-
-            gruppe.Add(neuerArtikel);
-
-            AktualisiereFortschritt();
-            await GesamtsummeAktualisierenAsync();
         }
         private async Task<string?> KategorieFuerNeuesProduktAuswaehlenAsync(string produktName)
         {

@@ -12,6 +12,7 @@ namespace Einkaufsliste.Application.Pages
     {
         private readonly ObservableCollection<Artikelgruppe> artikelGruppen = new();
         private readonly EinkauflistenDatenbank _datenbank ;
+        private readonly System.Threading.SemaphoreSlim _artikelHinzufuegenSperre = new(1, 1);
         private const string GruppierungsEinstellung = "Gruppierungsart";
         private string aktuelleGruppierung = "Produktkategorie";
         private List<Produkt> alleProdukte = new();
