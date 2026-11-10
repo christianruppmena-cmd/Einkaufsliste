@@ -136,6 +136,42 @@ public partial class ProduktVerwaltungPage
 
         return packung;
     }
+    private async Task<bool> VorhandenesProduktZusammenfuehrenAsync(Produkt zuSpeicherndesProdukt,Produkt vorhandenesProdukt,string urspruenglicherName)
+    {
+        if (zuSpeicherndesProdukt.Id == 0)
+        {
+            await DisplayAlertAsync(
+                "Produkt bereits vorhanden",
+                $"„{vorhandenesProdukt.Name}“ existiert bereits.",
+                "OK");
+            return false;
+        }
+
+        bool bestaetigen = await DisplayAlertAsync(
+            "Produkt bereits vorhanden",
+            $"„{vorhandenesProdukt.Name}“ existiert bereits. " +
+            "Sollen Einkaufsartikel, Preise und Preisverläufe von " +
+            $"„{urspruenglicherName}“ übernommen werden? " +
+            "Das vorhandene Produkt behält seine Stammdaten.",
+            "Ja, übernehmen",
+            "Nein");
+
+        if (!bestaetigen)
+            return false;
+
+        await _datenbank.ProduktZusammenfuehrenAsync(
+            zuSpeicherndesProdukt.Id,
+            vorhandenesProdukt.Id);
+
+        // Das vorhandene Produkt behält sein Bild.
+        if (!string.IsNullOrWhiteSpace(ausgewaehlterBildPfad) &&
+            File.Exists(ausgewaehlterBildPfad))
+        {
+            File.Delete(ausgewaehlterBildPfad);
+        }
+
+        return true;
+    }
     private async void OnProduktSpeichernClicked(object sender, EventArgs e)
     {
         string name = NameEntry.Text?.Trim() ?? "";
@@ -182,39 +218,12 @@ public partial class ProduktVerwaltungPage
 
             if (vorhandenesProdukt != null)
             {
-                if (zuSpeicherndesProdukt.Id == 0)
-                {
-                    await DisplayAlertAsync(
-                        "Produkt bereits vorhanden",
-                        $"„{vorhandenesProdukt.Name}“ existiert bereits.",
-                        "OK");
+                bool zusammengefuehrt =
+                    await VorhandenesProduktZusammenfuehrenAsync(zuSpeicherndesProdukt, vorhandenesProdukt, urspruenglicherName);
+
+                if (!zusammengefuehrt)
                     return;
-                }
-
-                bool bestaetigen = await DisplayAlertAsync(
-                    "Produkt bereits vorhanden",
-                    $"„{vorhandenesProdukt.Name}“ existiert bereits. " +
-                    $"Sollen Einkaufsartikel, Preise und Preisverläufe von " +
-                    $"„{urspruenglicherName}“ übernommen werden? " +
-                    "Das vorhandene Produkt behält seine Stammdaten.",
-                    "Ja, übernehmen",
-                    "Nein");
-
-                if (!bestaetigen)
-                    return;
-
-                await _datenbank.ProduktZusammenfuehrenAsync(
-                    zuSpeicherndesProdukt.Id,
-                    vorhandenesProdukt.Id);
-
                 wurdeZusammengefuehrt = true;
-
-                // Das vorhandene Produkt behält sein Bild.
-                if (!string.IsNullOrWhiteSpace(ausgewaehlterBildPfad) &&
-                    File.Exists(ausgewaehlterBildPfad))
-                {
-                    File.Delete(ausgewaehlterBildPfad);
-                }
             }
             else
             {
