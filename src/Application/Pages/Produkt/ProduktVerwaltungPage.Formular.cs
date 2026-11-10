@@ -62,6 +62,36 @@ public partial class ProduktVerwaltungPage
         BevorzugterHaendlerPicker.ItemsSource = haendlerNamen;
         BevorzugterHaendlerPicker.SelectedIndex = 0;
     }
+    private async Task<decimal?> PackungsgroesseValidierenAsync(string packungText,string einheit)
+    {
+        if (string.IsNullOrWhiteSpace(packungText))
+            return 0m;
+
+        if (!decimal.TryParse(
+            packungText.Replace(',', '.'),
+            NumberStyles.Number,
+            CultureInfo.InvariantCulture,
+            out decimal packung)
+            || packung <= 0)
+        {
+            await DisplayAlertAsync(
+                "Ungültige Packungsgröße",
+                "Bitte gib eine gültige Zahl größer als 0 ein.",
+                "OK");
+            return null;
+        }
+
+        if (string.IsNullOrWhiteSpace(einheit))
+        {
+            await DisplayAlertAsync(
+                "Einheit fehlt",
+                "Bitte wähle eine Basiseinheit aus.",
+                "OK");
+            return null;
+        }
+
+        return packung;
+    }
     private async void OnProduktSpeichernClicked(object sender, EventArgs e)
     {
         string name = NameEntry.Text?.Trim() ?? "";
@@ -86,34 +116,17 @@ public partial class ProduktVerwaltungPage
                 "Bitte wähle eine Kategorie aus.", "OK");
             return;
         }
+         string packungText = PackungsgroesseEntry.Text?.Trim() ?? "";
+        decimal? validiertePackungsgroesse = await PackungsgroesseValidierenAsync(packungText, einheit);
 
-        decimal packungsgroesse = 0;
-
-        string packungText =
-            PackungsgroesseEntry.Text?.Trim().Replace(',', '.') ?? "";
-
-        if (!string.IsNullOrWhiteSpace(packungText))
+        if(validiertePackungsgroesse is null)
         {
-            if (!decimal.TryParse(
-                packungText,
-                NumberStyles.Number,
-                CultureInfo.InvariantCulture,
-                out decimal packung) || packung <= 0)
-            {
-                await DisplayAlertAsync("Ungültige Packungsgröße",
-                    "Bitte gib eine gültige Zahl größer als 0 ein.", "OK");
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(einheit))
-            {
-                await DisplayAlertAsync("Einheit fehlt",
-                    "Bitte wähle eine Basiseinheit aus.", "OK");
-                return;
-            }
-
-            packungsgroesse = packung;
+            return;
         }
+
+        decimal packungsgroesse = validiertePackungsgroesse.Value;
+
+
 
         string altesBild = produktZumBearbeiten?.BildPfad;
 
