@@ -62,6 +62,28 @@ public partial class ProduktVerwaltungPage
         BevorzugterHaendlerPicker.ItemsSource = haendlerNamen;
         BevorzugterHaendlerPicker.SelectedIndex = 0;
     }
+    private async Task<bool> ProduktPflichtfelderValidierenAsync(string name,string kategorie)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            await DisplayAlertAsync(
+                "Eingabe fehlt",
+                "Bitte gib einen Produktnamen ein.",
+                "OK");
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(kategorie))
+        {
+            await DisplayAlertAsync(
+                "Eingabe fehlt",
+                "Bitte wähle eine Kategorie aus.",
+                "OK");
+            return false;
+        }
+
+        return true;
+    }
     private async Task<decimal?> PackungsgroesseValidierenAsync(string packungText,string einheit)
     {
         if (string.IsNullOrWhiteSpace(packungText))
@@ -103,20 +125,10 @@ public partial class ProduktVerwaltungPage
         string ausgewaehlterHaendler = BevorzugterHaendlerPicker.SelectedItem?.ToString();
         int bevorzugterHaendlerId = alleHaendler.FirstOrDefault(h => h.Name == ausgewaehlterHaendler)?.Id ?? 0;
 
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            await DisplayAlertAsync("Eingabe fehlt",
-                "Bitte gib einen Produktnamen ein.", "OK");
+        if (!await ProduktPflichtfelderValidierenAsync(name, kategorie))
             return;
-        }
-
-        if (string.IsNullOrWhiteSpace(kategorie))
-        {
-            await DisplayAlertAsync("Eingabe fehlt",
-                "Bitte wähle eine Kategorie aus.", "OK");
-            return;
-        }
-         string packungText = PackungsgroesseEntry.Text?.Trim() ?? "";
+        
+        string packungText = PackungsgroesseEntry.Text?.Trim() ?? "";
         decimal? validiertePackungsgroesse = await PackungsgroesseValidierenAsync(packungText, einheit);
 
         if(validiertePackungsgroesse is null)
@@ -125,8 +137,6 @@ public partial class ProduktVerwaltungPage
         }
 
         decimal packungsgroesse = validiertePackungsgroesse.Value;
-
-
 
         string altesBild = produktZumBearbeiten?.BildPfad;
 
