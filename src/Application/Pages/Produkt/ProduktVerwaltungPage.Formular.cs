@@ -6,6 +6,28 @@ namespace Einkaufsliste.Application.Pages.Produkte;
 
 public partial class ProduktVerwaltungPage
 {
+    private Produkt ProduktAusFormularErstellenOderAktualisieren(string name, string marke, string variante, string kategorie, string einheit, int bevorzugterHaendlerId, decimal packungsgroesse)
+    {
+        Produkt produkt = produktZumBearbeiten ?? new Produkt();
+
+        produkt.Name = name;
+        produkt.Marke = marke;
+        produkt.Variante = variante;
+        produkt.Kategorie = kategorie;
+        produkt.Basiseinheit = einheit ?? "";
+        produkt.BevorzugterHaendlerId = bevorzugterHaendlerId;
+        produkt.Packungsgroesse = packungsgroesse;
+
+        if (bildEntfernen)
+        {
+            produkt.BildPfad = null;
+        }
+        else if (ausgewaehlterBildPfad != null)
+        {
+            produkt.BildPfad = ausgewaehlterBildPfad;
+        }
+        return produkt;
+    }
     private void OnNeuesProduktClicked(object sender, EventArgs e)
     {
         FormularZustandZuruecksetzen();
@@ -142,26 +164,14 @@ public partial class ProduktVerwaltungPage
 
         string urspruenglicherName = produktZumBearbeiten?.Name ?? name;
 
-        Produkt zuSpeicherndesProdukt =
-            produktZumBearbeiten ?? new Produkt();
-
-        zuSpeicherndesProdukt.Name = name;
-        zuSpeicherndesProdukt.Marke = marke;
-        zuSpeicherndesProdukt.Variante = variante;
-        zuSpeicherndesProdukt.Kategorie = kategorie;
-        zuSpeicherndesProdukt.BevorzugterHaendlerId = bevorzugterHaendlerId;
-        zuSpeicherndesProdukt.Packungsgroesse = packungsgroesse;
-        zuSpeicherndesProdukt.Basiseinheit = einheit ?? "";
-
-
-        if (bildEntfernen)
-        {
-            zuSpeicherndesProdukt.BildPfad = null;
-        }
-        else if (ausgewaehlterBildPfad != null)
-        {
-            zuSpeicherndesProdukt.BildPfad = ausgewaehlterBildPfad;
-        }
+        Produkt zuSpeicherndesProdukt = ProduktAusFormularErstellenOderAktualisieren(
+            name,
+            marke,
+            variante,
+            kategorie,
+            einheit,
+            bevorzugterHaendlerId,
+            packungsgroesse);
 
         try
         {
