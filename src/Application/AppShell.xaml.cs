@@ -57,7 +57,7 @@ namespace Einkaufsliste.Application
             {
                 Title = "💾 Datensicherung",
                 Route = "DatenbanksicherungPage",
-                Content = new DatenbanksicherungPage(backupService)
+                Content = new DatenbanksicherungPage(backupService, datenbank)
             };
 
             // Eigene Menüeinträge

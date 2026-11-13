@@ -65,4 +65,20 @@ public partial class EinkauflistenDatenbank
                 "ALTER TABLE PreisHistorie ADD COLUMN Versionsnummer INTEGER NOT NULL DEFAULT 0");
         }
     }
+    public async Task DatenbankImportierenAsync(string importPfad)
+    {
+        SQLiteAsyncConnection bisherigeVerbindung = _datenbank;
+
+        try
+        {
+            await bisherigeVerbindung.CloseAsync();
+            await _backupService.DatenbankImportierenAsync(importPfad);
+        }
+        finally
+        {
+            _datenbank = new SQLiteAsyncConnection(datenbankPfad);
+        }
+
+        await InitialisierenAsync();
+    }
 }

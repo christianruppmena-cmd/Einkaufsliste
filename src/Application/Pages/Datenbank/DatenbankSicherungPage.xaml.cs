@@ -1,17 +1,20 @@
 using Einkaufsliste.Interfaces;
+using Einkaufsliste.Services;
 using Microsoft.Maui.Controls.Shapes;
 
 namespace Einkaufsliste.Application.Pages.Datenbank;
 
 public partial class DatenbanksicherungPage : ContentPage
 {
+    private readonly EinkauflistenDatenbank _datenbank;
     private readonly IDBBackupService _backupService;
 
-    public DatenbanksicherungPage(IDBBackupService dBBackupService)
+    public DatenbanksicherungPage(IDBBackupService dBBackupService, EinkauflistenDatenbank datenbank)
     {
         InitializeComponent();
 
         _backupService = dBBackupService;
+        _datenbank = datenbank;
     }
     protected override async void OnAppearing()
     {
@@ -83,7 +86,7 @@ public partial class DatenbanksicherungPage : ContentPage
             return;
         try
         {
-            await _backupService.DatenbankImportierenAsync(sicherung.FullName);
+            await _datenbank.DatenbankImportierenAsync(sicherung.FullName);
             StatusLabel.Text = "Lokale Sicherung erfolgreich wiederhergestellt.";
 
             await DisplayAlertAsync(
@@ -172,7 +175,7 @@ public partial class DatenbanksicherungPage : ContentPage
             }
 
             // Datenbank und Produktbilder importieren
-            await _backupService.DatenbankImportierenAsync(importPfad);
+            await _datenbank.DatenbankImportierenAsync(importPfad);
 
             StatusLabel.Text =
                 "Datenbanksicherung erfolgreich wiederhergestellt.";
