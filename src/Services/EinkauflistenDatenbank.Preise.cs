@@ -1,19 +1,9 @@
 ﻿using Einkaufsliste.Models;
-using Einkaufsliste.Interfaces;
 
 namespace Einkaufsliste.Services
 {
     public partial class EinkauflistenDatenbank
     {
-        public async Task<List<Produktpreis>> AlleProduktpreiseLadenAsync(int produktId)
-        {
-            await InitialisierenAsync();
-
-            return await _datenbank
-                .Table<Produktpreis>()
-                .Where(p => p.ProduktId == produktId && p.IstAktiv)
-                .ToListAsync();
-        }
         public async Task<Produktpreis?> AktuellenProduktpreisLadenAsync(int produktId, int haendlerId, string preisart)
         {
             await InitialisierenAsync();
@@ -207,18 +197,6 @@ namespace Einkaufsliste.Services
             });
 
             await _backupService.LokaleSicherungErstellenAsync();
-        }
-        public async Task<List<PreisHistorie>> PreisHistorieLadenAsync(int produktId, int haendlerId)
-        {
-            await InitialisierenAsync();
-
-            return await _datenbank
-                .Table<PreisHistorie>()
-                .Where(h =>
-                    h.ProduktId == produktId &&
-                    h.HaendlerId == haendlerId)
-                .OrderByDescending(h => h.ErfasstAm)
-                .ToListAsync();
         }
     }
 }
