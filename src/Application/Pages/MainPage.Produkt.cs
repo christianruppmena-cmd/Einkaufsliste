@@ -1,8 +1,4 @@
-﻿using Einkaufsliste.Services;
-using Einkaufsliste.Models;
-using Einkaufsliste.Utilities;
-using Einkaufsliste.Application.Pages.Artikel;
-using Einkaufsliste.Application.Pages.Kategorien;
+﻿using Einkaufsliste.Models;
 using Einkaufsliste.Application.Pages.Produkte;
 
 namespace Einkaufsliste.Application.Pages
