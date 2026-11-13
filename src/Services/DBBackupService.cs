@@ -1,6 +1,4 @@
 ﻿using Einkaufsliste.Interfaces;
-using Einkaufsliste.Models;
-using System.IO.Compression;
 
 namespace Einkaufsliste.Services;
 
