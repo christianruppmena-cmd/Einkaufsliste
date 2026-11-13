@@ -1,5 +1,4 @@
 ﻿using Einkaufsliste.Models;
-using Einkaufsliste.Interfaces;
 
 namespace Einkaufsliste.Services
 {
