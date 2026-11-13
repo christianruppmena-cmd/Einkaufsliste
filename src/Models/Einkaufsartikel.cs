@@ -2,14 +2,22 @@
 {
     public class Einkaufsartikel : INotifyPropertyChanged
     {
+        private string _haendlerAnzeige = string.Empty;
+        private string _name = string.Empty;
+        private bool _istErledigt;
+        private decimal _stueckpreis;
+        private string _menge = "1";
+        private string _einheit = "Stück";
+        private string _hinweis = string.Empty;
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
         [PrimaryKey, AutoIncrement]
         public int Id { get; set; }
         public int ProduktId { get; set; }
         public int AusgewaehlterHaendlerId { get; set; }
-
         public string Kategorie { get; set; } = "Sonstiges";
-
-        private string _haendlerAnzeige = string.Empty;
+        
         [Ignore]
         public string HaendlerAnzeige
         {
@@ -23,8 +31,6 @@
                 OnPropertyChanged(nameof(HaendlerAnzeige));
             }
         }
-
-        private string _name = string.Empty;
         public string Name
         {
             get => _name;
@@ -37,8 +43,6 @@
                 OnPropertyChanged();
             }
         }
-
-        private bool _istErledigt;
         public bool IstErledigt
         {
             get => _istErledigt;
@@ -50,32 +54,19 @@
                 OnPropertyChanged();
             }
         }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged(
-            [CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(
-                this,
-                new PropertyChangedEventArgs(propertyName));
-        }
-
-
-        private decimal stueckpreis;
         public decimal Stueckpreis
         {
-            get => stueckpreis;
+            get => _stueckpreis;
             set
             {
-                if (stueckpreis == value)
+                if (_stueckpreis == value)
                     return;
 
-                stueckpreis = value;
+                _stueckpreis = value;
                 OnPropertyChanged(nameof(Stueckpreis));
                 OnPropertyChanged(nameof(Gesamtpreis));
             }
         }
-
         public decimal Gesamtpreis
         {
             get
@@ -93,24 +84,20 @@
                 return Stueckpreis;
             }
         }
-
-        private string menge = "1";
         public string Menge
         {
-            get => menge;
+            get => _menge;
             set
             {
-                if (menge == value)
+                if (_menge == value)
                     return;
 
-                menge = value;
+                _menge = value;
                 OnPropertyChanged(nameof(Menge));
                 OnPropertyChanged(nameof(DetailsAnzeige));
                 OnPropertyChanged(nameof(Gesamtpreis));
             }
         }
-
-        private string _einheit = "Stück";
         public string Einheit
         {
             get => _einheit;
@@ -124,8 +111,6 @@
                 OnPropertyChanged(nameof(DetailsAnzeige));
             }
         }
-
-        private string _hinweis = string.Empty;
         public string Hinweis
         {
             get => _hinweis;
@@ -139,7 +124,6 @@
                 OnPropertyChanged(nameof(DetailsAnzeige));
             }
         }
-
         public string DetailsAnzeige
         {
             get
@@ -151,6 +135,12 @@
 
                 return $"{mengeEinheit} - {Hinweis}";
             }
+        }
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(
+                this,
+                new PropertyChangedEventArgs(propertyName));
         }
     }
 }

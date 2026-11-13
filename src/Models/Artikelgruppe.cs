@@ -3,7 +3,6 @@
 public class Artikelgruppe : ObservableCollection<Einkaufsartikel>
 {
     public string Kategorie { get; }
-
     public string Ueberschrift => $"{Kategorie.ToUpper()} ({Count})";
 
     public Artikelgruppe(string kategorie)
@@ -12,7 +11,6 @@ public class Artikelgruppe : ObservableCollection<Einkaufsartikel>
 
         CollectionChanged += BeiArtikelAenderung;
     }
-
     private void BeiArtikelAenderung(object sender, NotifyCollectionChangedEventArgs e)
     {
         OnPropertyChanged(

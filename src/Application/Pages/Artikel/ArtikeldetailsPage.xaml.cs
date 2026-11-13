@@ -7,9 +7,7 @@ public partial class ArtikeldetailsPage : ContentPage
     private readonly Einkaufsartikel artikel;
     private readonly TaskCompletionSource<bool> ergebnis = new TaskCompletionSource<bool>();
     public Task<bool> ErgebnisTask => ergebnis.Task;
-
     public bool Gespeichert { get; private set; }
-
     public ArtikeldetailsPage(Einkaufsartikel artikel)
     {
         InitializeComponent();
@@ -33,7 +31,6 @@ public partial class ArtikeldetailsPage : ContentPage
             EinheitAuswahl.SelectedItem = "Stück";
         }
     }
-
     private async void OnSpeichernClicked(object sender, EventArgs e)
   
         {
@@ -80,7 +77,6 @@ public partial class ArtikeldetailsPage : ContentPage
         await Navigation.PopModalAsync();
         ergebnis.TrySetResult(true);
     }
-
     private async void OnAbbrechenClicked(object sender, EventArgs e)
     {
         Gespeichert = false;

@@ -5,7 +5,6 @@ using Einkaufsliste.Application.Pages.Produkte;
 using Einkaufsliste.Application.Pages.Datenbank;
 using Einkaufsliste.Application.Pages.Kategorien;
 
-
 namespace Einkaufsliste.Application
 {
     public partial class AppShell : Shell
@@ -140,7 +139,6 @@ namespace Einkaufsliste.Application
 
             startInhalt = einkaufsliste;
         }
-
         public void StartseiteAnzeigen()
         {
             startInhalt.Content = new MainPage(_datenbank);

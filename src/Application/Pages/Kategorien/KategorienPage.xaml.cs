@@ -13,14 +13,12 @@ public partial class KategorienPage : ContentPage
         InitializeComponent();
         _datenbank = datenbank;
     }
-
     protected override async void OnAppearing()
     {
         base.OnAppearing();
 
         await KategorienLadenAsync();
     }
-
     private async Task KategorienLadenAsync()
     {
         await _datenbank.InitialisierenAsync();
@@ -30,7 +28,6 @@ public partial class KategorienPage : ContentPage
 
         KategorienListe.ItemsSource = kategorien;
     }
-
     private async void OnNeueKategorieClicked(object sender, EventArgs e)
     {
         string name = await DisplayPromptAsync(
@@ -54,7 +51,6 @@ public partial class KategorienPage : ContentPage
         await _datenbank.KategorieSpeichernAsync(new Kategorie { Name = name });
         await KategorienLadenAsync();
     }
-
     private async void OnKategorieBearbeitenClicked(object sender, EventArgs e)
     {
         if (sender is not Button button || button.CommandParameter is not Kategorie kategorie)
@@ -97,5 +93,4 @@ public partial class KategorienPage : ContentPage
             "Die Kategorie wurde umbenannt.",
             "OK");
     }
-
 }

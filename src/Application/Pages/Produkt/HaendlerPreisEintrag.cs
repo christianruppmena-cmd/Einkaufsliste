@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
+﻿
 namespace Einkaufsliste.Application.Pages.Produkte;
 
 public class HaendlerPreisEintrag : System.ComponentModel.INotifyPropertyChanged
 {
-    public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+    public event System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
 
     private bool gueltigBisAktiviert;
     public int HaendlerId { get; set; }

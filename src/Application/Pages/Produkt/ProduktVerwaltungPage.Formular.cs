@@ -1,5 +1,4 @@
-﻿using Einkaufsliste.Services;
-using System.Globalization;
+﻿using System.Globalization;
 using Einkaufsliste.Models;
 
 namespace Einkaufsliste.Application.Pages.Produkte;

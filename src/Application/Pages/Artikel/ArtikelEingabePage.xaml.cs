@@ -5,9 +5,8 @@ namespace Einkaufsliste.Application.Pages.Artikel;
 public partial class ArtikelEingabePage : ContentPage
 {
     private readonly TaskCompletionSource<Einkaufsartikel> ergebnisQuelle = new();
-
     public Task<Einkaufsartikel> ErgebnisTask => ergebnisQuelle.Task;
-
+   
     public ArtikelEingabePage(string artikelName)
     {
         InitializeComponent();
@@ -15,7 +14,6 @@ public partial class ArtikelEingabePage : ContentPage
         ArtikelNameEingabe.Text = artikelName;
         EinheitAuswahl.SelectedItem = "Stück";
     }
-
     private async void OnHinzufuegenClicked(object sender, EventArgs e)
     {
         string name = ArtikelNameEingabe.Text?.Trim() ?? string.Empty;
@@ -83,7 +81,6 @@ public partial class ArtikelEingabePage : ContentPage
         ergebnisQuelle.TrySetResult(artikel);
         await Navigation.PopModalAsync();
     }
-
     private async void OnAbbrechenClicked(object sender, EventArgs e)
     {
         ergebnisQuelle.TrySetResult(null);

@@ -1,10 +1,5 @@
 ﻿using Einkaufsliste.Services;
 using Einkaufsliste.Models;
-using Einkaufsliste.Utilities;
-using Einkaufsliste.Application.Pages.Artikel;
-using Einkaufsliste.Application.Pages.Kategorien;
-using Einkaufsliste.Application.Pages.Produkte;
-
 
 namespace Einkaufsliste.Application.Pages
 {
@@ -50,10 +45,6 @@ namespace Einkaufsliste.Application.Pages
             await GesamtsummeAktualisierenAsync();
 
            
-        }
-        private async void OnKategorienOeffnenClicked(object sender, EventArgs e)
-        {
-            await Navigation.PushAsync(new KategorienPage(_datenbank));
-        }
+        }        
      }
 }

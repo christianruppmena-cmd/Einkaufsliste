@@ -1,5 +1,4 @@
-﻿
-using Einkaufsliste.Services;
+﻿using Einkaufsliste.Services;
 using Einkaufsliste.Interfaces;
 
 namespace Einkaufsliste.Application
@@ -14,7 +13,6 @@ namespace Einkaufsliste.Application
             _datenbank = datenbank;
             _backupService = backupService;
         }
-
         protected override Window CreateWindow(IActivationState? activationState)
         {
             var shell = new AppShell(_datenbank, _backupService);

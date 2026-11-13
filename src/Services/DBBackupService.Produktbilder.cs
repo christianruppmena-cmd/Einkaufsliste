@@ -5,8 +5,7 @@ namespace Einkaufsliste.Services
 {
     public partial class DBBackupService
     {
-        private async Task ProduktbilderZumArchivHinzufuegenAsync(
-            ZipArchive archiv)
+        private async Task ProduktbilderZumArchivHinzufuegenAsync(ZipArchive archiv)
         {
             var produkte = await datenbank
                 .Table<Produkt>()

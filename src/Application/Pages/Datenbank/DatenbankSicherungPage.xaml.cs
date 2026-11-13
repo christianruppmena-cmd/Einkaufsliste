@@ -13,13 +13,11 @@ public partial class DatenbanksicherungPage : ContentPage
 
         _backupService = dBBackupService;
     }
-
     protected override async void OnAppearing()
     {
         base.OnAppearing();
         await SicherungenAnzeigenAsync();
     }
-
     private async Task SicherungenAnzeigenAsync()
     {
         SicherungenListe.Children.Clear();
@@ -74,7 +72,6 @@ public partial class DatenbanksicherungPage : ContentPage
             SicherungenListe.Children.Add(karte);
         }
     }
-
     private async Task LokaleSicherungenWiederherstellenAsync(FileInfo sicherung)
     {
         bool bestaetigt = await DisplayAlertAsync(
@@ -103,7 +100,6 @@ public partial class DatenbanksicherungPage : ContentPage
                 "OK");
         }
     }
-
     private async void OnExportierenClicked(object sender, EventArgs e)
     {
         try
@@ -128,7 +124,6 @@ public partial class DatenbanksicherungPage : ContentPage
                 "OK");
         }
     }
-
     private async void OnImportierenClicked(object sender, EventArgs e)
     {
         string importPfad = null;

@@ -7,10 +7,7 @@ public class Haendler
 
     [Unique, NotNull]
     public string Name { get; set; } = string.Empty;
-
     public bool IstAktiv { get; set; } = true;
-
     public int Sortierung { get; set; }
-
     public string? LogoPfad { get; set; }
 }
