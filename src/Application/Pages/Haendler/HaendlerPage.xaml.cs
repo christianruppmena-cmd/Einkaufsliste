@@ -1,6 +1,5 @@
 using Einkaufsliste.Models;
 using Einkaufsliste.Services;
-using System.Collections.ObjectModel;
 
 namespace Einkaufsliste;
 
@@ -8,12 +7,7 @@ public partial class HaendlerPage : ContentPage
 {
     private readonly EinkauflistenDatenbank datenbank;
 
-    private readonly string logoOrdner = Path.Combine(
-        FileSystem.AppDataDirectory,
-        "Haendlerlogos");
-
     public ObservableCollection<Haendler> HaendlerListeItems { get; set; } = new();
-
     public HaendlerPage(EinkauflistenDatenbank datenbank)
     {
         InitializeComponent();
@@ -22,14 +16,12 @@ public partial class HaendlerPage : ContentPage
 
         HaendlerListe.ItemsSource = HaendlerListeItems;
     }
-
     protected override async void OnAppearing()
     {
         base.OnAppearing();
 
         await HaendlerLadenAsync();
     }
-
     private async Task HaendlerLadenAsync()
     {
         HaendlerListeItems.Clear();
@@ -42,7 +34,6 @@ public partial class HaendlerPage : ContentPage
             HaendlerListeItems.Add(eintrag);
         }
     }
-
     private async void OnHaendlerAngeklickt(object sender, TappedEventArgs e)
     {
         if (sender is not BindableObject element ||
@@ -163,7 +154,6 @@ public partial class HaendlerPage : ContentPage
                 break;
         }
     }
-   
     private async Task<string?> LogoAuswaehlenAsync()
     {
         try
@@ -203,7 +193,6 @@ public partial class HaendlerPage : ContentPage
             return null;
         }
     }
-
     private async void OnHaendlerHinzufuegenClicked(object sender, EventArgs e)
     {
         string name = await DisplayPromptAsync(
@@ -251,4 +240,7 @@ public partial class HaendlerPage : ContentPage
             $"Der Händler „{name}“ wurde hinzugefügt.",
             "OK");
     }
+    private readonly string logoOrdner = Path.Combine(
+        FileSystem.AppDataDirectory,
+        "Haendlerlogos");
 }
