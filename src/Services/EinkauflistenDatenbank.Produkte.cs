@@ -1,5 +1,4 @@
 ﻿using Einkaufsliste.Models;
-using Einkaufsliste.Interfaces;
 
 namespace Einkaufsliste.Services
 {
@@ -9,19 +8,6 @@ namespace Einkaufsliste.Services
         {
             return await _datenbank.Table<Produkt>().ToListAsync();
 
-        }
-        public async Task<List<string>> AlleKategorienLadenAsync()
-        {
-            await InitialisierenAsync();
-
-            List<Produkt> produkte = await _datenbank.Table<Produkt>().ToListAsync();
-
-            return produkte
-                .Select(p => p.Kategorie)
-                .Where(k => !string.IsNullOrWhiteSpace(k))
-                .Distinct()
-                .OrderBy(k => k)
-                .ToList();
         }
         public async Task<Produkt?> ProduktFindenAsync(string name)
         {
