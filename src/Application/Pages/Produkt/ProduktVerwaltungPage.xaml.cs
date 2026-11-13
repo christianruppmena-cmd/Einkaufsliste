@@ -32,7 +32,6 @@ public partial class ProduktVerwaltungPage : ContentPage
             ProduktFormularBereich.IsVisible = false;
         }
     }
-   
     protected override async void OnAppearing()
     {
         base.OnAppearing();
@@ -41,14 +40,12 @@ public partial class ProduktVerwaltungPage : ContentPage
         await LadeProdukteAsync();
         await LadeHaendlerAsync();
     }
-    
     private async Task LadeProdukteAsync()
     {
         alleProdukte = await _datenbank.AlleProdukteLadenAsync();
 
         ProduktListe.ItemsSource = alleProdukte.Where(p => p.IstAktiv).OrderBy(p => p.Name).ToList();
     }
-    
     private async void OnProduktLoeschenClicked(object sender, EventArgs e)
     {
         if (produktZumBearbeiten == null)
@@ -85,7 +82,6 @@ public partial class ProduktVerwaltungPage : ContentPage
                 "OK");
         }
     }
-    
     private async void OnPreiseVerwaltenClicked( object sender,EventArgs e)
     {
         if (sender is not Button button ||

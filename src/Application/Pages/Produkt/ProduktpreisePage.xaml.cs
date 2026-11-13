@@ -14,7 +14,6 @@ public partial class ProduktpreisePage : ContentPage
 {
     private readonly EinkauflistenDatenbank datenbank;
     private readonly Produkt produkt;
-
     public ProduktpreisePage(EinkauflistenDatenbank datenbank, Produkt produkt)
     {
         InitializeComponent();
@@ -24,13 +23,11 @@ public partial class ProduktpreisePage : ContentPage
 
         ProduktNameLabel.Text = produkt.Name;
     }
-
     protected override async void OnAppearing()
     {
         base.OnAppearing();
         await LadePreiseAsync();
     }
-
     private async Task LadePreiseAsync()
     {
         List<Haendler> haendler =
@@ -83,7 +80,6 @@ public partial class ProduktpreisePage : ContentPage
 
         HaendlerPreisListe.ItemsSource = anzeige;
     }
-
     private async void OnHaendlerPreisSpeichernClicked(object sender, EventArgs e)
     {
         if (sender is not Button button ||

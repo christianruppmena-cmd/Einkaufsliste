@@ -1,5 +1,5 @@
 ﻿using Einkaufsliste.Models;
-using Einkaufsliste.Interfaces;
+
 
 namespace Einkaufsliste.Services
 {
@@ -65,13 +65,6 @@ namespace Einkaufsliste.Services
         {
             await _datenbank.DeleteAsync(artikel);
             await _backupService.LokaleSicherungErstellenAsync();
-        }
-        public async Task<Einkaufsartikel?> ArtikelLadenNachIdAsync(int id)
-        {
-            return await _datenbank
-                .Table<Einkaufsartikel>()
-                .Where(a => a.Id == id)
-                .FirstOrDefaultAsync();
         }
     }
 }

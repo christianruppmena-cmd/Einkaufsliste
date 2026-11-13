@@ -65,8 +65,4 @@ public partial class EinkauflistenDatenbank
                 "ALTER TABLE PreisHistorie ADD COLUMN Versionsnummer INTEGER NOT NULL DEFAULT 0");
         }
     }
-    
-    
-    
-
 }
