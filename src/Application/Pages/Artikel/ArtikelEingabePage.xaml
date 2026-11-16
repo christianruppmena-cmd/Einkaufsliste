@@ -58,6 +58,7 @@
                         <Picker.Items>
                             <x:String>Stück</x:String>
                             <x:String>Packung</x:String>
+                            <x:String>Kasten</x:String>
                             <x:String>Flasche</x:String>
                             <x:String>Gramm</x:String>
                             <x:String>Kilogramm</x:String>

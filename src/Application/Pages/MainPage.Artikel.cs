@@ -151,7 +151,7 @@ namespace Einkaufsliste.Application.Pages
 
             string[] einheiten =
             {
-                "Stück","Packung", "Flasche", "Kg", "g", "Liter", "ml"
+                "Stück","Packung", "Kasten", "Flasche", "Kg", "g", "Liter", "ml"
             };
 
             string einheit = await DisplayActionSheetAsync(

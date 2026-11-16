@@ -430,6 +430,7 @@
                                         <x:String>Stück</x:String>
                                         <x:String>Packung</x:String>
                                         <x:String>Flasche</x:String>
+                                        <x:String>Kasten</x:String>
                                         <x:String>Kg</x:String>
                                         <x:String>g</x:String>
                                         <x:String>Liter</x:String>

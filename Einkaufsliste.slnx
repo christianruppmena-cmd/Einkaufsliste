@@ -1,3 +1,5 @@
 <Solution>
-  <Project Path="Einkaufsliste.csproj" />
+  <Project Path="Einkaufsliste.csproj">
+    <Deploy Solution="Debug|*" />
+  </Project>
 </Solution>
