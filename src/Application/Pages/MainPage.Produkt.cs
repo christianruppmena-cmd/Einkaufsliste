@@ -7,12 +7,12 @@ namespace Einkaufsliste.Application.Pages
     {
         private async Task LadeProdukteFuerSucheAsync()
         {
-            alleProdukte = await _datenbank.AlleProdukteLadenAsync();
+            alleProdukte = await _produkteService.AlleProdukteLadenAsync();
         }
         private async void OnProduktNeuAnlegenClicked(object sender, EventArgs e)
         {
             await Navigation.PushAsync(
-                new ProduktVerwaltungPage(_datenbank, true));
+                new ProduktVerwaltungPage(true));
         }
         private void OnProduktsucheTextChanged(object sender, TextChangedEventArgs e)
         {
@@ -59,7 +59,7 @@ namespace Einkaufsliste.Application.Pages
 
             if (produkt.BevorzugterHaendlerId > 0)
             {
-                aktuellerPreis = await _datenbank!.GuenstigstenAktuellenPreisLadenAsync(
+                aktuellerPreis = await _preisService.GuenstigstenAktuellenPreisLadenAsync(
                     produkt.Id,
                     produkt.BevorzugterHaendlerId);
             }

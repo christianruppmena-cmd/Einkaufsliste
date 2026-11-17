@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Einkaufsliste.Services;
 using Einkaufsliste.Interfaces;
 using Einkaufsliste.Application;
+using Einkaufsliste.Application.Pages;
 
 namespace Einkaufsliste
 {
@@ -20,8 +21,15 @@ namespace Einkaufsliste
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
 
-            builder.Services.AddSingleton<EinkauflistenDatenbank>();
-            builder.Services.AddSingleton<IDBBackupService, DBBackupService>();
+            
+            builder.Services.AddTransient<IDBBackupService, DBBackupService>();
+            builder.Services.AddTransient<IArtikelService, ArtikelService>();
+            builder.Services.AddTransient<IPreisService, PreiseService>();
+            builder.Services.AddTransient<IHaendlerService, HaendlerService>();
+            builder.Services.AddTransient<IKategorienService, KategorienService>();
+            builder.Services.AddTransient<IProdukteService, ProdukteService>();
+            builder.Services.AddTransient<IInitialisierungsService, InitialisierungsService>();
+            builder.Services.AddSingleton<MainPage>();
 
 #if DEBUG
             builder.Logging.AddDebug();

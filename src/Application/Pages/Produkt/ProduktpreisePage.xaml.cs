@@ -1,24 +1,22 @@
-using Einkaufsliste.Services;
 using Einkaufsliste.Models;
-using System.ComponentModel;
+using Einkaufsliste.Interfaces;
 using System.Globalization;
 
-using Einkaufsliste;
-using Einkaufsliste.Application;
-using Einkaufsliste.Application.Pages;
-using Einkaufsliste.Application.Pages.Produkte;
 
 namespace Einkaufsliste.Application.Pages.Produkte;
 
 public partial class ProduktpreisePage : ContentPage
 {
-    private readonly EinkauflistenDatenbank datenbank;
+    private readonly IHaendlerService _haendlerService;
+    private readonly IPreisService _preisService;
+    private readonly IArtikelService _artikelService;
+    
     private readonly Produkt produkt;
-    public ProduktpreisePage(EinkauflistenDatenbank datenbank, Produkt produkt)
+    public ProduktpreisePage(Produkt produkt)
     {
         InitializeComponent();
 
-        this.datenbank = datenbank;
+        
         this.produkt = produkt;
 
         ProduktNameLabel.Text = produkt.Name;
@@ -31,20 +29,20 @@ public partial class ProduktpreisePage : ContentPage
     private async Task LadePreiseAsync()
     {
         List<Haendler> haendler =
-            await datenbank.AlleHaendlerLadenAsync();
+            await _haendlerService.AlleHaendlerLadenAsync();
 
         List<HaendlerPreisEintrag> anzeige = new();
 
         foreach (Haendler h in haendler)
         {
             Produktpreis normalpreis =
-                await datenbank.AktuellenProduktpreisLadenAsync(
+                await _preisService.AktuellenProduktpreisLadenAsync(
                     produkt.Id,
                     h.Id,
                     "Normalpreis");
 
             Produktpreis angebot =
-                await datenbank.AktuellenProduktpreisLadenAsync(
+                await   _preisService.AktuellenProduktpreisLadenAsync(
                     produkt.Id,
                     h.Id,
                     "Angebot");
@@ -168,14 +166,14 @@ public partial class ProduktpreisePage : ContentPage
                     IstAktiv = true
                 };
 
-                await datenbank.ProduktpreisSpeichernAsync(neuerPreis);
+                await _preisService.ProduktpreisSpeichernAsync(neuerPreis);
             }
 
             if (angebotDeaktivieren)
             {
                 if (eintrag.AngebotId > 0)
                 {
-                    await datenbank.ProduktpreisDeaktivierenAsync(
+                    await _preisService.ProduktpreisDeaktivierenAsync(
                         eintrag.AngebotId);
                 }
             }
@@ -205,12 +203,12 @@ public partial class ProduktpreisePage : ContentPage
                     IstAktiv = true
                 };
 
-                await datenbank.ProduktpreisSpeichernAsync(neuerPreis);
+                await _preisService.ProduktpreisSpeichernAsync(neuerPreis);
             }
 
             if (produkt.BevorzugterHaendlerId == eintrag.HaendlerId)
             {
-                await datenbank.EinkaufsartikelHaendlerAktualisierenAsync(
+                await _artikelService.EinkaufsartikelHaendlerAktualisierenAsync(
                     produkt.Id,
                     eintrag.HaendlerId);
             }

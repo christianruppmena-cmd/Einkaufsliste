@@ -33,7 +33,7 @@ namespace Einkaufsliste.Services
             {
                 // Aktuelle Datenbank sichern
                 string sichererPfad = tempDatenbank.Replace("'", "''");
-                await datenbank.ExecuteAsync(
+                await Datenbank.ExecuteAsync(
                     "VACUUM INTO ?",
                     sichererPfad);
 
@@ -99,7 +99,7 @@ namespace Einkaufsliste.Services
         }
         private async Task<bool> DatenbankEnthaeltDatenAsync()
         {
-            int anzahlProdukte = await datenbank.Table<Produkt>().CountAsync();
+            int anzahlProdukte = await Datenbank.Table<Produkt>().CountAsync();
             return anzahlProdukte > 0;
         }
         private async Task SicherungsOrdnerErstellenAsync()

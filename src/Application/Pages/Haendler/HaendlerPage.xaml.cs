@@ -1,18 +1,18 @@
+using Einkaufsliste.Interfaces;
 using Einkaufsliste.Models;
-using Einkaufsliste.Services;
 
 namespace Einkaufsliste;
 
 public partial class HaendlerPage : ContentPage
 {
-    private readonly EinkauflistenDatenbank datenbank;
+    private readonly IHaendlerService _haendlerService;
 
     public ObservableCollection<Haendler> HaendlerListeItems { get; set; } = new();
-    public HaendlerPage(EinkauflistenDatenbank datenbank)
+    public HaendlerPage()
     {
         InitializeComponent();
 
-        this.datenbank = datenbank;
+        _haendlerService = Handler!.MauiContext.Services!.GetService<IHaendlerService>();
 
         HaendlerListe.ItemsSource = HaendlerListeItems;
     }
@@ -27,7 +27,7 @@ public partial class HaendlerPage : ContentPage
         HaendlerListeItems.Clear();
 
         var haendler =
-            await datenbank.AlleHaendlerVerwaltenLadenAsync();
+            await _haendlerService.AlleHaendlerLadenAsync();
 
         foreach (var eintrag in haendler)
         {
@@ -67,7 +67,7 @@ public partial class HaendlerPage : ContentPage
                 neuerName = neuerName.Trim();
 
                 var alleHaendler =
-                    await datenbank.AlleHaendlerVerwaltenLadenAsync();
+                    await _haendlerService.AlleHaendlerLadenAsync();
 
                 if (alleHaendler.Any(h =>
                     h.Id != haendler.Id &&
@@ -83,7 +83,7 @@ public partial class HaendlerPage : ContentPage
 
                 haendler.Name = neuerName;
 
-                await datenbank.HaendlerSpeichernAsync(haendler);
+                await _haendlerService.HaendlerSpeichernAsync(haendler);
 
                 await HaendlerLadenAsync();
 
@@ -102,7 +102,7 @@ public partial class HaendlerPage : ContentPage
 
                 try
                 {
-                    await datenbank.HaendlerSpeichernAsync(haendler);
+                    await _haendlerService.HaendlerSpeichernAsync(haendler);
 
                     // Altes Logo erst nach erfolgreichem Speichern löschen
                     if (!string.IsNullOrWhiteSpace(altesLogo) &&
@@ -147,7 +147,7 @@ public partial class HaendlerPage : ContentPage
 
                 haendler.IstAktiv = neuerStatus;
 
-                await datenbank.HaendlerSpeichernAsync(haendler);
+                await _haendlerService.HaendlerSpeichernAsync(haendler);
 
                 await HaendlerLadenAsync();
 
@@ -208,7 +208,7 @@ public partial class HaendlerPage : ContentPage
         name = name.Trim();
 
         var vorhandeneHaendler =
-            await datenbank.AlleHaendlerVerwaltenLadenAsync();
+            await _haendlerService.AlleHaendlerLadenAsync();
 
         if (vorhandeneHaendler.Any(h =>
             h.Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
@@ -231,7 +231,7 @@ public partial class HaendlerPage : ContentPage
             Sortierung = vorhandeneHaendler.Count + 1
         };
 
-        await datenbank.HaendlerSpeichernAsync(neuerHaendler);
+        await _haendlerService.HaendlerSpeichernAsync(neuerHaendler);
 
         await HaendlerLadenAsync();
 

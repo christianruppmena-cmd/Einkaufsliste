@@ -1,12 +1,15 @@
 ﻿using System.Globalization;
 
-namespace Einkaufsliste.Converters;
+namespace Einkaufsliste.Application.Pages.Handler.Converters;
 
-public class StringNullOrEmptyConverter : IValueConverter
+public class BooleanToStatusConverter : IValueConverter
 {
     public object Convert(object value,Type targetType,object parameter,CultureInfo culture)
     {
-        return !string.IsNullOrWhiteSpace(value as string);
+        if (value is bool istAktiv)
+            return istAktiv ? "Aktiv" : "Inaktiv";
+
+        return "Unbekannt";
     }
     public object ConvertBack(object value,Type targetType,object parameter,CultureInfo culture)
     {

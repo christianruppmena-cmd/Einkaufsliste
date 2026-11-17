@@ -7,7 +7,7 @@ namespace Einkaufsliste.Services
     {
         private async Task ProduktbilderZumArchivHinzufuegenAsync(ZipArchive archiv)
         {
-            var produkte = await datenbank
+            var produkte = await Datenbank
                 .Table<Produkt>()
                 .ToListAsync();
 

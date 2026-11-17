@@ -1,4 +1,5 @@
 ﻿using Einkaufsliste.Models;
+using Einkaufsliste.Interfaces;
 
 namespace Einkaufsliste.Application.Pages
 {
@@ -27,7 +28,7 @@ namespace Einkaufsliste.Application.Pages
         private async Task GesamtsummeAktualisierenAsync()
         {
             List<Einkaufsartikel> alleArtikel =
-                await _datenbank.AlleArtikelLadenAsync();
+                await _artikelService.AlleArtikelLadenAsync();
 
             decimal gesamtsumme = alleArtikel.Sum(a => a.Gesamtpreis);
 
@@ -132,7 +133,7 @@ namespace Einkaufsliste.Application.Pages
                 aktuelleGruppierung);
 
             List<Einkaufsartikel> alleArtikel =
-                await _datenbank.AlleArtikelLadenAsync();
+                await _artikelService.AlleArtikelLadenAsync();
 
             ArtikelGruppieren(alleArtikel);
 

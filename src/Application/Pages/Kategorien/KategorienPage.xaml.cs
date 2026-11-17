@@ -1,17 +1,18 @@
 using Einkaufsliste.Services;
 using Einkaufsliste.Models;
 using Einkaufsliste.Utilities;
+using Einkaufsliste.Interfaces;
 
 namespace Einkaufsliste.Application.Pages.Kategorien;
 
 public partial class KategorienPage : ContentPage
 {
-    private readonly EinkauflistenDatenbank _datenbank;
+    private readonly IKategorienService _kategorienService;
 
-    public KategorienPage(EinkauflistenDatenbank datenbank)
+    public KategorienPage()
     {
         InitializeComponent();
-        _datenbank = datenbank;
+        _kategorienService = Handler!.MauiContext.Services!.GetService<IKategorienService>();
     }
     protected override async void OnAppearing()
     {
@@ -21,10 +22,8 @@ public partial class KategorienPage : ContentPage
     }
     private async Task KategorienLadenAsync()
     {
-        await _datenbank.InitialisierenAsync();
-
         List<Kategorie> kategorien =
-            await _datenbank.AlleKategorieEintraegeLadenAsync();
+            await _kategorienService.AlleKategorieEintraegeLadenAsync();
 
         KategorienListe.ItemsSource = kategorien;
     }
@@ -39,7 +38,7 @@ public partial class KategorienPage : ContentPage
 
         name = TextHelfer.Normalisieren(name);
 
-        List<Kategorie> kategorien = await _datenbank.AlleKategorieEintraegeLadenAsync();
+        List<Kategorie> kategorien = await _kategorienService.AlleKategorieEintraegeLadenAsync();
 
         bool existiert = kategorien.Any(k => string.Equals(k.Name, name, StringComparison.OrdinalIgnoreCase));
 
@@ -48,7 +47,7 @@ public partial class KategorienPage : ContentPage
             await DisplayAlertAsync("Hinweis", "Diese Kategorie existiert bereits.", "OK");
             return;
         }
-        await _datenbank.KategorieSpeichernAsync(new Kategorie { Name = name });
+        await _kategorienService.KategorieSpeichernAsync(new Kategorie { Name = name });
         await KategorienLadenAsync();
     }
     private async void OnKategorieBearbeitenClicked(object sender, EventArgs e)
@@ -74,7 +73,7 @@ public partial class KategorienPage : ContentPage
             StringComparison.Ordinal))
             return;
 
-        bool gespeichert = await _datenbank.KategorieUmbenennenAsync(
+        bool gespeichert = await _kategorienService.KategorieUmbenennenAsync(
             kategorie, neuerName);
 
         if(!gespeichert)

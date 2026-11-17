@@ -1,10 +1,30 @@
 ﻿using System.IO.Compression;
-
+using Einkaufsliste.Interfaces;
 namespace Einkaufsliste.Services
+
 {
     public partial class DBBackupService
     {
+        private readonly IInitialisierungsService _initialisierungsService;
+        
+        private string _datenbankPfad = Path.Combine(FileSystem.AppDataDirectory, "einkaufliste.db3");
+        
         public async Task DatenbankImportierenAsync(string importPfad)
+        {
+            try
+            {
+                CloseConnection();
+                await DatenbankImportierenAsync(importPfad);
+                OpenConnection();
+                await _initialisierungsService.InitialisierenAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Fehler beim Importieren der Datenbank: " + ex.Message, ex);
+            }
+        }
+        
+        private async Task DatenbankImportLogicAsync(string importPfad)
         {
             if (!File.Exists(importPfad))
             {
@@ -37,7 +57,7 @@ namespace Einkaufsliste.Services
                 ProduktbilderTemporaerExtrahieren(importPfad, importBildOrdner);
 
                 // Aktuelle Datenbank als Rückfallsicherung erstellen
-                await datenbank.ExecuteAsync(
+                await Datenbank.ExecuteAsync(
                     "VACUUM INTO ?",
                     rueckfallPfad);
 
@@ -47,7 +67,7 @@ namespace Einkaufsliste.Services
                 ProduktbilderAlsRueckfallSichern(rueckfallBildOrdner);
 
                 // Verbindung erst nach erfolgreicher Sicherung schließen
-                await datenbank.CloseAsync();
+                await Datenbank.CloseAsync();
 
                 try
                 {
@@ -77,6 +97,7 @@ namespace Einkaufsliste.Services
                 ImportdateienAufraeumen(pruefPfad, importBildOrdner, rueckfallPfad, rueckfallBildOrdner);
             }
         }
+        
         private static void SicherungsdatenbankExtrahierenUndPruefen(string importPfad, string pruefPfad)
         {
             // ZIP-Sicherung öffnen und Datenbank extrahieren
@@ -120,6 +141,7 @@ namespace Einkaufsliste.Services
                 }
             }
         }
+        
         private static void ProduktbilderTemporaerExtrahieren(string importPfad, string importBildOrdner)
         {
             // Produktbilder zunächst temporär extrahieren
@@ -160,6 +182,7 @@ namespace Einkaufsliste.Services
                 }
             }
         }
+        
         private static void ProduktbilderAlsRueckfallSichern(string rueckfallBildOrdner)
         {
             // Bisherige Produktbilder für einen möglichen Rollback sichern
@@ -182,6 +205,7 @@ namespace Einkaufsliste.Services
                 }
             }
         }
+        
         private static void ProduktbilderErsetzen(string importBildOrdner)
         {
             // Vorhandene Produktbilder entfernen
@@ -221,30 +245,32 @@ namespace Einkaufsliste.Services
                     overwrite: true);
             }
         }
+        
         private void ImportierteDatenbankUebernehmen(string pruefPfad)
         {
             // Alte SQLite-Begleitdateien entfernen
-            if (File.Exists(datenbankPfad + "-wal"))
-                File.Delete(datenbankPfad + "-wal");
+            if (File.Exists(_datenbankPfad + "-wal"))
+                File.Delete(_datenbankPfad + "-wal");
 
-            if (File.Exists(datenbankPfad + "-shm"))
-                File.Delete(datenbankPfad + "-shm");
+            if (File.Exists(_datenbankPfad + "-shm"))
+                File.Delete(_datenbankPfad + "-shm");
 
             // Neue Datenbank übernehmen
             File.Copy(
                 pruefPfad,
-                datenbankPfad,
+                _datenbankPfad,
                 overwrite: true);
 
             // Neue Verbindung herstellen
-            datenbank = new SQLiteAsyncConnection(datenbankPfad);
+            Datenbank = new SQLiteAsyncConnection(_datenbankPfad);
         }
+        
         private async Task UrsprungsdatenbankWiederherstellenAsync(string rueckfallPfad,string rueckfallBildOrdner)
         {
             // Fehler beim Import: ursprüngliche Datenbank wiederherstellen
             try
             {
-                await datenbank.CloseAsync();
+                await Datenbank.CloseAsync();
             }
             catch
             {
@@ -255,12 +281,12 @@ namespace Einkaufsliste.Services
             {
                 File.Copy(
                     rueckfallPfad,
-                    datenbankPfad,
+                    _datenbankPfad,
                     overwrite: true);
             }
 
             // Ursprüngliche Datenbankverbindung wiederherstellen
-            datenbank = new SQLiteAsyncConnection(datenbankPfad);
+            Datenbank = new SQLiteAsyncConnection(_datenbankPfad);
 
             // Importierte Produktbilder entfernen
             foreach (string datei in Directory.GetFiles(
@@ -292,6 +318,7 @@ namespace Einkaufsliste.Services
                 }
             }
         }
+        
         private static void ImportdateienAufraeumen(string pruefPfad, string importBildOrdner,string rueckfallPfad,string rueckfallBildOrdner)
         {
             // Temporäre Dateien und Ordner aufräumen
@@ -315,6 +342,7 @@ namespace Einkaufsliste.Services
                     recursive: true);
             }
         }
+        
         private static bool IstUnterstuetztesBildformat(string dateipfad)
         {
             string erweiterung = Path.GetExtension(dateipfad);

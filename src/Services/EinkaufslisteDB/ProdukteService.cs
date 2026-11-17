@@ -1,12 +1,18 @@
 ﻿using Einkaufsliste.Models;
+using Einkaufsliste.Interfaces;
 
 namespace Einkaufsliste.Services
 {
-    public partial class EinkauflistenDatenbank
+    public class ProdukteService : DBConnection, IProdukteService
     {
+        private readonly IDBBackupService _backupService;
+        private ProdukteService(IDBBackupService backupService)
+        {
+            _backupService = backupService;
+        }
         public async Task<List<Produkt>> AlleProdukteLadenAsync()
         {
-            return await _datenbank.Table<Produkt>().ToListAsync();
+            return await Datenbank.Table<Produkt>().ToListAsync();
 
         }
         public async Task<Produkt?> ProduktFindenAsync(string name)
@@ -22,7 +28,7 @@ namespace Einkaufsliste.Services
             string suchname = Normalisieren(name);
 
             List<Produkt> produkte =
-                await _datenbank.Table<Produkt>().ToListAsync();
+                await Datenbank.Table<Produkt>().ToListAsync();
 
             // Den vollständigen Namen vergleichen
 
@@ -62,7 +68,7 @@ namespace Einkaufsliste.Services
 
             produkt.ProduktSchluessel = ProduktSchluesselErstellen(produkt);
 
-            var vorhandenesProdukt = await _datenbank
+            var vorhandenesProdukt = await Datenbank
                 .Table<Produkt>()
                 .Where(p => p.ProduktSchluessel == produkt.ProduktSchluessel)
                 .FirstOrDefaultAsync();
@@ -76,11 +82,11 @@ namespace Einkaufsliste.Services
 
             if (produkt.Id == 0)
             {
-                await _datenbank.InsertAsync(produkt);
+                await Datenbank.InsertAsync(produkt);
             }
             else
             {
-                await _datenbank.UpdateAsync(produkt);
+                await Datenbank.UpdateAsync(produkt);
             }
             await _backupService.LokaleSicherungErstellenAsync();
         }
@@ -91,10 +97,8 @@ namespace Einkaufsliste.Services
                 throw new ArgumentException(
                     "Quell- und Zielprodukt müssen verschieden sein.");
             }
-
-            await InitialisierenAsync();
-
-            await _datenbank.RunInTransactionAsync(verbindung =>
+                        
+            await Datenbank.RunInTransactionAsync(verbindung =>
             {
                 Produkt quellProdukt =
                     verbindung.Find<Produkt>(quellProduktId);
@@ -150,7 +154,7 @@ namespace Einkaufsliste.Services
         {
             string schluessel = ProduktSchluesselErstellen(produkt);
 
-            return await _datenbank
+            return await Datenbank
                 .Table<Produkt>()
                 .Where(p =>
                     p.Id != produkt.Id &&

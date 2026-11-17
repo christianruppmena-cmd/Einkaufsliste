@@ -1,5 +1,6 @@
 ﻿using Einkaufsliste.Models;
 
+
 namespace Einkaufsliste.Application.Pages.Produkte;
 
 public partial class ProduktVerwaltungPage
@@ -100,7 +101,7 @@ public partial class ProduktVerwaltungPage
             return;
 
         List<Produkt> produkte =
-            await _datenbank.AlleProdukteLadenAsync();
+            await _produkteService.AlleProdukteLadenAsync();
 
         bool wirdNochVerwendet = produkte.Any(p =>
             string.Equals(

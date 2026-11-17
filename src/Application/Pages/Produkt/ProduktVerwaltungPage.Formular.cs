@@ -62,7 +62,7 @@ public partial class ProduktVerwaltungPage
     private async Task LadeKategorienAsync()
     {
         List<Kategorie> kategorien =
-            await _datenbank.AlleKategorieEintraegeLadenAsync();
+            await _kategorienService.AlleKategorieEintraegeLadenAsync();
 
         KategoriePicker.ItemsSource = kategorien
             .Select(k => k.Name)
@@ -70,7 +70,7 @@ public partial class ProduktVerwaltungPage
     }
     private async Task LadeHaendlerAsync()
     {
-        alleHaendler = await _datenbank.AlleHaendlerLadenAsync();
+        alleHaendler = await _haendlerService.AlleHaendlerLadenAsync();
 
         var haendlerNamen = new List<string>
     {
@@ -158,7 +158,7 @@ public partial class ProduktVerwaltungPage
         if (!bestaetigen)
             return false;
 
-        await _datenbank.ProduktZusammenfuehrenAsync(
+        await _produkteService.ProduktZusammenfuehrenAsync(
             zuSpeicherndesProdukt.Id,
             vorhandenesProdukt.Id);
 
@@ -211,7 +211,7 @@ public partial class ProduktVerwaltungPage
         try
         {
             Produkt? vorhandenesProdukt =
-                        await _datenbank.ProduktMitGleichemSchluesselLadenAsync(zuSpeicherndesProdukt);
+                        await _produkteService.ProduktMitGleichemSchluesselLadenAsync(zuSpeicherndesProdukt);
 
             bool wurdeZusammengefuehrt = false;
 
@@ -226,9 +226,9 @@ public partial class ProduktVerwaltungPage
             }
             else
             {
-                await _datenbank.ProduktSpeichernAsync(zuSpeicherndesProdukt);
+                await _produkteService.ProduktSpeichernAsync(zuSpeicherndesProdukt);
 
-                await _datenbank.EinkaufsartikelHaendlerAktualisierenAsync(
+                await _artikelService.EinkaufsartikelHaendlerAktualisierenAsync(
                     zuSpeicherndesProdukt.Id,
                     zuSpeicherndesProdukt.BevorzugterHaendlerId);
             }

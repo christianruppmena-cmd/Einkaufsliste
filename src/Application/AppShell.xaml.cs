@@ -1,5 +1,4 @@
-﻿using Einkaufsliste.Services;
-using Einkaufsliste.Application.Pages;
+﻿using Einkaufsliste.Application.Pages;
 using Einkaufsliste.Interfaces;
 using Einkaufsliste.Application.Pages.Produkte;
 using Einkaufsliste.Application.Pages.Datenbank;
@@ -10,15 +9,24 @@ namespace Einkaufsliste.Application
     public partial class AppShell : Shell
     {
         private readonly ShellContent startInhalt;
-        private readonly EinkauflistenDatenbank _datenbank;
         private readonly IDBBackupService _backupService;
+        private readonly IKategorienService _kategorienService;
+        private readonly IProdukteService _produkteService;
+        private readonly IHaendlerService _haendlerService;
+        private readonly IArtikelService _artikelService;
+        private readonly IPreisService _preisService;
 
-        public AppShell(EinkauflistenDatenbank datenbank, IDBBackupService backupService)
+        public AppShell()
         {
             InitializeComponent();
 
-            _datenbank = datenbank;
-            _backupService = backupService;
+            
+            _backupService = Handler!.MauiContext.Services!.GetService<IDBBackupService>(); 
+            _kategorienService = Handler!.MauiContext.Services!.GetService<IKategorienService>(); 
+            _produkteService = Handler!.MauiContext.Services!.GetService<IProdukteService>(); 
+            _haendlerService = Handler!.MauiContext.Services!.GetService<IHaendlerService>(); 
+            _preisService = Handler!.MauiContext.Services!.GetService<IPreisService>(); 
+            _artikelService = Handler!.MauiContext.Services!.GetService<IArtikelService>(); 
 
             // Einkaufsliste
             var einkaufsliste = new ShellContent
@@ -41,7 +49,7 @@ namespace Einkaufsliste.Application
             {
                 Title = "📦 Produktverwaltung",
                 Route = "ProduktVerwaltungPage",
-                Content = new ProduktVerwaltungPage(datenbank)
+                Content = new ProduktVerwaltungPage()
             };
 
             // Kategorienverwaltung
@@ -49,7 +57,7 @@ namespace Einkaufsliste.Application
             {
                 Title = "🏷️ Kategorien",
                 Route = "KategorienPage",
-                Content = new KategorienPage(datenbank)
+                Content = new KategorienPage()
             };
 
             // Datensicherung
@@ -57,7 +65,7 @@ namespace Einkaufsliste.Application
             {
                 Title = "💾 Datensicherung",
                 Route = "DatenbanksicherungPage",
-                Content = new DatenbanksicherungPage(backupService, datenbank)
+                Content = new DatenbanksicherungPage()
             };
 
             // Eigene Menüeinträge
@@ -99,21 +107,9 @@ namespace Einkaufsliste.Application
                             {
                                 Title = "Händlerverwaltung",
                                 Route = "HaendlerPage",
-                                Content = new HaendlerPage(datenbank)
+                                Content = new HaendlerPage()
                             }
                         }
-                    }
-                }
-            };
-
-            var datensicherungMenue = new FlyoutItem
-            {
-                Title = "💾 Datensicherung",
-                Items =
-                {
-                    new ShellSection
-                    {
-                        Items = { datensicherung }
                     }
                 }
             };
@@ -135,13 +131,22 @@ namespace Einkaufsliste.Application
             Items.Add(produktverwaltungMenue);
             Items.Add(kategorienMenue);
             Items.Add(haendlerMenue);
-            Items.Add(datensicherungMenue);
+            Items.Add(new FlyoutItem{
+                Title = "💾 Datensicherung",
+                Items =
+                {
+                    new ShellSection
+                    {
+                        Items = { datensicherung }
+                    }
+                }
+            });
 
             startInhalt = einkaufsliste;
         }
         public void StartseiteAnzeigen()
         {
-            startInhalt.Content = new MainPage(_datenbank);
+            startInhalt.Content = new MainPage();
         }
     }
 }

@@ -1,9 +1,17 @@
 ﻿using Einkaufsliste.Models;
+using Einkaufsliste.Interfaces;
 
 namespace Einkaufsliste.Services
 {
-    public partial class EinkauflistenDatenbank
+    public class KategorienService : DBConnection, IKategorienService
     {
+        private readonly IDBBackupService _backupService;
+
+        public KategorienService(IDBBackupService backupService)
+        {
+            _backupService = backupService;
+        }
+
         public async Task StandardkategorienAnlegenAsync()
         {
             string[] standardkategorien =
@@ -23,14 +31,14 @@ namespace Einkaufsliste.Services
 
             foreach (string name in standardkategorien)
             {
-                Kategorie? vorhanden = await _datenbank
+                Kategorie? vorhanden = await Datenbank
                     .Table<Kategorie>()
                     .Where(k => k.Name == name)
                     .FirstOrDefaultAsync();
 
                 if (vorhanden == null)
                 {
-                    await _datenbank.InsertAsync(new Kategorie
+                    await Datenbank.InsertAsync(new Kategorie
                     {
                         Name = name
                     });
@@ -39,32 +47,27 @@ namespace Einkaufsliste.Services
         }
         public async Task<List<Kategorie>> AlleKategorieEintraegeLadenAsync()
         {
-            await InitialisierenAsync();
-
-            return await _datenbank
+            return await Datenbank
                 .Table<Kategorie>()
                 .OrderBy(k => k.Name)
                 .ToListAsync();
         }
         public async Task KategorieSpeichernAsync(Kategorie kategorie)
         {
-            await InitialisierenAsync();
-
+          
             if (kategorie.Id == 0)
             {
-                await _datenbank.InsertAsync(kategorie);
+                await Datenbank.InsertAsync(kategorie);
 
             }
             else
             {
-                await _datenbank.UpdateAsync(kategorie);
+                await Datenbank.UpdateAsync(kategorie);
             }
             await _backupService.LokaleSicherungErstellenAsync();
         }
         public async Task<bool> KategorieUmbenennenAsync(Kategorie kategorie, string neuerName)
         {
-            await InitialisierenAsync();
-
             string alterName = kategorie.Name.Trim();
             neuerName = neuerName.Trim();
 
@@ -74,7 +77,7 @@ namespace Einkaufsliste.Services
             // Prüfen ob der neue Name bereits vergene ist
 
             List<Kategorie> kategorien =
-                await _datenbank.Table<Kategorie>().ToListAsync();
+                await Datenbank.Table<Kategorie>().ToListAsync();
 
             bool existiertBereits = kategorien.Any(k =>
             k.Id != kategorie.Id &&
@@ -89,12 +92,12 @@ namespace Einkaufsliste.Services
             // Alle betroffenen Artikel aktualisieren
 
             List<Einkaufsartikel> artikel =
-                await _datenbank.Table<Einkaufsartikel>().ToListAsync();
+                await Datenbank.Table<Einkaufsartikel>().ToListAsync();
 
             List<Produkt> produkte =
-                await _datenbank.Table<Produkt>().ToListAsync();
+                await Datenbank.Table<Produkt>().ToListAsync();
 
-            await _datenbank.RunInTransactionAsync(conn =>
+            await Datenbank.RunInTransactionAsync(conn =>
             {
                 foreach (Einkaufsartikel eintrag in artikel.Where(a =>
                 string.Equals(

@@ -17,7 +17,7 @@ namespace Einkaufsliste.Services
             try
             {
                 // Aktuelle Datenbank erstellen
-                await datenbank.ExecuteAsync(
+                await Datenbank.ExecuteAsync(
                     "VACUUM INTO ?",
                     tempDatenbank);
 

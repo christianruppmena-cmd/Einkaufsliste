@@ -1,16 +1,21 @@
 ﻿using Einkaufsliste.Models;
+using Einkaufsliste.Interfaces;
 
 namespace Einkaufsliste.Services
 {
-    public partial class EinkauflistenDatenbank
+    public class PreiseService : DBConnection, IPreisService
     {
+        private readonly IDBBackupService _backupService;
+        public PreiseService(IDBBackupService backupService)
+        {
+            _backupService = backupService;
+        }
+    
         public async Task<Produktpreis?> AktuellenProduktpreisLadenAsync(int produktId, int haendlerId, string preisart)
         {
-            await InitialisierenAsync();
-
             string heute = DateTime.Now.ToString("yyyy-MM-dd");
 
-            List<Produktpreis> preise = await _datenbank
+            List<Produktpreis> preise = await Datenbank
                 .Table<Produktpreis>()
                 .Where(p =>
                     p.ProduktId == produktId &&
@@ -27,6 +32,7 @@ namespace Einkaufsliste.Services
                 .OrderByDescending(p => p.GueltigVon)
                 .FirstOrDefault();
         }
+        
         public async Task<Produktpreis?> GuenstigstenAktuellenPreisLadenAsync(int produktId, int haendlerId)
         {
             Produktpreis? angebot = await AktuellenProduktpreisLadenAsync(
@@ -42,32 +48,9 @@ namespace Einkaufsliste.Services
                 haendlerId,
                 "Normalpreis");
         }
-        private static void PreisInHistorieUebernehmen(SQLiteConnection conn, Produktpreis preis)
-        {
-            int naechsteVersion = conn.Table<PreisHistorie>()
-                .Where(h => h.ProduktpreisId == preis.Id)
-                .ToList()
-                .Select(h => h.Versionsnummer)
-                .DefaultIfEmpty(0)
-                .Max() + 1;
-
-            conn.Insert(new PreisHistorie
-            {
-                ProduktpreisId = preis.Id,
-                Versionsnummer = naechsteVersion,
-                ProduktId = preis.ProduktId,
-                HaendlerId = preis.HaendlerId,
-                PreisInCent = preis.PreisInCent,
-                Preisart = preis.Preisart,
-                ErfasstAm = preis.ErfasstAm,
-                GueltigVon = preis.GueltigVon,
-                GueltigBis = preis.GueltigBis
-            });
-        }
+       
         public async Task ProduktpreisSpeichernAsync(Produktpreis produktpreis)
         {
-            await InitialisierenAsync();
-
             if (produktpreis.ProduktId <= 0 ||
                 produktpreis.HaendlerId <= 0 ||
                 produktpreis.PreisInCent <= 0)
@@ -112,7 +95,7 @@ namespace Einkaufsliste.Services
             produktpreis.ErfasstAm =
                 DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
-            await _datenbank.RunInTransactionAsync(conn =>
+            await Datenbank.RunInTransactionAsync(conn =>
             {
                 // Alten Stand beim Bearbeiten sichern
                 if (produktpreis.Id > 0)
@@ -172,14 +155,13 @@ namespace Einkaufsliste.Services
             });
             await _backupService.LokaleSicherungErstellenAsync();
         }
+        
         public async Task ProduktpreisDeaktivierenAsync(int produktpreisId)
         {
-            await InitialisierenAsync();
-
             if (produktpreisId <= 0)
                 return;
 
-            await _datenbank.RunInTransactionAsync(conn =>
+            await Datenbank.RunInTransactionAsync(conn =>
             {
                 Produktpreis? preis = conn.Find<Produktpreis>(produktpreisId);
 
@@ -197,6 +179,29 @@ namespace Einkaufsliste.Services
             });
 
             await _backupService.LokaleSicherungErstellenAsync();
+        }
+        
+        private void PreisInHistorieUebernehmen(SQLiteConnection conn, Produktpreis preis)
+        {
+            int naechsteVersion = conn.Table<PreisHistorie>()
+                .Where(h => h.ProduktpreisId == preis.Id)
+                .ToList()
+                .Select(h => h.Versionsnummer)
+                .DefaultIfEmpty(0)
+                .Max() + 1;
+
+            conn.Insert(new PreisHistorie
+            {
+                ProduktpreisId = preis.Id,
+                Versionsnummer = naechsteVersion,
+                ProduktId = preis.ProduktId,
+                HaendlerId = preis.HaendlerId,
+                PreisInCent = preis.PreisInCent,
+                Preisart = preis.Preisart,
+                ErfasstAm = preis.ErfasstAm,
+                GueltigVon = preis.GueltigVon,
+                GueltigBis = preis.GueltigBis
+            });
         }
     }
 }

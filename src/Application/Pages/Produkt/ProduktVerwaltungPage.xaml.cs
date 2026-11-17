@@ -1,23 +1,32 @@
 using Einkaufsliste.Services;
-using System.Globalization;
 using Einkaufsliste.Models;
+using Einkaufsliste.Interfaces;
 
 namespace Einkaufsliste.Application.Pages.Produkte;
 
 public partial class ProduktVerwaltungPage : ContentPage
 {
-    private readonly EinkauflistenDatenbank _datenbank;
+   
+    private readonly IProdukteService _produkteService;
+    private readonly IKategorienService _kategorienService;
+    private readonly IHaendlerService _haendlerService;
+    private readonly IArtikelService _artikelService;
     private List<Produkt> alleProdukte = new();
     private List<Haendler> alleHaendler = new();
     private string ausgewaehlterBildPfad;
     private Produkt produktZumBearbeiten;
     private bool bildEntfernen;
     private readonly bool nurNeuesProduktFormular;
-    public ProduktVerwaltungPage(EinkauflistenDatenbank datenbank, bool nurNeuesProduktFormular = false)
+    public ProduktVerwaltungPage(bool nurNeuesProduktFormular = false)
     {
         InitializeComponent();
 
-        _datenbank = datenbank;
+
+        _produkteService = Handler!.MauiContext.Services!.GetService<IProdukteService>();
+        _kategorienService = Handler!.MauiContext.Services!.GetService<IKategorienService>();
+        _haendlerService = Handler!.MauiContext.Services!.GetService<IHaendlerService>();
+        _artikelService = Handler!.MauiContext.Services!.GetService<IArtikelService>();
+
         this.nurNeuesProduktFormular = nurNeuesProduktFormular;
 
         if(nurNeuesProduktFormular)
@@ -42,7 +51,7 @@ public partial class ProduktVerwaltungPage : ContentPage
     }
     private async Task LadeProdukteAsync()
     {
-        alleProdukte = await _datenbank.AlleProdukteLadenAsync();
+        alleProdukte = await _produkteService.AlleProdukteLadenAsync();
 
         ProduktListe.ItemsSource = alleProdukte.Where(p => p.IstAktiv).OrderBy(p => p.Name).ToList();
     }
@@ -64,7 +73,7 @@ public partial class ProduktVerwaltungPage : ContentPage
         {
             produktZumBearbeiten.IstAktiv = false;
 
-            await _datenbank.ProduktSpeichernAsync(produktZumBearbeiten);
+            await _produkteService.ProduktSpeichernAsync(produktZumBearbeiten);
             await LadeProdukteAsync();
 
             ZurProduktlisteZurueckkehren();
@@ -91,7 +100,7 @@ public partial class ProduktVerwaltungPage : ContentPage
         }
 
         await Navigation.PushAsync(
-            new ProduktpreisePage(_datenbank, produkt));
+            new ProduktpreisePage(produkt));
     }
 
 }

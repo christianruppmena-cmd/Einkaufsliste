@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 
-namespace Einkaufsliste.Converters;
+namespace Einkaufsliste.Application.Pages.Handler.Converters;
 
 public class InvertedStringNullOrEmptyConverter : IValueConverter
 {

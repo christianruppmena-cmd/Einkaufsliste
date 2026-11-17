@@ -1,4 +1,6 @@
-﻿using Einkaufsliste.Models;
+﻿using Einkaufsliste.Interfaces;
+using Einkaufsliste.Models;
+
 
 namespace Einkaufsliste.Application.Pages
 {
@@ -30,16 +32,16 @@ namespace Einkaufsliste.Application.Pages
             try
             {
                 List<Einkaufsartikel> aktuelleArtikel =
-                    await _datenbank.AlleArtikelLadenAsync();
+                    await _artikelService.AlleArtikelLadenAsync();
 
                 ArtikelGruppieren(aktuelleArtikel);
 
                 if (await VorhandenenArtikelBehandelnAsync(neuerEintrag))
                     return;
 
-                await _datenbank.ArtikelSpeichernAsync(neuerEintrag);
+                await _artikelService.ArtikelSpeichernAsync(neuerEintrag);
 
-                aktuelleArtikel = await _datenbank.AlleArtikelLadenAsync();
+                aktuelleArtikel = await _artikelService.AlleArtikelLadenAsync();
                 ArtikelGruppieren(aktuelleArtikel);
 
                 AktualisiereFortschritt();
@@ -55,7 +57,7 @@ namespace Einkaufsliste.Application.Pages
             if (sender is Button button &&
                 button.CommandParameter is Einkaufsartikel artikelZumLoeschen)
             {
-                await _datenbank.ArtikelLoeschenAsync(artikelZumLoeschen);
+                await _artikelService.ArtikelLoeschenAsync(artikelZumLoeschen);
 
                 Artikelgruppe gruppe = artikelGruppen.FirstOrDefault(g => g.Contains(artikelZumLoeschen));
 
@@ -81,7 +83,7 @@ namespace Einkaufsliste.Application.Pages
                 return;
             }
 
-            await _datenbank.ArtikelSpeichernAsync(artikel);
+            await _artikelService.ArtikelSpeichernAsync(artikel);
 
             Artikelgruppe alteGruppe = artikelGruppen
                 .FirstOrDefault(g => g.Contains(artikel));
@@ -208,7 +210,7 @@ namespace Einkaufsliste.Application.Pages
             artikel.Menge = menge.ToString(
                 System.Globalization.CultureInfo.CurrentCulture);
 
-            await _datenbank.ArtikelSpeichernAsync(artikel);
+            await _artikelService.ArtikelSpeichernAsync(artikel);
 
             await GesamtsummeAktualisierenAsync();
         }
@@ -235,7 +237,7 @@ namespace Einkaufsliste.Application.Pages
             artikel.Menge = menge.ToString(
                 System.Globalization.CultureInfo.CurrentCulture);
 
-            await _datenbank.ArtikelSpeichernAsync(artikel);
+            await _artikelService.ArtikelSpeichernAsync(artikel);
 
             await GesamtsummeAktualisierenAsync();
         }
@@ -258,7 +260,7 @@ namespace Einkaufsliste.Application.Pages
             if (menge <= 0)
                 return;
 
-            await _datenbank.ArtikelSpeichernAsync(artikel);
+            await _artikelService.ArtikelSpeichernAsync(artikel);
 
             await GesamtsummeAktualisierenAsync();
         }
@@ -275,7 +277,7 @@ namespace Einkaufsliste.Application.Pages
 
             artikel.Einheit = neueEinheit;
 
-            await _datenbank.ArtikelSpeichernAsync(artikel);
+            await _artikelService.ArtikelSpeichernAsync(artikel);
 
             await GesamtsummeAktualisierenAsync();
         }
@@ -345,7 +347,7 @@ namespace Einkaufsliste.Application.Pages
                 return true;
             }
 
-            await _datenbank.ArtikelSpeichernAsync(vorhandenerArtikel);
+            await _artikelService.ArtikelSpeichernAsync(vorhandenerArtikel);
             AktualisiereFortschritt();
             await GesamtsummeAktualisierenAsync();
 

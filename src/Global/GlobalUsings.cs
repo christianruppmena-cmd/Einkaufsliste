@@ -4,9 +4,10 @@ global using System.Collections.Specialized;
 global using SQLite;
 global using System.Runtime.CompilerServices;
 
-namespace Einkaufsliste.src.Global
+namespace Einkaufsliste.Global
 {
     internal class GlobalUsings
     {
+
     }
 }

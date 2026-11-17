@@ -1,22 +1,29 @@
-﻿using Einkaufsliste.Services;
-using Einkaufsliste.Models;
+﻿using Einkaufsliste.Models;
+using Einkaufsliste.Interfaces;
 
 namespace Einkaufsliste.Application.Pages
 {
     public partial class MainPage : ContentPage
     {
+        private readonly IHaendlerService _haendlerService;
+        private readonly IArtikelService _artikelService;
+        private readonly IProdukteService _produkteService;
+        private readonly IPreisService _preisService;
+
         private readonly ObservableCollection<Artikelgruppe> artikelGruppen = new();
-        private readonly EinkauflistenDatenbank _datenbank ;
         private readonly System.Threading.SemaphoreSlim _artikelHinzufuegenSperre = new(1, 1);
         private const string GruppierungsEinstellung = "Gruppierungsart";
         private string aktuelleGruppierung = "Produktkategorie";
         private List<Produkt> alleProdukte = new();
-        private List<Haendler> alleHaendler = new();
-        public MainPage(EinkauflistenDatenbank datenbank)
+        private List<Haendler> alleHaendler = new();        
+        public MainPage()
         {
             InitializeComponent();
 
-            _datenbank = datenbank;
+            _haendlerService = Handler!.MauiContext.Services!.GetService<IHaendlerService>();
+            _artikelService = Handler!.MauiContext.Services!.GetService<IArtikelService>();           
+            _produkteService = Handler!.MauiContext.Services!.GetService<IProdukteService>(); 
+            _preisService = Handler!.MauiContext.Services!.GetService<IPreisService>(); 
 
             ArtikelListe.ItemsSource = artikelGruppen;
 
@@ -35,9 +42,9 @@ namespace Einkaufsliste.Application.Pages
         }
         private async Task LadeDatenAsync()
         {
-            alleHaendler = await _datenbank.AlleHaendlerLadenAsync();
+            alleHaendler = await _haendlerService.AlleHaendlerLadenAsync();
 
-            List<Einkaufsartikel> gespeicherteArtikel = await _datenbank.AlleArtikelLadenAsync();
+            List<Einkaufsartikel> gespeicherteArtikel = await _artikelService.AlleArtikelLadenAsync();
             
             ArtikelGruppieren(gespeicherteArtikel);
 
