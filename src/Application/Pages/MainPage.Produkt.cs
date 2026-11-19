@@ -1,5 +1,6 @@
 ﻿using Einkaufsliste.Models;
 using Einkaufsliste.Application.Pages.Produkte;
+using Einkaufsliste.Interfaces;
 
 namespace Einkaufsliste.Application.Pages
 {
@@ -12,7 +13,7 @@ namespace Einkaufsliste.Application.Pages
         private async void OnProduktNeuAnlegenClicked(object sender, EventArgs e)
         {
             await Navigation.PushAsync(
-                new ProduktVerwaltungPage(true));
+                new ProduktVerwaltungPage(_produkteService, _kategorienService, _haendlerService,_artikelService ,true));
         }
         private void OnProduktsucheTextChanged(object sender, TextChangedEventArgs e)
         {

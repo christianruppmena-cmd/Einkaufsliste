@@ -12,23 +12,20 @@ namespace Einkaufsliste.Application
         private readonly IPreisService _preisService;
         private readonly IArtikelService _artikelService;
         private readonly IInitialisierungsService _initialisierungsService;
+        private readonly AppShell _shell;
 
-
-        public App()
+        public App( AppShell shell, IInitialisierungsService initialisierungService, IHaendlerService haendlerService, IKategorienService kategorienService)
         {
             InitializeComponent();
-            
-            _backupService = Handler!.MauiContext.Services!.GetService<IDBBackupService>();
-            _kategorienService = Handler!.MauiContext.Services!.GetService<IKategorienService>();
-            _produkteService = Handler!.MauiContext.Services!.GetService<IProdukteService>();
-            _haendlerService = Handler!.MauiContext.Services!.GetService<IHaendlerService>();
-            _preisService = Handler!.MauiContext.Services!.GetService<IPreisService>();
-            _artikelService = Handler!.MauiContext.Services!.GetService<IArtikelService>();
-            _initialisierungsService = Handler!.MauiContext.Services!.GetService<IInitialisierungsService>();
+
+            _shell = shell;
+            _initialisierungsService = initialisierungService;
+            _haendlerService = haendlerService;
+            _kategorienService = kategorienService;
         }
         protected override Window CreateWindow(IActivationState? activationState)
         {
-            var shell = new AppShell();
+            var shell = _shell;
 
             MainThread.BeginInvokeOnMainThread(async () =>
             {
@@ -49,7 +46,7 @@ namespace Einkaufsliste.Application
                 }
             });
 
-            return new Window(shell);
+            return new Window(_shell);
         }
     }
 }

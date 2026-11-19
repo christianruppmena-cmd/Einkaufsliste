@@ -6,7 +6,7 @@ namespace Einkaufsliste.Services
     public class ProdukteService : DBConnection, IProdukteService
     {
         private readonly IDBBackupService _backupService;
-        private ProdukteService(IDBBackupService backupService)
+        public ProdukteService(IDBBackupService backupService)
         {
             _backupService = backupService;
         }

@@ -9,10 +9,10 @@ public partial class KategorienPage : ContentPage
 {
     private readonly IKategorienService _kategorienService;
 
-    public KategorienPage()
+    public KategorienPage(IKategorienService kategorienService)
     {
         InitializeComponent();
-        _kategorienService = Handler!.MauiContext.Services!.GetService<IKategorienService>();
+        _kategorienService = kategorienService;
     }
     protected override async void OnAppearing()
     {

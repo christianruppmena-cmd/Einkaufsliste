@@ -8,11 +8,11 @@ public partial class HaendlerPage : ContentPage
     private readonly IHaendlerService _haendlerService;
 
     public ObservableCollection<Haendler> HaendlerListeItems { get; set; } = new();
-    public HaendlerPage()
+    public HaendlerPage(IHaendlerService haendlerService)
     {
         InitializeComponent();
 
-        _haendlerService = Handler!.MauiContext.Services!.GetService<IHaendlerService>();
+        _haendlerService = haendlerService;
 
         HaendlerListe.ItemsSource = HaendlerListeItems;
     }
@@ -27,7 +27,7 @@ public partial class HaendlerPage : ContentPage
         HaendlerListeItems.Clear();
 
         var haendler =
-            await _haendlerService.AlleHaendlerLadenAsync();
+            await _haendlerService.AlleHaendlerVerwaltenLadenAsync();
 
         foreach (var eintrag in haendler)
         {

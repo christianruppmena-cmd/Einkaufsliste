@@ -1,4 +1,3 @@
-using Einkaufsliste.Services;
 using Einkaufsliste.Models;
 using Einkaufsliste.Interfaces;
 
@@ -17,15 +16,15 @@ public partial class ProduktVerwaltungPage : ContentPage
     private Produkt produktZumBearbeiten;
     private bool bildEntfernen;
     private readonly bool nurNeuesProduktFormular;
-    public ProduktVerwaltungPage(bool nurNeuesProduktFormular = false)
+    public ProduktVerwaltungPage(IProdukteService produkteService,IKategorienService kategorienService,IHaendlerService haendlerService, IArtikelService artikelService , bool nurNeuesProduktFormular = false)
     {
         InitializeComponent();
 
 
-        _produkteService = Handler!.MauiContext.Services!.GetService<IProdukteService>();
-        _kategorienService = Handler!.MauiContext.Services!.GetService<IKategorienService>();
-        _haendlerService = Handler!.MauiContext.Services!.GetService<IHaendlerService>();
-        _artikelService = Handler!.MauiContext.Services!.GetService<IArtikelService>();
+        _produkteService = produkteService;
+        _kategorienService = kategorienService;
+        _haendlerService = haendlerService;
+        _artikelService = artikelService;
 
         this.nurNeuesProduktFormular = nurNeuesProduktFormular;
 

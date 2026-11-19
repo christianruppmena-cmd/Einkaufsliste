@@ -1,5 +1,4 @@
 ﻿using Einkaufsliste.Application.Pages;
-using Einkaufsliste.Interfaces;
 using Einkaufsliste.Application.Pages.Produkte;
 using Einkaufsliste.Application.Pages.Datenbank;
 using Einkaufsliste.Application.Pages.Kategorien;
@@ -9,24 +8,19 @@ namespace Einkaufsliste.Application
     public partial class AppShell : Shell
     {
         private readonly ShellContent startInhalt;
-        private readonly IDBBackupService _backupService;
-        private readonly IKategorienService _kategorienService;
-        private readonly IProdukteService _produkteService;
-        private readonly IHaendlerService _haendlerService;
-        private readonly IArtikelService _artikelService;
-        private readonly IPreisService _preisService;
-
-        public AppShell()
+        private readonly MainPage _mainPage;
+        private readonly ProduktVerwaltungPage _produktVerwaltungPage;
+        private readonly KategorienPage _kategorienPage;
+        private readonly DatenbanksicherungPage _datenbanksicherungPage;
+        private readonly HaendlerPage _haendlerPage; 
+        public AppShell(MainPage mainPage, ProduktVerwaltungPage produktVerwaltungPage, KategorienPage kategorienPage, DatenbanksicherungPage datenbanksicherungPage, HaendlerPage haendlerPage)
         {
             InitializeComponent();
-
-            
-            _backupService = Handler!.MauiContext.Services!.GetService<IDBBackupService>(); 
-            _kategorienService = Handler!.MauiContext.Services!.GetService<IKategorienService>(); 
-            _produkteService = Handler!.MauiContext.Services!.GetService<IProdukteService>(); 
-            _haendlerService = Handler!.MauiContext.Services!.GetService<IHaendlerService>(); 
-            _preisService = Handler!.MauiContext.Services!.GetService<IPreisService>(); 
-            _artikelService = Handler!.MauiContext.Services!.GetService<IArtikelService>(); 
+            _mainPage = mainPage;
+            _produktVerwaltungPage = produktVerwaltungPage;
+            _kategorienPage = kategorienPage;
+            _datenbanksicherungPage = datenbanksicherungPage;
+            _haendlerPage = haendlerPage;
 
             // Einkaufsliste
             var einkaufsliste = new ShellContent
@@ -49,7 +43,7 @@ namespace Einkaufsliste.Application
             {
                 Title = "📦 Produktverwaltung",
                 Route = "ProduktVerwaltungPage",
-                Content = new ProduktVerwaltungPage()
+                Content = _produktVerwaltungPage
             };
 
             // Kategorienverwaltung
@@ -57,7 +51,7 @@ namespace Einkaufsliste.Application
             {
                 Title = "🏷️ Kategorien",
                 Route = "KategorienPage",
-                Content = new KategorienPage()
+                Content = _kategorienPage
             };
 
             // Datensicherung
@@ -65,7 +59,7 @@ namespace Einkaufsliste.Application
             {
                 Title = "💾 Datensicherung",
                 Route = "DatenbanksicherungPage",
-                Content = new DatenbanksicherungPage()
+                Content = _datenbanksicherungPage
             };
 
             // Eigene Menüeinträge
@@ -107,7 +101,7 @@ namespace Einkaufsliste.Application
                             {
                                 Title = "Händlerverwaltung",
                                 Route = "HaendlerPage",
-                                Content = new HaendlerPage()
+                                Content = _haendlerPage
                             }
                         }
                     }
@@ -146,7 +140,7 @@ namespace Einkaufsliste.Application
         }
         public void StartseiteAnzeigen()
         {
-            startInhalt.Content = new MainPage();
+            startInhalt.Content = _mainPage;
         }
     }
 }

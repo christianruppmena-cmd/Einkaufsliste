@@ -9,6 +9,7 @@ namespace Einkaufsliste.Application.Pages
         private readonly IArtikelService _artikelService;
         private readonly IProdukteService _produkteService;
         private readonly IPreisService _preisService;
+        private readonly IKategorienService _kategorienService;
 
         private readonly ObservableCollection<Artikelgruppe> artikelGruppen = new();
         private readonly System.Threading.SemaphoreSlim _artikelHinzufuegenSperre = new(1, 1);
@@ -16,15 +17,15 @@ namespace Einkaufsliste.Application.Pages
         private string aktuelleGruppierung = "Produktkategorie";
         private List<Produkt> alleProdukte = new();
         private List<Haendler> alleHaendler = new();        
-        public MainPage()
+        public MainPage(IHaendlerService haendlerService, IArtikelService artikelService, IProdukteService produkteService, IPreisService preisService, IKategorienService kategorienService)
         {
             InitializeComponent();
 
-            _haendlerService = Handler!.MauiContext.Services!.GetService<IHaendlerService>();
-            _artikelService = Handler!.MauiContext.Services!.GetService<IArtikelService>();           
-            _produkteService = Handler!.MauiContext.Services!.GetService<IProdukteService>(); 
-            _preisService = Handler!.MauiContext.Services!.GetService<IPreisService>(); 
-
+            _haendlerService = haendlerService;
+            _artikelService = artikelService;           
+            _produkteService = produkteService; 
+            _preisService = preisService;
+            _kategorienService = kategorienService;
             ArtikelListe.ItemsSource = artikelGruppen;
 
             aktuelleGruppierung = Preferences.Get(

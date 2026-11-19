@@ -8,11 +8,11 @@ public partial class DatenbanksicherungPage : ContentPage
 {
     private readonly IDBBackupService _backupService;
 
-    public DatenbanksicherungPage()
+    public DatenbanksicherungPage(IDBBackupService backupService)
     {
         InitializeComponent();
 
-        _backupService = Handler!.MauiContext.Services!.GetService<IDBBackupService>();
+        _backupService = backupService;
     }
     protected override async void OnAppearing()
     {
