@@ -10,13 +10,14 @@ public partial class ProduktVerwaltungPage : ContentPage
     private readonly IKategorienService _kategorienService;
     private readonly IHaendlerService _haendlerService;
     private readonly IArtikelService _artikelService;
+    private readonly IPreisService _preisService;
     private List<Produkt> alleProdukte = new();
     private List<Haendler> alleHaendler = new();
     private string ausgewaehlterBildPfad;
     private Produkt produktZumBearbeiten;
     private bool bildEntfernen;
     private readonly bool nurNeuesProduktFormular;
-    public ProduktVerwaltungPage(IProdukteService produkteService,IKategorienService kategorienService,IHaendlerService haendlerService, IArtikelService artikelService , bool nurNeuesProduktFormular = false)
+    public ProduktVerwaltungPage(IProdukteService produkteService,IKategorienService kategorienService,IHaendlerService haendlerService, IArtikelService artikelService,IPreisService preisService , bool nurNeuesProduktFormular = false)
     {
         InitializeComponent();
 
@@ -25,6 +26,7 @@ public partial class ProduktVerwaltungPage : ContentPage
         _kategorienService = kategorienService;
         _haendlerService = haendlerService;
         _artikelService = artikelService;
+        _preisService = preisService;
 
         this.nurNeuesProduktFormular = nurNeuesProduktFormular;
 
@@ -99,7 +101,7 @@ public partial class ProduktVerwaltungPage : ContentPage
         }
 
         await Navigation.PushAsync(
-            new ProduktpreisePage(produkt));
+            new ProduktpreisePage(produkt,_haendlerService,_preisService,_artikelService));
     }
 
 }

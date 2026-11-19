@@ -3,24 +3,26 @@ using Einkaufsliste.Application.Pages.Produkte;
 using Einkaufsliste.Application.Pages.Datenbank;
 using Einkaufsliste.Application.Pages.Kategorien;
 
+
 namespace Einkaufsliste.Application
 {
     public partial class AppShell : Shell
     {
         private readonly ShellContent startInhalt;
+        
+        //Die Einkaufsliste wird nach der Datenbankinitialisiernug angezeigt.
         private readonly MainPage _mainPage;
-        private readonly ProduktVerwaltungPage _produktVerwaltungPage;
-        private readonly KategorienPage _kategorienPage;
-        private readonly DatenbanksicherungPage _datenbanksicherungPage;
-        private readonly HaendlerPage _haendlerPage; 
-        public AppShell(MainPage mainPage, ProduktVerwaltungPage produktVerwaltungPage, KategorienPage kategorienPage, DatenbanksicherungPage datenbanksicherungPage, HaendlerPage haendlerPage)
+        
+        //Ermöglicht es, Nebenseiten erst bei Bedarf über DI zu erzeugen.
+        private readonly IServiceProvider _serviceProvider; 
+        
+        // Die Hauptseite wird für den Start übergeben.
+        // Weitere Pages erzeugt die Shell erst wenn sie geöffnet werden
+        public AppShell(MainPage mainPage, IServiceProvider serviceProvider)
         {
             InitializeComponent();
             _mainPage = mainPage;
-            _produktVerwaltungPage = produktVerwaltungPage;
-            _kategorienPage = kategorienPage;
-            _datenbanksicherungPage = datenbanksicherungPage;
-            _haendlerPage = haendlerPage;
+            _serviceProvider = serviceProvider;
 
             // Einkaufsliste
             var einkaufsliste = new ShellContent
@@ -43,7 +45,9 @@ namespace Einkaufsliste.Application
             {
                 Title = "📦 Produktverwaltung",
                 Route = "ProduktVerwaltungPage",
-                Content = _produktVerwaltungPage
+                
+                //Die seite wird erst erzeugt wenn der Nutzer diesen Menüpunkt öffnet.
+                ContentTemplate = new DataTemplate(() => _serviceProvider.GetRequiredService<ProduktVerwaltungPage>())
             };
 
             // Kategorienverwaltung
@@ -51,7 +55,9 @@ namespace Einkaufsliste.Application
             {
                 Title = "🏷️ Kategorien",
                 Route = "KategorienPage",
-                Content = _kategorienPage
+                
+                //Die seite wird erst erzeugt wenn der Nutzer diesen Menüpunkt öffnet.
+                ContentTemplate = new DataTemplate(() => _serviceProvider.GetRequiredService<KategorienPage>())
             };
 
             // Datensicherung
@@ -59,7 +65,9 @@ namespace Einkaufsliste.Application
             {
                 Title = "💾 Datensicherung",
                 Route = "DatenbanksicherungPage",
-                Content = _datenbanksicherungPage
+
+                //Die seite wird erst erzeugt wenn der Nutzer diesen Menüpunkt öffnet.
+                ContentTemplate = new DataTemplate(()=> _serviceProvider.GetRequiredService<DatenbanksicherungPage>())
             };
 
             // Eigene Menüeinträge
@@ -101,7 +109,9 @@ namespace Einkaufsliste.Application
                             {
                                 Title = "Händlerverwaltung",
                                 Route = "HaendlerPage",
-                                Content = _haendlerPage
+
+                                //Die seite wird erst erzeugt wenn der Nutzer diesen Menüpunkt öffnet.
+                                ContentTemplate = new DataTemplate (() => _serviceProvider.GetRequiredService<HaendlerPage>())
                             }
                         }
                     }

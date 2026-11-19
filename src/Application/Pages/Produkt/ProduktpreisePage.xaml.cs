@@ -12,12 +12,14 @@ public partial class ProduktpreisePage : ContentPage
     private readonly IArtikelService _artikelService;
     
     private readonly Produkt produkt;
-    public ProduktpreisePage(Produkt produkt)
+    public ProduktpreisePage(Produkt produkt, IHaendlerService haendlerService, IPreisService preisService, IArtikelService artikelService)
     {
         InitializeComponent();
-
-        
+                
         this.produkt = produkt;
+        _haendlerService = haendlerService;
+        _preisService = preisService;
+        _artikelService = artikelService;
 
         ProduktNameLabel.Text = produkt.Name;
     }

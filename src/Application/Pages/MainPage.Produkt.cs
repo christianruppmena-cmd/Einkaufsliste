@@ -13,7 +13,7 @@ namespace Einkaufsliste.Application.Pages
         private async void OnProduktNeuAnlegenClicked(object sender, EventArgs e)
         {
             await Navigation.PushAsync(
-                new ProduktVerwaltungPage(_produkteService, _kategorienService, _haendlerService,_artikelService ,true));
+                new ProduktVerwaltungPage(_produkteService, _kategorienService, _haendlerService,_artikelService,_preisService ,true));
         }
         private void OnProduktsucheTextChanged(object sender, TextChangedEventArgs e)
         {

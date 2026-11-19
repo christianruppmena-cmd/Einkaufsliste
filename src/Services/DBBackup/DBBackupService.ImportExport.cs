@@ -1,12 +1,11 @@
 ﻿using System.IO.Compression;
-using Einkaufsliste.Interfaces;
+
 namespace Einkaufsliste.Services
 
 {
     public partial class DBBackupService
     {
-        private readonly IInitialisierungsService _initialisierungsService;
-        
+               
         private string _datenbankPfad = Path.Combine(FileSystem.AppDataDirectory, "einkaufliste.db3");
         
         public async Task DatenbankImportierenAsync(string importPfad)
@@ -14,7 +13,7 @@ namespace Einkaufsliste.Services
             try
             {
                 CloseConnection();
-                await DatenbankImportierenAsync(importPfad);
+                await DatenbankImportLogicAsync(importPfad);
                 OpenConnection();
                 await _initialisierungsService.InitialisierenAsync();
             }
