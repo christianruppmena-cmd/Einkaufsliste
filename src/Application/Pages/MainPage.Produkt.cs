@@ -12,8 +12,9 @@ namespace Einkaufsliste.Application.Pages
         }
         private async void OnProduktNeuAnlegenClicked(object sender, EventArgs e)
         {
+            // Öffnet das Produktformular im Modus "neues Produkt"
             await Navigation.PushAsync(
-                new ProduktVerwaltungPage(_produkteService, _kategorienService, _haendlerService,_artikelService,_preisService ,true));
+                _produktVerwaltungPageFactory.Erstellen(true));
         }
         private void OnProduktsucheTextChanged(object sender, TextChangedEventArgs e)
         {

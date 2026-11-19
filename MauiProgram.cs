@@ -25,7 +25,7 @@ namespace Einkaufsliste
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
 
-            
+            // Interfaces
             builder.Services.AddTransient<IDBBackupService, DBBackupService>();
             builder.Services.AddTransient<IArtikelService, ArtikelService>();
             builder.Services.AddTransient<IPreisService, PreiseService>();
@@ -33,12 +33,15 @@ namespace Einkaufsliste
             builder.Services.AddTransient<IKategorienService, KategorienService>();
             builder.Services.AddTransient<IProdukteService, ProdukteService>();
             builder.Services.AddTransient<IInitialisierungsService, InitialisierungsService>();
+           
+
+            // Pages werden erstellt mit den Passenden DI-Abhängigkeiten
             builder.Services.AddTransient<MainPage>();
             builder.Services.AddTransient<ProduktVerwaltungPage>();
             builder.Services.AddTransient<KategorienPage>();
             builder.Services.AddTransient<DatenbanksicherungPage>();
             builder.Services.AddTransient<HaendlerPage>();
-
+            builder.Services.AddTransient<IProduktVerwaltungPageFactory, ProduktVerwaltungPageFactory>();
 
             builder.Services.AddSingleton<AppShell>();
             

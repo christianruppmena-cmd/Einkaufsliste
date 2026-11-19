@@ -10,6 +10,7 @@ namespace Einkaufsliste.Application.Pages
         private readonly IProdukteService _produkteService;
         private readonly IPreisService _preisService;
         private readonly IKategorienService _kategorienService;
+        private readonly IProduktVerwaltungPageFactory _produktVerwaltungPageFactory;
 
         private readonly ObservableCollection<Artikelgruppe> artikelGruppen = new();
         private readonly System.Threading.SemaphoreSlim _artikelHinzufuegenSperre = new(1, 1);
@@ -17,7 +18,7 @@ namespace Einkaufsliste.Application.Pages
         private string aktuelleGruppierung = "Produktkategorie";
         private List<Produkt> alleProdukte = new();
         private List<Haendler> alleHaendler = new();        
-        public MainPage(IHaendlerService haendlerService, IArtikelService artikelService, IProdukteService produkteService, IPreisService preisService, IKategorienService kategorienService)
+        public MainPage(IHaendlerService haendlerService, IArtikelService artikelService, IProdukteService produkteService, IPreisService preisService, IKategorienService kategorienService, IProduktVerwaltungPageFactory produktVerwaltungPageFactory)
         {
             InitializeComponent();
 
@@ -26,6 +27,7 @@ namespace Einkaufsliste.Application.Pages
             _produkteService = produkteService; 
             _preisService = preisService;
             _kategorienService = kategorienService;
+            _produktVerwaltungPageFactory = produktVerwaltungPageFactory;
             ArtikelListe.ItemsSource = artikelGruppen;
 
             aktuelleGruppierung = Preferences.Get(
