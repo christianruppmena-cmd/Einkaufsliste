@@ -42,6 +42,7 @@ namespace Einkaufsliste
             builder.Services.AddTransient<DatenbanksicherungPage>();
             builder.Services.AddTransient<HaendlerPage>();
             builder.Services.AddTransient<IProduktVerwaltungPageFactory, ProduktVerwaltungPageFactory>();
+            builder.Services.AddTransient<IProduktPreisePageFactory, ProduktPreisePageFatcory>();
 
             builder.Services.AddSingleton<AppShell>();
             

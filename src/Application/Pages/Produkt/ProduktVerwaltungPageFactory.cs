@@ -8,16 +8,16 @@ public class ProduktVerwaltungPageFactory : IProduktVerwaltungPageFactory
     private readonly IKategorienService _kategorienService;
     private readonly IHaendlerService _haendlerService;
     private readonly IArtikelService _artikelService;
-    private readonly IPreisService _preisService;
+    private readonly IProduktPreisePageFactory _produktPreisePageFactory;
 
     public ProduktVerwaltungPageFactory(
-        IProdukteService produkteService, IKategorienService kategorienService, IHaendlerService haendlerService, IArtikelService artikelService, IPreisService preisService )
+        IProdukteService produkteService, IKategorienService kategorienService, IHaendlerService haendlerService, IArtikelService artikelService, IProduktPreisePageFactory produktPreisePageFactory )
     {
         _produkteService = produkteService;
         _kategorienService = kategorienService;
         _haendlerService = haendlerService;
         _artikelService = artikelService;
-        _preisService = preisService;
+        _produktPreisePageFactory = produktPreisePageFactory;
     }
 
     public ProduktVerwaltungPage Erstellen(bool nurNeuesProduktFormular)
@@ -27,7 +27,7 @@ public class ProduktVerwaltungPageFactory : IProduktVerwaltungPageFactory
             _kategorienService,
             _haendlerService,
             _artikelService,
-            _preisService,
+            _produktPreisePageFactory,
             nurNeuesProduktFormular);
     }
 }
