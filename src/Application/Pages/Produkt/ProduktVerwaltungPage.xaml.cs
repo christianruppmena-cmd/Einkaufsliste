@@ -10,14 +10,14 @@ public partial class ProduktVerwaltungPage : ContentPage
     private readonly IKategorienService _kategorienService;
     private readonly IHaendlerService _haendlerService;
     private readonly IArtikelService _artikelService;
-    private readonly IProduktPreisePageFactory _produktPreisePageFactory; 
-    private List<Produkt> alleProdukte = new();
-    private List<Haendler> alleHaendler = new();
-    private string? ausgewaehlterBildPfad;
-    private Produkt? produktZumBearbeiten;
-    private bool bildEntfernen;
-    private readonly bool nurNeuesProduktFormular;
-    public ProduktVerwaltungPage(IProdukteService produkteService,IKategorienService kategorienService,IHaendlerService haendlerService, IArtikelService artikelService, IProduktPreisePageFactory produktPreisePageFactory , bool nurNeuesProduktFormular = false)
+    private readonly IProduktPreisePageFactory _produktPreisePageFactory;
+    private List<Produkt> _alleProdukte = new();
+    private List<Haendler> _alleHaendler = new();
+    private string? _ausgewaehlterBildPfad;
+    private Produkt? _produktZumBearbeiten;
+    private bool _bildEntfernen;
+    private readonly bool _nurNeuesProduktFormular;
+    public ProduktVerwaltungPage(IProdukteService produkteService, IKategorienService kategorienService,IHaendlerService haendlerService, IArtikelService artikelService, IProduktPreisePageFactory produktPreisePageFactory , bool nurNeuesProduktFormular = false)
     {
         InitializeComponent();
 
@@ -28,7 +28,7 @@ public partial class ProduktVerwaltungPage : ContentPage
         _artikelService = artikelService;
         _produktPreisePageFactory = produktPreisePageFactory;
 
-        this.nurNeuesProduktFormular = nurNeuesProduktFormular;
+        this._nurNeuesProduktFormular = nurNeuesProduktFormular;
 
         if(nurNeuesProduktFormular)
         {
@@ -52,18 +52,18 @@ public partial class ProduktVerwaltungPage : ContentPage
     }
     private async Task LadeProdukteAsync()
     {
-        alleProdukte = await _produkteService.AlleProdukteLadenAsync();
+        _alleProdukte = await _produkteService.AlleProdukteLadenAsync();
 
-        ProduktListe.ItemsSource = alleProdukte.Where(p => p.IstAktiv).OrderBy(p => p.Name).ToList();
+        ProduktListe.ItemsSource = _alleProdukte.Where(p => p.IstAktiv).OrderBy(p => p.Name).ToList();
     }
     private async void OnProduktLoeschenClicked(object sender, EventArgs e)
     {
-        if (produktZumBearbeiten == null)
+        if (_produktZumBearbeiten == null)
             return;
 
         bool bestaetigen = await DisplayAlertAsync(
             "Produkt löschen",
-            $"Möchtest du „{produktZumBearbeiten.Name}“ wirklich aus der Produktverwaltung entfernen?\n\nBereits vorhandene Einkaufsartikel bleiben erhalten.",
+            $"Möchtest du „{_produktZumBearbeiten.Name}“ wirklich aus der Produktverwaltung entfernen?\n\nBereits vorhandene Einkaufsartikel bleiben erhalten.",
             "Löschen",
             "Abbrechen");
 
@@ -72,9 +72,9 @@ public partial class ProduktVerwaltungPage : ContentPage
 
         try
         {
-            produktZumBearbeiten.IstAktiv = false;
+            _produktZumBearbeiten.IstAktiv = false;
 
-            await _produkteService.ProduktSpeichernAsync(produktZumBearbeiten);
+            await _produkteService.ProduktSpeichernAsync(_produktZumBearbeiten);
             await LadeProdukteAsync();
 
             ZurProduktlisteZurueckkehren();

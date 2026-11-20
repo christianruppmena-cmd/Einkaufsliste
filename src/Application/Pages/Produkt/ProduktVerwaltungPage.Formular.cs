@@ -7,7 +7,7 @@ public partial class ProduktVerwaltungPage
 {
     private Produkt ProduktAusFormularErstellenOderAktualisieren(string name, string marke, string variante, string kategorie, string einheit, int bevorzugterHaendlerId, decimal packungsgroesse)
     {
-        Produkt produkt = produktZumBearbeiten ?? new Produkt();
+        Produkt produkt = _produktZumBearbeiten ?? new Produkt();
 
         produkt.Name = name;
         produkt.Marke = marke;
@@ -17,13 +17,13 @@ public partial class ProduktVerwaltungPage
         produkt.BevorzugterHaendlerId = bevorzugterHaendlerId;
         produkt.Packungsgroesse = packungsgroesse;
 
-        if (bildEntfernen)
+        if (_bildEntfernen)
         {
             produkt.BildPfad = null;
         }
-        else if (ausgewaehlterBildPfad != null)
+        else if (_ausgewaehlterBildPfad != null)
         {
-            produkt.BildPfad = ausgewaehlterBildPfad;
+            produkt.BildPfad = _ausgewaehlterBildPfad;
         }
         return produkt;
     }
@@ -70,15 +70,15 @@ public partial class ProduktVerwaltungPage
     }
     private async Task LadeHaendlerAsync()
     {
-        alleHaendler = await _haendlerService.AlleHaendlerLadenAsync();
+        _alleHaendler = await _haendlerService.AlleHaendlerLadenAsync();
 
         var haendlerNamen = new List<string>
-    {
-        "Kein bevorzugter Markt"
-    };
+        {
+            "Kein bevorzugter Markt"
+        };
 
         haendlerNamen.AddRange(
-            alleHaendler.Select(h => h.Name));
+            _alleHaendler.Select(h => h.Name));
 
         BevorzugterHaendlerPicker.ItemsSource = haendlerNamen;
         BevorzugterHaendlerPicker.SelectedIndex = 0;
@@ -163,10 +163,10 @@ public partial class ProduktVerwaltungPage
             vorhandenesProdukt.Id);
 
         // Das vorhandene Produkt behält sein Bild.
-        if (!string.IsNullOrWhiteSpace(ausgewaehlterBildPfad) &&
-            File.Exists(ausgewaehlterBildPfad))
+        if (!string.IsNullOrWhiteSpace(_ausgewaehlterBildPfad) &&
+            File.Exists(_ausgewaehlterBildPfad))
         {
-            File.Delete(ausgewaehlterBildPfad);
+            File.Delete(_ausgewaehlterBildPfad);
         }
 
         return true;
@@ -180,7 +180,7 @@ public partial class ProduktVerwaltungPage
         string kategorie = KategoriePicker.SelectedItem?.ToString();
         string einheit = BasiseinheitPicker.SelectedItem?.ToString();
         string ausgewaehlterHaendler = BevorzugterHaendlerPicker.SelectedItem?.ToString();
-        int bevorzugterHaendlerId = alleHaendler.FirstOrDefault(h => h.Name == ausgewaehlterHaendler)?.Id ?? 0;
+        int bevorzugterHaendlerId = _alleHaendler.FirstOrDefault(h => h.Name == ausgewaehlterHaendler)?.Id ?? 0;
 
         if (!await ProduktPflichtfelderValidierenAsync(name, kategorie))
             return;
@@ -195,9 +195,9 @@ public partial class ProduktVerwaltungPage
 
         decimal packungsgroesse = validiertePackungsgroesse.Value;
 
-        string? altesBild = produktZumBearbeiten?.BildPfad;
+        string? altesBild = _produktZumBearbeiten?.BildPfad;
 
-        string urspruenglicherName = produktZumBearbeiten?.Name ?? name;
+        string urspruenglicherName = _produktZumBearbeiten?.Name ?? name;
 
         Produkt zuSpeicherndesProdukt = ProduktAusFormularErstellenOderAktualisieren(
             name,
@@ -250,7 +250,7 @@ public partial class ProduktVerwaltungPage
                     : $"{name} wurde erfolgreich gespeichert.",
                 "OK");
             // Bei direktem Aufruf über den Plus-Button zurückkehren
-            if (nurNeuesProduktFormular)
+            if (_nurNeuesProduktFormular)
             {
                 await Navigation.PopAsync();
                 return;
@@ -276,9 +276,9 @@ public partial class ProduktVerwaltungPage
             return;
         }
 
-        produktZumBearbeiten = produkt;
-        bildEntfernen = false;
-        ausgewaehlterBildPfad = null;
+        _produktZumBearbeiten = produkt;
+        _bildEntfernen = false;
+        _ausgewaehlterBildPfad = null;
 
         FormularTitel.Text = "Produkt bearbeiten";
         ProduktLoeschenButton.IsVisible = true;
@@ -291,7 +291,7 @@ public partial class ProduktVerwaltungPage
 
         if (produkt.BevorzugterHaendlerId > 0)
         {
-            var bevorzugterHaendler = alleHaendler.FirstOrDefault(
+            var bevorzugterHaendler = _alleHaendler.FirstOrDefault(
                 h => h.Id == produkt.BevorzugterHaendlerId);
 
             BevorzugterHaendlerPicker.SelectedItem =
@@ -313,8 +313,8 @@ public partial class ProduktVerwaltungPage
     }
     private void FormularZustandZuruecksetzen()
     {
-        produktZumBearbeiten = null;
-        ausgewaehlterBildPfad = null;
-        bildEntfernen = false;
+        _produktZumBearbeiten = null;
+        _ausgewaehlterBildPfad = null;
+        _bildEntfernen = false;
     }
 }

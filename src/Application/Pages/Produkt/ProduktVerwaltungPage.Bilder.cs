@@ -26,8 +26,8 @@ public partial class ProduktVerwaltungPage
                 break;
 
             case "Produktbild entfernen":
-                ausgewaehlterBildPfad = null;
-                bildEntfernen = true;
+                _ausgewaehlterBildPfad = null;
+                _bildEntfernen = true;
 
                 await DisplayAlertAsync(
                     "Bild entfernt",
@@ -55,7 +55,7 @@ public partial class ProduktVerwaltungPage
             if (foto == null)
                 return;
 
-            string? vorherigesBild = ausgewaehlterBildPfad;
+            string? vorherigesBild = _ausgewaehlterBildPfad;
 
             string dateiendung = Path.GetExtension(foto.FileName);
             string dateiname = $"{Guid.NewGuid()}{dateiendung}";
@@ -69,8 +69,8 @@ public partial class ProduktVerwaltungPage
 
             await quelle.CopyToAsync(ziel);
 
-            ausgewaehlterBildPfad = zielpfad;
-            bildEntfernen = false;
+            _ausgewaehlterBildPfad = zielpfad;
+            _bildEntfernen = false;
 
             await AltesProduktbildLoeschenAsync(
                 vorherigesBild,
@@ -145,12 +145,12 @@ public partial class ProduktVerwaltungPage
             if (foto == null)
                 return;
 
-            string? vorherigesBild = ausgewaehlterBildPfad;
+            string? vorherigesBild = _ausgewaehlterBildPfad;
             string zielpfad = await ProduktbildLokalSpeichernAsync(foto);
 
 
-            ausgewaehlterBildPfad = zielpfad;
-            bildEntfernen = false;
+            _ausgewaehlterBildPfad = zielpfad;
+            _bildEntfernen = false;
 
             // Vorheriges, noch nicht gespeichertes Bild aufräumen
             await AltesProduktbildLoeschenAsync(
