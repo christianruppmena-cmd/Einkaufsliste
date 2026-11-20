@@ -195,7 +195,7 @@ public partial class ProduktVerwaltungPage
 
         decimal packungsgroesse = validiertePackungsgroesse.Value;
 
-        string altesBild = produktZumBearbeiten?.BildPfad;
+        string? altesBild = produktZumBearbeiten?.BildPfad;
 
         string urspruenglicherName = produktZumBearbeiten?.Name ?? name;
 

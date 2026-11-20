@@ -13,8 +13,8 @@ public partial class ProduktVerwaltungPage : ContentPage
     private readonly IProduktPreisePageFactory _produktPreisePageFactory; 
     private List<Produkt> alleProdukte = new();
     private List<Haendler> alleHaendler = new();
-    private string ausgewaehlterBildPfad;
-    private Produkt produktZumBearbeiten;
+    private string? ausgewaehlterBildPfad;
+    private Produkt? produktZumBearbeiten;
     private bool bildEntfernen;
     private readonly bool nurNeuesProduktFormular;
     public ProduktVerwaltungPage(IProdukteService produkteService,IKategorienService kategorienService,IHaendlerService haendlerService, IArtikelService artikelService, IProduktPreisePageFactory produktPreisePageFactory , bool nurNeuesProduktFormular = false)

@@ -55,7 +55,7 @@ public partial class ProduktVerwaltungPage
             if (foto == null)
                 return;
 
-            string vorherigesBild = ausgewaehlterBildPfad;
+            string? vorherigesBild = ausgewaehlterBildPfad;
 
             string dateiendung = Path.GetExtension(foto.FileName);
             string dateiname = $"{Guid.NewGuid()}{dateiendung}";
@@ -89,7 +89,7 @@ public partial class ProduktVerwaltungPage
                 "OK");
         }
     }
-    private async Task AltesProduktbildLoeschenAsync(string altesBild, string neuesBild)
+    private async Task AltesProduktbildLoeschenAsync(string? altesBild, string neuesBild)
     {
         if (string.IsNullOrWhiteSpace(altesBild))
             return;
@@ -145,7 +145,7 @@ public partial class ProduktVerwaltungPage
             if (foto == null)
                 return;
 
-            string vorherigesBild = ausgewaehlterBildPfad;
+            string? vorherigesBild = ausgewaehlterBildPfad;
             string zielpfad = await ProduktbildLokalSpeichernAsync(foto);
 
 
